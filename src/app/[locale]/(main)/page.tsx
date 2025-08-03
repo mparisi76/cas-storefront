@@ -1,5 +1,5 @@
 import {
-  AlgoliaTrendingListings,
+  // AlgoliaTrendingListings,
   BannerSection,
   BlogSection,
   Hero,
@@ -43,9 +43,9 @@ export default async function Home({
   return (
     <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start text-primary">
       <Hero
-        image="/images/hero/Image.jpg"
-        heading="Snag your style in a flash"
-        paragraph="Buy, sell, and discover pre-loved gems from the trendiest brands."
+        image="/images/hero/Image.png"
+        heading="Tag line"
+        paragraph="Buy, sell, and discover pre-loved gems."
         buttons={[
           { label: "Buy now", path: "/categories" },
           {
@@ -57,16 +57,16 @@ export default async function Home({
           },
         ]}
       />
-      <div className="px-4 lg:px-8 w-full">
+      {/* <div className="px-4 lg:px-8 w-full">
         <HomeProductSection heading="trending listings" locale={locale} home />
-      </div>
+      </div> */}
       {/* <HomePopularBrandsSection />*/}
-      <div className="px-4 lg:px-8 w-full">
+      {/* <div className="px-4 lg:px-8 w-full">
         <HomeCategories heading="SHOP BY CATEGORY" />
-      </div>
-      <BannerSection />
-      <ShopByStyleSection />
-      <BlogSection />
+      </div> */}
+      {/* <BannerSection /> */}
+      {/* <ShopByStyleSection /> */}
+      {/* <BlogSection /> */}
     </main>
   )
 }

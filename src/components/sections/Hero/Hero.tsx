@@ -20,7 +20,7 @@ export const Hero = ({ image, heading, paragraph, buttons }: HeroProps) => {
         width={700}
         height={600}
         alt="Hero"
-        className="w-full order-2 lg:order-1"
+        className="w-full order-2 lg:order-1 rounded-sm"
       />
       <div className="w-full lg:order-2">
         <div className="border rounded-sm w-full px-6 flex items-end h-[calc(100%-144px)]">
