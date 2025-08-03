@@ -40,8 +40,6 @@ Ready to go:
 
 Mercur is a platform to start, customize, manage, and scale your marketplace for every business model with a modern technology stack.
 
-![Mercur](https://cdn.prod.website-files.com/6790aeffc4b432ccaf1b56e5/67a1020f202572832c954ead_6b96703adfe74613f85133f83a19b1f0_Fleek%20Tilt%20-%20Readme.png)
-
 ## Quickstart
 
 ### Installation
@@ -86,9 +84,9 @@ NEXT_PUBLIC_STRIPE_KEY=supersecret
 # Backend cookie secret
 REVALIDATE_SECRET=supersecret
 # Your site name in metadata
-NEXT_PUBLIC_SITE_NAME="Fleek Marketplace"
+NEXT_PUBLIC_SITE_NAME=""
 # Your site description in metadata
-NEXT_PUBLIC_SITE_DESCRIPTION="Fleek Markeplace"
+NEXT_PUBLIC_SITE_DESCRIPTION=""
 # Algolia Application ID
 NEXT_PUBLIC_ALGOLIA_ID=supersecret
 # Algolia Search API Key

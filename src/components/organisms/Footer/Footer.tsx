@@ -59,7 +59,7 @@ export function Footer() {
       </div>
 
       <div className="py-6 border rounded-sm ">
-        <p className="text-md text-secondary text-center ">© 2024 Fleek</p>
+        <p className="text-md text-secondary text-center ">© 2024 Catskill Architectural Salvage</p>
       </div>
     </footer>
   )
