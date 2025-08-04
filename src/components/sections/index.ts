@@ -11,7 +11,7 @@ import { Cart } from "./Cart/Cart"
 import { WishlistPage } from "./WishlistPage/WishlistPage"
 import { ProductDetailsPage } from "./ProductDetailsPage/ProductDetailsPage"
 import { AlgoliaProductsListing } from "./ProductListing/AlgoliaProductsListing"
-import { AlgoliaTrendingListings } from "./HomeProductSection/AlgoliaTrendingListings"
+// import { AlgoliaTrendingListings } from "./HomeProductSection/AlgoliaTrendingListings"
 import { OrdersPagination } from "../organisms/OrdersPagination/OrdersPagination"
 
 export {
@@ -28,6 +28,6 @@ export {
   WishlistPage,
   ProductDetailsPage,
   AlgoliaProductsListing,
-  AlgoliaTrendingListings,
+  // AlgoliaTrendingListings,
   OrdersPagination,
 }
