@@ -1,9 +1,10 @@
 import { Category, CategoryTree } from "@/types/category";
-import { Product } from "@/types/product";
+import { Artifact } from "@/types/product";
+// import { Product } from "@/types/product";
 
 export function getCategoryTree(
   categories: Category[],
-  items: Product[]
+  items: Artifact[],
 ): CategoryTree {
   const tree: CategoryTree = {};
 
