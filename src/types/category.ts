@@ -1,9 +1,10 @@
 export interface Category {
   id: string | number;
   name: string;
-  slug: string;
+  slug?: string;
   parent: {
     id: string | number;
+    name: string;
     slug: string;
   } | null;
 }

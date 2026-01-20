@@ -4,8 +4,9 @@ import { redirect, notFound } from "next/navigation";
 import EditArtifactForm from "./EditArtifactForm";
 import Link from "next/link";
 import directus from "@/lib/directus";
-import { readItem } from "@directus/sdk";
+import { readItem, readItems } from "@directus/sdk";
 import { Artifact } from "@/types/product";
+import { Category } from "@/types/category";
 
 export default async function EditPage({
   params,
@@ -18,35 +19,51 @@ export default async function EditPage({
 
   if (!token) redirect("/login");
 
-  // 1. Fetch data outside of the return statement
-  // We use the SDK to get the nested directus_files_id UUIDs
-  const artifact = await directus
-    .request<Artifact>(
+  // Fetch both the Artifact and the Categories list
+  // Note: We include 'category.*' to get the nested id for the select defaultValue
+  const [artifact, categories] = await Promise.all([
+    directus.request<Artifact>(
       readItem("props", id, {
-        fields: ["*", { photo_gallery: ["directus_files_id"] }],
-      }),
-    )
-    .catch((err) => {
-      console.error("Directus Fetch Error:", err);
-      return null;
-    });
+        fields: [
+          "*", 
+          { photo_gallery: ["directus_files_id"] },
+          { category: ["id", "name"] }
+        ],
+      })
+    ).catch(() => null),
+    
+    // ADD THE TYPE HERE: <Category[]>
+    directus.request<Category[]>(
+      readItems("categories", {
+        fields: ["id", "name", "slug", { parent: ["id", "name", "slug"] }],
+        filter: {
+          parent: {
+            _nnull: true // "Is Not Null" -> Only fetches children
+          }
+        },
+        sort: ["name"],
+      })
+    ).catch(() => [])
+  ]);
 
-  // 2. Handle the "null" or "error" case immediately
   if (!artifact) {
     notFound();
   }
 
-  // 3. Return JSX at the top level (Fixes the try/catch JSX error)
   return (
     <div className="max-w-3xl mx-auto px-6 py-12">
+      {/* Visual fix: using the aligned arrow logic from earlier */}
       <Link
-        href="/dashboard"
-        className="text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-900 transition-colors mb-4 inline-block"
+        href="/inventory"
+        className="group inline-flex items-center gap-3 mb-10 text-[12px] font-bold uppercase tracking-[0.25em] text-zinc-400 hover:text-zinc-900 transition-colors"
       >
-        ← Back to Dashboard
+        <span className="text-lg leading-none group-hover:-translate-x-1 transition-transform duration-200">
+          &larr;
+        </span>
+        <span className="leading-none">Catalog Inventory</span>
       </Link>
 
-      <EditArtifactForm artifact={artifact} id={id} />
+      <EditArtifactForm artifact={artifact} id={id} categories={categories} />
     </div>
   );
 }

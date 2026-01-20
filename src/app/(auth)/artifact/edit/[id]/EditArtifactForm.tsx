@@ -7,14 +7,17 @@ import {
 } from "@/app/actions/artifacts";
 import { ArtifactFormState } from "@/types/dashboard";
 import { Artifact, GalleryItem } from "@/types/product";
-import EditGallery from "@/app/(auth)/artifact/edit/[id]/EditGallery";
+import GalleryWrapper from "@/components/portal/GalleryWrapper";
+import { Category } from "@/types/category";
 
 export default function EditArtifactForm({
   artifact,
   id,
+  categories,
 }: {
   artifact: Artifact;
   id: string;
+  categories: Category[];
 }) {
   // Merge thumbnail and gallery into a single array for the draggable editor.
   // We ensure the thumbnail is at index 0 so it stays the 'Primary' image.
@@ -25,7 +28,7 @@ export default function EditArtifactForm({
     ),
   ];
 
-  const cleanDescription = (artifact.description ?? "").replace(/<[^>]*>/g, '');
+  const cleanDescription = (artifact.description ?? "").replace(/<[^>]*>/g, "");
 
   const updateWithId = (state: ArtifactFormState | null, formData: FormData) =>
     updateArtifactAction(id, state, formData);
@@ -39,6 +42,17 @@ export default function EditArtifactForm({
       });
     }
   };
+
+  const sortedCategories = [...categories].sort((a, b) => {
+    // 1. Sort by Parent Name
+    const parentA = a.parent?.name || "";
+    const parentB = b.parent?.name || "";
+    const parentSort = parentA.localeCompare(parentB);
+
+    // 2. If parents are the same, sort by Child Name
+    if (parentSort !== 0) return parentSort;
+    return a.name.localeCompare(b.name);
+  });
 
   return (
     <div className="relative">
@@ -73,7 +87,7 @@ export default function EditArtifactForm({
             Drag to reorder images. The first image will be set as the Primary
             Thumbnail.
           </p>
-          <EditGallery initialItems={initialGalleryItems} />
+          <GalleryWrapper initialItems={initialGalleryItems} />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pt-6 border-t border-zinc-50">
@@ -104,6 +118,41 @@ export default function EditArtifactForm({
               required
               className="w-full border-b border-zinc-200 py-4 outline-none focus:border-zinc-900 text-lg bg-transparent text-zinc-900 font-mono"
             />
+          </div>
+        </div>
+
+        {/* Category */}
+        <div className="space-y-3 relative">
+          <label className="block text-xs font-black uppercase tracking-widest text-zinc-800">
+            Category
+          </label>
+          <div className="relative border-b border-zinc-200">
+            <select
+              name="category"
+              defaultValue={
+                typeof artifact.category === "object" &&
+                artifact.category !== null
+                  ? (artifact.category as Category).id
+                  : (artifact.category ?? "")
+              }
+              required
+              className="w-full py-4 outline-none focus:border-zinc-900 text-lg bg-transparent text-zinc-900 font-medium appearance-none cursor-pointer pr-8"
+            >
+              <option value="" disabled className="text-zinc-400">
+                Select a category
+              </option>
+              {sortedCategories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {/* If parent name exists, show it for better context */}
+                  {cat.parent?.name ? `${cat.parent.name} — ` : ""}
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+            {/* Centered Chevron */}
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400 text-[10px]">
+              ▼
+            </div>
           </div>
         </div>
 

@@ -24,43 +24,31 @@ export async function createArtifactAction(
   }
 
   try {
-    // 1. Handle File Upload
-    const file = formData.get("image") as File;
-    let imageId: string | null = null;
+    // 1. Parse the Gallery IDs from the hidden input
+    const galleryJson = formData.get("ordered_gallery") as string;
+    const galleryIds: string[] = galleryJson ? JSON.parse(galleryJson) : [];
 
-    if (file && file.size > 0) {
-      const fileData = new FormData();
-      fileData.append("file", file);
+    // 2. Set the Thumbnail to the first image in the gallery (the "Primary" one)
+    const primaryThumbnail = galleryIds.length > 0 ? galleryIds[0] : null;
 
-      const fileRes = await fetch(
-        `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/files`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-          body: fileData,
-        },
-      );
+    // 3. Prepare the many-to-many payload for the photo_gallery field
+    const photoGalleryPayload = galleryIds.map((id) => ({
+      directus_files_id: id,
+    }));
 
-      if (fileRes.ok) {
-        const fileJson = await fileRes.json();
-        imageId = fileJson.data.id;
-      } else {
-        return { error: "Image upload failed. Please try a smaller file." };
-      }
-    }
-
-    // 2. Prepare Payload
+    // 4. Prepare Payload
     const priceRaw = formData.get("price") as string;
     const payload = {
       name: formData.get("name") as string,
-      price: parseFloat(priceRaw) || 0,
+      purchase_price: parseFloat(priceRaw) || 0,
       description: formData.get("description") as string,
       availability: "available",
       status: "published",
-      thumbnail: imageId,
+      thumbnail: primaryThumbnail, // Automatically uses the first gallery image
+      photo_gallery: photoGalleryPayload, // Directus handles the junction table sync
     };
 
-    // 3. Save to Directus
+    // 5. Save to Directus (Using the Admin Client if you have one, or fetch)
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/items/props`,
       {
@@ -76,17 +64,19 @@ export async function createArtifactAction(
     if (!res.ok) {
       const errorData = await res.json();
       return {
-        error:
-          errorData.errors?.[0]?.message ||
-          "Database error. Check your permissions.",
+        error: errorData.errors?.[0]?.message || "Database error. Check permissions.",
       };
     }
+
+    // Clear caches so the new artifact shows up immediately
+    revalidatePath("/inventory");
+    revalidatePath("/dashboard");
+
   } catch (e) {
     console.error("Artifact Creation Error:", e);
-    return { error: "A server error occurred while saving the artifact." };
+    return { error: "A server error occurred while saving." };
   }
 
-  // Success path: Redirect back to the dashboard
   redirect("/dashboard");
 }
 
@@ -129,7 +119,7 @@ export async function updateArtifactAction(
     await adminClient.request(
       updateItem("props", numericId, {
         name,
-        price: parseFloat(price),
+        purchase_price: parseFloat(price),
         description,
         thumbnail: primaryThumbnail,
         // Directus will sync this junction table: 

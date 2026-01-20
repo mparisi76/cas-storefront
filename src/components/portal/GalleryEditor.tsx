@@ -22,6 +22,10 @@ import { CSS } from "@dnd-kit/utilities";
 import { GalleryItem } from "@/types/product";
 import { DirectusFile } from "@directus/sdk";
 
+/**
+ * SortablePhoto component handles the individual image cards
+ * and their drag-and-drop behavior.
+ */
 function SortablePhoto({
   id,
   url,
@@ -41,11 +45,12 @@ function SortablePhoto({
     transition,
     isDragging,
   } = useSortable({ id });
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     zIndex: isDragging ? 50 : 0,
-    touchAction: "none",
+    touchAction: "none" as const,
   };
 
   return (
@@ -81,11 +86,16 @@ function SortablePhoto({
   );
 }
 
+/**
+ * GalleryEditor - Modular component for managing photo galleries
+ * Works for both creating new artifacts and editing existing ones.
+ */
 export default function GalleryEditor({
-  initialItems,
+  initialItems = [], // Default to empty array for "New Artifact" page
 }: {
-  initialItems: GalleryItem[];
+  initialItems?: GalleryItem[];
 }) {
+  // Initialize state from existing items (if any)
   const [items, setItems] = useState<string[]>(
     initialItems.map((item) => item.directus_files_id),
   );
@@ -111,9 +121,12 @@ export default function GalleryEditor({
         method: "POST",
         body: formData,
       });
+      
       if (!response.ok) throw new Error("Upload failed");
 
       const result = await response.json();
+      
+      // Type-safe extraction of IDs from Directus response
       const newIds = Array.isArray(result)
         ? result.map((f: DirectusFile) => f.id)
         : [result.id];
@@ -123,6 +136,7 @@ export default function GalleryEditor({
       alert("Upload failed. Image might be too large or server is busy.");
     } finally {
       setIsUploading(false);
+      // Reset input value so same file can be uploaded again if needed
       e.target.value = "";
     }
   };
@@ -160,11 +174,12 @@ export default function GalleryEditor({
             ))}
           </SortableContext>
 
-          {/* THE ONLY UPLOAD BUTTON */}
+          {/* Upload Button */}
           <div className="relative aspect-4/5 w-32 border-2 border-dashed border-zinc-200 flex flex-col items-center justify-center bg-zinc-50/50 hover:bg-zinc-100 transition-colors">
             <input
               type="file"
               multiple
+              accept="image/*"
               onChange={handleFileUpload}
               className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed"
               disabled={isUploading}
@@ -176,7 +191,9 @@ export default function GalleryEditor({
         </div>
       </DndContext>
 
-      {/* This hidden input is what actually saves the data when the form submits */}
+      {/* This hidden input provides the JSON string of IDs to the form action.
+          Directus will use this array to sync the junction table.
+      */}
       <input
         type="hidden"
         name="ordered_gallery"
