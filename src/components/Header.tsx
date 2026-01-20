@@ -9,16 +9,19 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-40 w-full bg-[#F9F8F6]/80 backdrop-blur-md border-b border-zinc-200">
-      <div className="max-w-7xl mx-auto px-6 lg:px-2">
+      <div className="mx-auto px-6 lg:px-4">
         <div className="flex h-20 items-center justify-between">
           
           {/* Left: Navigation (Hidden on Mobile) */}
           <nav className="hidden lg:flex items-center gap-8">
-            <Link href="/" className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-blue-600 transition-colors">
+            <Link href="/inventory" className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-blue-600 transition-colors">
               Catalog
             </Link>
             <Link href="/archives" className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-blue-600 transition-colors">
               Archives
+            </Link>
+            <Link href="/login" className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-blue-600 transition-colors">
+              Portal
             </Link>
           </nav>
 

@@ -7,7 +7,6 @@ export const revalidate = 0;
 
 export default async function HomePage() {
   try {
-    // 1. Get the total count of available items
     const countResult = await directus.request(
       aggregate("props", {
         aggregate: { count: "*" },
@@ -22,8 +21,6 @@ export default async function HomePage() {
 
     const countValue = countResult?.[0]?.count ?? "0";
     const totalItems = parseInt(String(countValue));
-
-    // 2. Pick a random index and fetch that specific item
     const randomIndex = Math.floor(Math.random() * totalItems);
 
     const randomItems = await directus.request(
@@ -48,9 +45,7 @@ export default async function HomePage() {
       <main className="fixed inset-0 w-full h-full overflow-hidden bg-zinc-950 touch-none">
         <style
           dangerouslySetInnerHTML={{
-            __html: `
-          html, body { overscroll-behavior: none; overflow: hidden; height: 100%; }
-        `,
+            __html: `html, body { overscroll-behavior: none; overflow: hidden; height: 100%; }`,
           }}
         />
 
@@ -81,22 +76,33 @@ export default async function HomePage() {
             </h1>
           </div>
 
-          <p className="max-w-md mb-12 text-[10px] md:text-xs leading-relaxed text-zinc-500 font-medium tracking-[0.2em] uppercase italic opacity-70">
+          <p className="max-w-md mb-12 text-[10px] md:text-xs leading-relaxed text-zinc-400 font-medium tracking-[0.2em] uppercase italic opacity-90">
             Preserving Historical Objects • Machinery • Antiques
           </p>
 
-          <Link
-            href="/inventory"
-            className="group relative border border-white/10 px-12 py-5 bg-white/2 backdrop-blur-md transition-all hover:border-blue-500/50"
-          >
-            <span className="relative z-10 text-[11px] font-black uppercase tracking-[0.4em] text-white group-hover:text-blue-400">
-              Enter Inventory
-            </span>
-          </Link>
+          {/* Button Stack */}
+          <div className="flex flex-col items-center gap-6 w-full max-w-xs">
+            <Link
+              href="/inventory"
+              className="group w-full relative border border-white/20 px-12 py-5 bg-white/5 backdrop-blur-md transition-all hover:border-blue-500/50 hover:bg-white/10"
+            >
+              <span className="relative z-10 text-[11px] font-black uppercase tracking-[0.4em] text-white group-hover:text-blue-400">
+                View Inventory
+              </span>
+            </Link>
+
+            <Link
+              href="/login"
+              className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-white border-b border-transparent hover:border-white transition-all pb-1"
+            >
+              Merchant Access
+            </Link>
+          </div>
         </div>
 
-        <div className="absolute bottom-10 w-full px-10 flex justify-between items-end z-10 text-zinc-500 pointer-events-none">
-          <div className="space-y-1">
+        {/* Footer Area with Vendor Access */}
+        <div className="absolute bottom-10 w-full px-10 flex justify-between items-end z-20 text-zinc-500">
+          <div className="space-y-1 pointer-events-none">
             <p className="text-[9px] font-mono uppercase tracking-[0.3em]">
               Est. 2024 — Preservation
             </p>
@@ -104,22 +110,18 @@ export default async function HomePage() {
               Catskill, New York
             </p>
           </div>
-          <div className="text-right space-y-1">
-            {heroName && (
-              <p className="text-[8px] font-mono uppercase tracking-[0.2em] text-zinc-500">
+
+          <div className="text-right space-y-4">
+             {heroName && (
+              <p className="text-[8px] font-mono uppercase tracking-[0.2em] text-zinc-600 pointer-events-none">
                 Featured: {heroName}
               </p>
             )}
-            {/* <p className="text-[9px] font-mono uppercase tracking-[0.3em]">
-              Vegan Owned & Operated
-            </p> */}
           </div>
         </div>
       </main>
     );
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (error: unknown) {
-    // Basic fallback if the Directus call fails for any reason
+  } catch {
     return (
       <main className="fixed inset-0 bg-zinc-950 flex items-center justify-center">
         <Link

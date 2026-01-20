@@ -1,5 +1,7 @@
-// app/layout.tsx
-import Header from "@/components/Header"; // Adjust path based on your structure
+"use client"; // We need this for the scroll listener
+
+import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 import "./globals.css";
 
 export default function RootLayout({
@@ -7,12 +9,17 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+
+  useEffect(() => {
+    // This forces the window to the top every time the route changes
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [pathname]);
+
   return (
     <html lang="en">
-      <body>
-        <Header />
-        {children}
-        {/* You can add a Footer here later */}
+      <body className="flex flex-col min-h-screen bg-[#F9F8F6] text-zinc-700 antialiased">
+        <main className="flex-1">{children}</main>
       </body>
     </html>
   );

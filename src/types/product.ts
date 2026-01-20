@@ -1,4 +1,4 @@
-export interface Product {
+export interface Artifact {
   id: string | number;
   name: string;
   price: number;
@@ -29,7 +29,7 @@ export interface Product {
   dimensions?: string;
   quantity_available: number;
   condition?: string;
-	purchase_price: string;
+  purchase_price: string;
 }
 
 export interface GalleryItem {

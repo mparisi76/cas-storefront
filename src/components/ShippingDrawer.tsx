@@ -75,7 +75,7 @@ export default function ShippingDrawer({
 
   const handleFreightInquiry = () => {
     const subject = encodeURIComponent(
-      `Freight Quote Request: CAS-${String(id).padStart(4, "0")}`
+      `Freight Quote Request: CAS-${String(id).padStart(4, "0")}`,
     );
     const body = encodeURIComponent(
       `Hello Catskill Architectural Salvage,\n\n` +
@@ -85,7 +85,7 @@ export default function ShippingDrawer({
         `Dimensions: ${length}" x ${width}" x ${height}"\n` +
         `Weight: ${weight} lbs\n` +
         `Destination Zip Code: ${zipCode}\n\n` +
-        `Please provide an estimated shipping cost and timeline for this piece.`
+        `Please provide an estimated shipping cost and timeline for this piece.`,
     );
     window.location.href = `mailto:info@catskillsalvage.com?subject=${subject}&body=${body}`;
   };
@@ -127,7 +127,7 @@ export default function ShippingDrawer({
               <h2 className="text-2xl font-bold uppercase tracking-tighter text-zinc-600 italic">
                 Shipping
               </h2>
-              <p className="text-[10px] uppercase tracking-widest text-zinc-400 font-bold">
+              <p className="text-[10px] uppercase tracking-widest text-zinc-600 font-bold">
                 Logistics Estimate
               </p>
             </div>
@@ -135,27 +135,27 @@ export default function ShippingDrawer({
               onClick={() => setIsOpen(false)}
               className="p-2 hover:bg-zinc-200 rounded-full transition-colors cursor-pointer"
             >
-              <X size={24} className="text-zinc-400" />
+              <X size={24} className="text-zinc-600" />
             </button>
           </div>
 
           <div className="space-y-10">
             {/* Item Summary Card */}
             <div className="bg-white border border-zinc-200 p-6 shadow-sm">
-              <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3">
+              <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mb-3">
                 Item Specifications
               </p>
               <div className="flex justify-between items-end">
                 <p className="text-lg font-medium text-zinc-600 italic">
                   {weight} lbs
                 </p>
-                <p className="text-sm font-mono text-zinc-400">{`${length}" × ${width}" × ${height}"`}</p>
+                <p className="text-sm font-mono text-zinc-600">{`${length}" × ${width}" × ${height}"`}</p>
               </div>
             </div>
 
             {/* Zip Input Section */}
             <div className="space-y-4">
-              <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400">
+              <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-600">
                 Destination Zip Code
               </label>
               <div className="flex gap-2">
@@ -188,15 +188,14 @@ export default function ShippingDrawer({
             <div className="space-y-4 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
               {isFreight && (
                 <div className="bg-zinc-100 border border-zinc-200 p-8 text-center space-y-5">
-                  <Truck size={32} className="mx-auto text-zinc-400" />
+                  <Truck size={32} className="mx-auto text-zinc-600" />
                   <div>
                     <p className="text-xs font-black uppercase tracking-widest text-zinc-600">
                       Freight Notice
                     </p>
                     <p className="text-[12px] text-zinc-500 mt-2 leading-relaxed italic">
-                      Due to the weight of this piece, standard
-                      carrier service is unavailable. We offer specialized
-                      freight handling.
+                      Due to the weight of this piece, standard carrier service
+                      is unavailable. We offer specialized freight handling.
                     </p>
                   </div>
                   <button
@@ -214,7 +213,7 @@ export default function ShippingDrawer({
                   className="flex justify-between items-center bg-white border-l-4 border-l-blue-600 border border-zinc-200 p-5 shadow-sm"
                 >
                   <div>
-                    <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1">
+                    <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-1">
                       {rate.provider} {rate.service}
                     </p>
                     <p className="text-sm font-bold text-zinc-600 italic">
@@ -231,8 +230,8 @@ export default function ShippingDrawer({
 
               {!loading && rates.length === 0 && !error && !isFreight && (
                 <div className="py-12 text-center border-2 border-dashed border-zinc-200">
-                  <Truck size={32} className="mx-auto text-zinc-400 mb-2" />
-                  <p className="text-[10px] uppercase font-bold text-zinc-400 tracking-widest">
+                  <Truck size={32} className="mx-auto text-zinc-600 mb-2" />
+                  <p className="text-[10px] uppercase font-bold text-zinc-600Acquisition tracking-widest">
                     Enter zip to see rates
                   </p>
                 </div>
