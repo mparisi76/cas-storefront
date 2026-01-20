@@ -94,9 +94,8 @@ export async function updateArtifactAction(
   const name = formData.get("name") as string;
   const price = formData.get("price") as string;
   const description = formData.get("description") as string;
+  const categoryId = formData.get("category") as string; // Added this
 
-  // 1. Get the IDs from our Client Component. 
-  // These already include the new uploads from our /api/upload bridge!
   const orderedGalleryRaw = formData.get("ordered_gallery") as string;
   const finalIdList: string[] = JSON.parse(orderedGalleryRaw || "[]");
 
@@ -104,26 +103,22 @@ export async function updateArtifactAction(
     const numericId = parseInt(id, 10);
     const primaryThumbnail = finalIdList.length > 0 ? finalIdList[0] : null;
 
-    // 2. Prepare the Junction Table data.
-    // Note: Don't filter out the primaryThumbnail! 
-    // Usually, you want the primary photo to exist in the gallery AND be the thumbnail.
     const galleryUpdate = finalIdList.map((uuid) => ({
-      props_id: numericId,
       directus_files_id: uuid,
     }));
 
-		const adminClient = createDirectus(process.env.NEXT_PUBLIC_DIRECTUS_URL!)
-			.with(staticToken(process.env.DIRECTUS_STATIC_TOKEN!))
-			.with(rest());
+    const adminClient = createDirectus(process.env.NEXT_PUBLIC_DIRECTUS_URL!)
+      .with(staticToken(process.env.DIRECTUS_STATIC_TOKEN!))
+      .with(rest());
 
+    // IMPORTANT: Ensure "name" in Directus isn't set to a Numeric type
     await adminClient.request(
       updateItem("props", numericId, {
-        name,
-        purchase_price: parseFloat(price),
-        description,
+        name: name,
+        price: parseFloat(price), // Check if your field is 'price' or 'purchase_price'
+        category: categoryId ? parseInt(categoryId, 10) : null, // Added category
+        description: description,
         thumbnail: primaryThumbnail,
-        // Directus will sync this junction table: 
-        // it deletes old links and adds these new ones in this order.
         photo_gallery: galleryUpdate, 
       })
     );
@@ -134,12 +129,8 @@ export async function updateArtifactAction(
     return { error: errorMessage };
   }
 
-  // 3. Revalidate and Redirect
   revalidatePath(`/artifact/edit/${id}`);
-  revalidatePath(`/artifact/${id}`);
   revalidatePath("/dashboard");
-	revalidatePath("/inventory");
-
   redirect("/dashboard");
 }
 
