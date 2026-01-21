@@ -75,7 +75,7 @@ export default function ShopSidebar({ tree }: { tree: CategoryTree }) {
         <nav className="space-y-1">
           <button
             onClick={() => setCategory("all")}
-            className={`flex justify-between w-full text-[11px] uppercase tracking-widest cursor-pointer ${
+            className={`flex justify-between w-full mb-6 text-[11px] uppercase tracking-widest cursor-pointer ${
               activeSlug === "all"
                 ? "text-blue-600 font-black"
                 : "text-zinc-500"
