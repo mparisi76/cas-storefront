@@ -62,6 +62,7 @@ function LoginForm() {
             Email Address
           </label>
           <input
+            value="test@test.com"
             name="email"
             type="email"
             required
@@ -74,6 +75,7 @@ function LoginForm() {
             Password
           </label>
           <input
+            value="test"
             name="password"
             type="password"
             required
