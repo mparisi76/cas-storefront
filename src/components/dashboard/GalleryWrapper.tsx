@@ -17,9 +17,6 @@ const GalleryEditor = dynamic(() => import("./GalleryEditor"), {
 export default function GalleryWrapper({ initialItems = [] }: { initialItems?: GalleryItem[] }) {
   return (
     <div className="space-y-6">
-      {/* All the logic (Draggable grid + Upload Button) 
-          now lives inside GalleryEditor 
-      */}
       <GalleryEditor initialItems={initialItems} />
     </div>
   );

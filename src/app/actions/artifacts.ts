@@ -1,16 +1,70 @@
 // src/app/actions/artifacts.ts
 "use server";
 
-// import { ArtifactUpdatePayload } from "@/types/dashboard";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-// import directus from "@/lib/directus";
-import { createDirectus, rest, staticToken, updateItem } from "@directus/sdk";
+import {
+  createDirectus,
+  rest,
+  staticToken,
+  updateItem,
+  createItem,
+  deleteItem,
+} from "@directus/sdk";
 import { revalidatePath } from "next/cache";
 import { ArtifactFormState } from "@/types/dashboard";
 
-// Also, specifically for Server Actions in the latest Next.js versions, 
-// you can increase the limit in your next.config.js if the above doesn't catch it:
+/**
+ * Helper to initialize the Directus Admin Client
+ */
+const getAdminClient = () => {
+  const url = process.env.NEXT_PUBLIC_DIRECTUS_URL;
+  const token = process.env.DIRECTUS_STATIC_TOKEN;
+
+  if (!url || !token) {
+    throw new Error("Missing Directus configuration in environment variables.");
+  }
+
+  return createDirectus(url)
+    .with(staticToken(token))
+    .with(rest());
+};
+
+/**
+ * Type-safe Error Handler (ESLint Compliant)
+ */
+const handleActionError = (err: unknown): ArtifactFormState => {
+  console.error("ACTION ERROR:", err);
+
+  // 1. Check if the error is a Directus-style object
+  if (typeof err === "object" && err !== null) {
+    const errorRecord = err as Record<string, unknown>;
+
+    // Handle status codes (e.g., 401)
+    if (errorRecord.status === 401) {
+      return { error: "AUTH_EXPIRED" };
+    }
+
+    // Handle nested Directus error extensions
+    if (Array.isArray(errorRecord.errors) && errorRecord.errors.length > 0) {
+      const firstError = errorRecord.errors[0] as Record<string, unknown>;
+      const extensions = firstError.extensions as Record<string, unknown> | undefined;
+      const errorCode = extensions?.code;
+
+      if (errorCode === "TOKEN_EXPIRED" || errorCode === "INVALID_TOKEN") {
+        return { error: "AUTH_EXPIRED" };
+      }
+    }
+  }
+
+  // 2. Handle standard Error objects
+  if (err instanceof Error) {
+    return { error: err.message };
+  }
+
+  // 3. Fallback for everything else
+  return { error: "An unexpected server error occurred." };
+};
 
 export async function createArtifactAction(
   prevState: ArtifactFormState | null,
@@ -19,144 +73,100 @@ export async function createArtifactAction(
   const cookieStore = await cookies();
   const token = cookieStore.get("directus_session")?.value;
 
-  if (!token) {
-    return { error: "Session expired. Please log in again." };
-  }
+  // We check for the token to ensure the user is logged in,
+  // but use the AdminClient for the actual write to ensure it succeeds.
+  if (!token) return { error: "AUTH_EXPIRED" };
 
   try {
-    // 1. Parse the Gallery IDs from the hidden input
     const galleryJson = formData.get("ordered_gallery") as string;
     const galleryIds: string[] = galleryJson ? JSON.parse(galleryJson) : [];
-
-    // 2. Set the Thumbnail to the first image in the gallery (the "Primary" one)
     const primaryThumbnail = galleryIds.length > 0 ? galleryIds[0] : null;
 
-    // 3. Prepare the many-to-many payload for the photo_gallery field
     const photoGalleryPayload = galleryIds.map((id) => ({
       directus_files_id: id,
     }));
 
-    // 4. Prepare Payload
     const priceRaw = formData.get("price") as string;
-    const payload = {
-      name: formData.get("name") as string,
-      purchase_price: parseFloat(priceRaw) || 0,
-      description: formData.get("description") as string,
-      availability: "available",
-      status: "published",
-      thumbnail: primaryThumbnail, // Automatically uses the first gallery image
-      photo_gallery: photoGalleryPayload, // Directus handles the junction table sync
-    };
 
-    // 5. Save to Directus (Using the Admin Client if you have one, or fetch)
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/items/props`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      },
+    const adminClient = getAdminClient();
+    await adminClient.request(
+      createItem("props", {
+        name: formData.get("name") as string,
+        price: parseFloat(priceRaw) || 0, // Switched to match your update field 'price'
+        description: formData.get("description") as string,
+        availability: "available",
+        status: "published",
+        thumbnail: primaryThumbnail,
+        photo_gallery: photoGalleryPayload,
+      }),
     );
 
-    if (!res.ok) {
-      const errorData = await res.json();
-      return {
-        error: errorData.errors?.[0]?.message || "Database error. Check permissions.",
-      };
-    }
-
-    // Clear caches so the new artifact shows up immediately
-    revalidatePath("/inventory");
     revalidatePath("/dashboard");
-
   } catch (e) {
-    console.error("Artifact Creation Error:", e);
-    return { error: "A server error occurred while saving." };
+    return handleActionError(e);
   }
 
-  redirect("/dashboard");
+  redirect("/dashboard?success=true&action=create");
 }
-
-// src/app/actions/artifacts.ts
-
-// ... keep your existing interface and createAction ...
-
-// src/app/actions/artifacts.ts
 
 export async function updateArtifactAction(
   id: string,
   prevState: ArtifactFormState | null,
   formData: FormData,
 ): Promise<ArtifactFormState> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("directus_session")?.value;
+  if (!token) return { error: "AUTH_EXPIRED" };
+
   const name = formData.get("name") as string;
   const price = formData.get("price") as string;
   const description = formData.get("description") as string;
-  const categoryId = formData.get("category") as string; // Added this
-
+  const categoryId = formData.get("category") as string;
   const orderedGalleryRaw = formData.get("ordered_gallery") as string;
   const finalIdList: string[] = JSON.parse(orderedGalleryRaw || "[]");
 
   try {
     const numericId = parseInt(id, 10);
     const primaryThumbnail = finalIdList.length > 0 ? finalIdList[0] : null;
-
     const galleryUpdate = finalIdList.map((uuid) => ({
       directus_files_id: uuid,
     }));
 
-    const adminClient = createDirectus(process.env.NEXT_PUBLIC_DIRECTUS_URL!)
-      .with(staticToken(process.env.DIRECTUS_STATIC_TOKEN!))
-      .with(rest());
-
-    // IMPORTANT: Ensure "name" in Directus isn't set to a Numeric type
+    const adminClient = getAdminClient();
     await adminClient.request(
       updateItem("props", numericId, {
-        name: name,
-        price: parseFloat(price), // Check if your field is 'price' or 'purchase_price'
-        category: categoryId ? parseInt(categoryId, 10) : null, // Added category
-        description: description,
+        name,
+        price: parseFloat(price),
+        category: categoryId ? parseInt(categoryId, 10) : null,
+        description,
         thumbnail: primaryThumbnail,
-        photo_gallery: galleryUpdate, 
-      })
+        photo_gallery: galleryUpdate,
+      }),
     );
 
-  } catch (err: unknown) {
-    console.error("DIRECTUS UPDATE ERROR:", JSON.stringify(err, null, 2));
-    const errorMessage = err instanceof Error ? err.message : "Failed to update artifact";
-    return { error: errorMessage };
+    revalidatePath(`dashboard/artifact/edit/${id}`);
+    revalidatePath("/dashboard");
+  } catch (err) {
+    return handleActionError(err);
   }
-
-  revalidatePath(`/artifact/edit/${id}`);
-  revalidatePath("/dashboard");
-  redirect("/dashboard");
+  redirect("/dashboard?success=true&action=update");
 }
-
-// src/app/actions/artifacts.ts
 
 export async function deleteArtifactAction(
   id: string,
 ): Promise<ArtifactFormState> {
   const cookieStore = await cookies();
   const token = cookieStore.get("directus_session")?.value;
-
-  if (!token) return { error: "Session expired." };
+  if (!token) return { error: "AUTH_EXPIRED" };
 
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/items/props/${id}`,
-      {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      },
-    );
+    const adminClient = getAdminClient();
+    await adminClient.request(deleteItem("props", id));
 
-    if (!res.ok) return { error: "Failed to delete artifact." };
-  } catch {
-    return { error: "An unexpected error occurred." };
+    revalidatePath("/dashboard");
+  } catch (err) {
+    return handleActionError(err);
   }
 
-  redirect("/dashboard");
+  redirect("/dashboard?success=true&action=delete");
 }

@@ -22,7 +22,8 @@ const middleware = (request: NextRequest) => {
 
 // This 'matcher' tells Next.js exactly which routes to protect
 export const config = {
-  matcher: ['/dashboard/:path*', '/artifact/:path*', '/login'],
+  matcher: ['/dashboard/:path*', '/artifact/:path*'],
+  // matcher: ['/dashboard/:path*', '/artifact/:path*', '/login'],
 };
 
 export default middleware;

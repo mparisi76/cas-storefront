@@ -1,30 +1,39 @@
-// src/app/(auth)/artifact/new/NewArtifactForm.tsx
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { createArtifactAction } from "@/app/actions/artifacts";
-import GalleryWrapper from "@/components/portal/GalleryWrapper";
+import GalleryWrapper from "@/components/dashboard/GalleryWrapper";
+import { CategorySelect } from "@/components/dashboard/CategorySelect"; // Assuming this is where it lives
 import { Category } from "@/types/category";
 
-export default function NewArtifactForm({ categories }: { categories: Category[] }) {
+export default function NewArtifactForm({
+  categories,
+}: {
+  categories: Category[];
+}) {
   const [state, formAction, isPending] = useActionState(
     createArtifactAction,
     null,
   );
 
-  // Double-check sorting on the client-side just in case
-  const sortedCategories = [...categories].sort((a, b) => {
-		// 1. Sort by Parent Name
-		const parentA = a.parent?.name || "";
-		const parentB = b.parent?.name || "";
-		const parentSort = parentA.localeCompare(parentB);
-		
-		// 2. If parents are the same, sort by Child Name
-		if (parentSort !== 0) return parentSort;
-		return a.name.localeCompare(b.name);
-	});
+  // Track the selected category for the custom component
+  const [selectedCategoryId, setSelectedCategoryId] = useState("");
+
+  // We transform your types to match the simple interface of the select
+	const formattedCategories = categories.map((cat) => ({
+		id: String(cat.id), // Force to string
+		name: cat.name,
+		parent: cat.parent?.id ? String(cat.parent.id) : null, // Force to string
+	}));
 
   return (
+    <div className="relative">
+      {/* Header Section */}
+      <div className="flex items-end justify-between border-b border-zinc-100 pb-8 mb-10">
+        <h1 className="text-3xl font-light tracking-tighter text-zinc-900 italic">
+          New Artifact
+        </h1>
+      </div>
     <form action={formAction} className="space-y-10">
       {state?.error && (
         <div className="bg-red-50 border border-red-200 p-4 text-sm font-bold text-red-700">
@@ -73,29 +82,25 @@ export default function NewArtifactForm({ categories }: { categories: Category[]
         </div>
       </div>
 
-      {/* Category Dropdown */}
+      {/* NEW Custom Category Dropdown */}
       <div className="space-y-3 relative">
         <label className="block text-xs font-black uppercase tracking-widest text-zinc-800">
           Category
         </label>
-        <div className="relative border-b border-zinc-200">
-          <select
-            name="category"
-            defaultValue=""
-            required
-            className="w-full py-4 outline-none focus:border-zinc-900 text-lg bg-transparent text-zinc-900 font-medium appearance-none cursor-pointer pr-8"
-          >
-            <option value="" disabled className="text-zinc-400">Select a category</option>
-            {sortedCategories.map((cat) => (
-              <option key={cat.id} value={cat.id} className="text-zinc-900">
-                {cat.parent?.name ? `${cat.parent.name} — ` : ""}{cat.name}
-              </option>
-            ))}
-          </select>
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400 text-[10px]">
-            ▼
-          </div>
-        </div>
+
+        {/* Hidden input to pass the value to the server action */}
+        <input
+          type="hidden"
+          name="category"
+          value={selectedCategoryId}
+          required
+        />
+
+        <CategorySelect
+          categories={formattedCategories}
+          value={selectedCategoryId}
+          onChange={(id) => setSelectedCategoryId(id)}
+        />
       </div>
 
       <div className="space-y-3">
@@ -120,5 +125,6 @@ export default function NewArtifactForm({ categories }: { categories: Category[]
         </button>
       </div>
     </form>
+  </div>
   );
 }

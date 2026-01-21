@@ -1,15 +1,23 @@
 "use client";
 
-import { useActionState, Suspense } from "react";
+import { useActionState, Suspense, useEffect } from "react";
 import { loginAction } from "@/app/actions/auth";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
-// 1. Move the logic that uses useSearchParams into this sub-component
 function LoginForm() {
   const [state, formAction, isPending] = useActionState(loginAction, null);
   const searchParams = useSearchParams();
+  
   const isRegistered = searchParams.get("registered") === "true";
+  const isExpired = searchParams.get("error") === "session_expired";
+
+  // Automatically wipe the stale cookie if we were redirected for expiry
+  useEffect(() => {
+    if (isExpired) {
+      document.cookie = "directus_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    }
+  }, [isExpired]);
 
   return (
     <div className="w-full max-w-sm bg-white border border-zinc-200 p-10 md:p-14 shadow-sm">
@@ -27,6 +35,15 @@ function LoginForm() {
         <div className="bg-green-50 border border-green-100 p-3 text-center mb-6">
           <p className="text-[9px] font-bold uppercase tracking-widest text-green-700">
             Registration successful. Please login.
+          </p>
+        </div>
+      )}
+
+      {/* Session Expired Message */}
+      {isExpired && (
+        <div className="bg-amber-50 border border-amber-200 p-3 text-center mb-6">
+          <p className="text-[9px] font-bold uppercase tracking-widest text-amber-700">
+            Your session has expired. Please login again.
           </p>
         </div>
       )}
@@ -90,7 +107,6 @@ function LoginForm() {
   );
 }
 
-// 2. The main page component just wraps the form in Suspense
 export default function LoginPage() {
   return (
     <main className="min-h-[80dvh] flex items-center justify-center bg-[#F9F8F6] px-6">

@@ -17,6 +17,7 @@ export interface AuthResponse {
 export interface ArtifactFormState {
   error?: string;
   success?: boolean;
+  timestamp?: number;
 }
 
 // Define exactly what Directus expects for an update

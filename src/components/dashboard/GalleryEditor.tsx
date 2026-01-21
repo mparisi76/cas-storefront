@@ -64,11 +64,13 @@ function SortablePhoto({
         {...listeners}
         className="w-full h-full cursor-grab active:cursor-grabbing"
       >
-        <img
-          src={url}
-          alt=""
-          className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300"
-        />
+        <div className="w-full h-full bg-zinc-50 flex items-center justify-center overflow-hidden">
+          <img
+            src={url}
+            alt=""
+            className="w-full h-full object-contain transition-all duration-300"
+          />
+        </div>
       </div>
       {isPrimary && (
         <div className="absolute bottom-0 left-0 right-0 bg-zinc-900 text-[8px] text-white font-black uppercase tracking-widest py-1 text-center pointer-events-none">

@@ -103,9 +103,11 @@ export default async function ShopPage({
 
                     {item.thumbnail ? (
                       <img
-                        src={`${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${item.thumbnail}?width=800&height=1000&fit=cover`}
+                        src={`${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${item.thumbnail}?width=800&height=1000&fit=inside`}
                         alt={item.name}
-                        className={`object-cover w-full h-full transition-all duration-1000 ease-in-out scale-105 group-hover:scale-100 ${isSold ? "grayscale contrast-75" : "grayscale group-hover:grayscale-0"}`}
+                        className={`object-contain w-full h-full transition-all duration-1000 ease-in-out ${
+                          isSold ? "grayscale contrast-75" : "grayscale group-hover:grayscale-0"
+                        }`}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-zinc-300 uppercase tracking-[0.2em] text-[10px] font-bold">

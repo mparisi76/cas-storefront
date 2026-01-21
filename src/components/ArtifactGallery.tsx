@@ -48,12 +48,12 @@ export default function ArtifactGallery({
       <div className="aspect-4/5 bg-white shadow-lg relative overflow-hidden border border-zinc-200">
         <img
           key={activeImage}
-          src={`${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${activeImage}?width=1000&quality=80`}
+          src={`${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${activeImage}?width=1000&quality=80&fit=inside`}
           alt={name}
           onLoad={() => setIsLoaded(true)}
-          className={`object-cover w-full h-full transition-all duration-500 ease-in-out
+          className={`object-contain w-full h-full transition-all duration-500 ease-in-out
             ${isLoaded ? "opacity-100 scale-100" : "opacity-0 scale-[1.01]"} 
-            ${isSold ? "grayscale opacity-60" : "grayscale hover:grayscale-0"}
+            ${isSold ? "grayscale opacity-60" : "grayscale-0"} 
           `}
         />
         
