@@ -81,9 +81,7 @@ export default function ShopSidebar({ tree }: { tree: CategoryTree }) {
                 : "text-zinc-500"
             }`}
           >
-            <span>
-              All Collections
-            </span>
+            <span>All Collections</span>
           </button>
 
           {Object.entries(tree).map(([id, parent]: [string, TreeParent]) => {
