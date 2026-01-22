@@ -1,130 +1,194 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { createArtifactAction } from "@/app/actions/artifacts";
 import GalleryWrapper from "@/components/dashboard/GalleryWrapper";
-import { CategorySelect } from "@/components/dashboard/CategorySelect"; // Assuming this is where it lives
+import { CategorySelect } from "@/components/dashboard/controls/CategorySelect";
 import { Category } from "@/types/category";
+import { EraClassification } from "@/components/dashboard/controls/EraClassification";
 
 export default function NewArtifactForm({
   categories,
 }: {
   categories: Category[];
 }) {
+  const router = useRouter();
+  const formId = "new-artifact-form";
+  const MAX_NAME_LENGTH = 60;
+  
   const [state, formAction, isPending] = useActionState(
     createArtifactAction,
     null,
   );
 
-  // Track the selected category for the custom component
+  // --- Form State ---
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
+  const [classification, setClassification] = useState("vintage");
+  const [description, setDescription] = useState("");
 
-  // We transform your types to match the simple interface of the select
-	const formattedCategories = categories.map((cat) => ({
-		id: String(cat.id), // Force to string
-		name: cat.name,
-		parent: cat.parent?.id ? String(cat.parent.id) : null, // Force to string
-	}));
+  // --- Validation Logic ---
+  const isFormValid = useMemo(() => {
+    return (
+      name.trim().length > 0 && 
+      name.length <= MAX_NAME_LENGTH &&
+      price.trim().length > 0 && 
+      selectedCategoryId !== ""
+    );
+  }, [name, price, selectedCategoryId]);
+
+  const isPublishDisabled = isPending || !isFormValid;
+
+  // Transform categories for the custom select component
+  const formattedCategories = categories.map((cat) => ({
+    id: String(cat.id),
+    name: cat.name,
+    parent: cat.parent?.id ? String(cat.parent.id) : null,
+  }));
 
   return (
     <div className="relative">
-      {/* Header Section */}
-      <div className="flex items-end justify-between border-b border-zinc-100 pb-8 mb-10">
-        <h1 className="text-3xl font-light tracking-tighter text-zinc-900 italic">
-          New Artifact
-        </h1>
-      </div>
-    <form action={formAction} className="space-y-10">
-      {state?.error && (
-        <div className="bg-red-50 border border-red-200 p-4 text-sm font-bold text-red-700">
-          {state.error}
+      {/* Action Header */}
+      <div className="flex items-center justify-between border-b border-zinc-100 pb-1 mb-10">
+        <div className="flex flex-col">
+          <h1 className="text-3xl font-light tracking-tighter text-zinc-900 italic">
+            New Artifact
+          </h1>
         </div>
-      )}
 
-      {/* Image Upload */}
-      <div className="space-y-4">
-        <label className="block text-xs font-black uppercase tracking-widest text-zinc-800">
-          Manage photos
-        </label>
-        <p className="text-[10px] text-zinc-600 uppercase tracking-widest italic">
-          Drag to reorder images. The first image will be set as the Primary
-          Thumbnail.
-        </p>
-        <GalleryWrapper />
+        <div className="flex items-center gap-3">
+          <button
+            form={formId}
+            type="submit"
+            disabled={isPublishDisabled}
+            className="bg-zinc-900 px-8 py-2.5 text-[10px] font-black uppercase tracking-widest text-white hover:bg-zinc-800 transition-all disabled:opacity-10 disabled:grayscale disabled:cursor-not-allowed cursor-pointer"
+          >
+            {isPending ? "Archiving..." : "Publish"}
+          </button>
+
+          <button
+            onClick={() => router.back()}
+            type="button"
+            className="border border-zinc-200 px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-zinc-900 hover:border-zinc-300 hover:bg-zinc-50 transition-all bg-white"
+          >
+            Cancel
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pt-6 border-t border-zinc-50">
-        <div className="space-y-3">
+      <form id={formId} action={formAction} className="space-y-10">
+        {state?.error && (
+          <div className="bg-red-50 border border-red-200 p-4 text-sm font-bold text-red-700">
+            {state.error}
+          </div>
+        )}
+
+        {/* Image Upload Section */}
+        <div className="space-y-4">
           <label className="block text-xs font-black uppercase tracking-widest text-zinc-800">
-            Artifact Name
+            Manage photos
           </label>
-          <input
-            name="name"
-            type="text"
-            placeholder="e.g. 19th Century Cast Iron Pulley"
-            required
-            className="w-full border-b border-zinc-200 py-4 outline-none focus:border-zinc-900 text-lg bg-transparent text-zinc-900 font-medium placeholder:text-zinc-300"
+          <p className="text-[10px] text-zinc-600 uppercase tracking-widest italic">
+            The first image will be set as the Primary Thumbnail.
+          </p>
+          <GalleryWrapper />
+        </div>
+
+        {/* Era Classification Toggle */}
+        <div>
+          <EraClassification
+            currentValue={classification}
+            onChange={(val) => setClassification(val)}
           />
         </div>
 
-        <div className="space-y-3">
+        {/* Identity & Pricing Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          <div className="space-y-3">
+            <div className="flex justify-between items-end">
+              <label className="block text-xs font-black uppercase tracking-widest text-zinc-800">
+                Artifact Name <span className="text-red-500">*</span>
+              </label>
+              <span className={`text-[10px] font-mono tracking-tighter ${
+                name.length > MAX_NAME_LENGTH ? "text-red-500 font-bold" : "text-zinc-400"
+              }`}>
+                {name.length}/{MAX_NAME_LENGTH}
+              </span>
+            </div>
+            <input
+              name="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. 19th Century Cast Iron Pulley"
+              required
+              className="w-full border-b border-zinc-200 py-4 outline-none focus:border-zinc-900 text-lg bg-transparent text-zinc-900 font-medium placeholder:text-zinc-300 transition-colors"
+            />
+          </div>
+
+          <div className="space-y-3">
+            <label className="block text-xs font-black uppercase tracking-widest text-zinc-800">
+              Price (USD) <span className="text-red-500">*</span>
+            </label>
+            <input
+              name="price"
+              type="number"
+              step="0.01"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              placeholder="0.00"
+              required
+              className="w-full border-b border-zinc-200 py-4 outline-none focus:border-zinc-900 text-lg bg-transparent text-zinc-900 font-mono placeholder:text-zinc-300 transition-colors"
+            />
+          </div>
+        </div>
+
+        {/* Category Selection */}
+        <div className="space-y-3 relative">
           <label className="block text-xs font-black uppercase tracking-widest text-zinc-800">
-            Price (USD)
+            Category <span className="text-red-500">*</span>
           </label>
           <input
-            name="price"
-            type="number"
-            step="0.01"
-            placeholder="0.00"
+            type="hidden"
+            name="category"
+            value={selectedCategoryId}
             required
-            className="w-full border-b border-zinc-200 py-4 outline-none focus:border-zinc-900 text-lg bg-transparent text-zinc-900 font-mono placeholder:text-zinc-300"
+          />
+          <CategorySelect
+            categories={formattedCategories}
+            value={selectedCategoryId}
+            onChange={(id) => setSelectedCategoryId(id)}
           />
         </div>
-      </div>
 
-      {/* NEW Custom Category Dropdown */}
-      <div className="space-y-3 relative">
-        <label className="block text-xs font-black uppercase tracking-widest text-zinc-800">
-          Category
-        </label>
+        {/* Description Field */}
+        <div className="space-y-3">
+          <label className="block text-xs font-black uppercase tracking-widest text-zinc-800">
+            Description
+          </label>
+          <textarea
+            name="description"
+            rows={6}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Describe the provenance, material, and history..."
+            className="w-full border border-zinc-200 p-4 outline-none focus:border-zinc-900 text-base bg-transparent text-zinc-900 leading-relaxed placeholder:text-zinc-300 transition-colors"
+          />
+        </div>
 
-        {/* Hidden input to pass the value to the server action */}
-        <input
-          type="hidden"
-          name="category"
-          value={selectedCategoryId}
-          required
-        />
-
-        <CategorySelect
-          categories={formattedCategories}
-          value={selectedCategoryId}
-          onChange={(id) => setSelectedCategoryId(id)}
-        />
-      </div>
-
-      <div className="space-y-3">
-        <label className="block text-xs font-black uppercase tracking-widest text-zinc-800">
-          History & Material Details
-        </label>
-        <textarea
-          name="description"
-          rows={6}
-          placeholder="Describe the provenance, material, and history..."
-          className="w-full border border-zinc-200 p-4 outline-none focus:border-zinc-900 text-base bg-transparent text-zinc-900 leading-relaxed placeholder:text-zinc-300"
-        />
-      </div>
-
-      <div className="pt-8">
-        <button
-          disabled={isPending}
-          type="submit"
-          className="w-full bg-zinc-900 text-white py-6 text-sm font-black uppercase tracking-[0.3em] hover:bg-zinc-800 transition-all shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isPending ? "Archiving..." : "Publish to Marketplace"}
-        </button>
-      </div>
-    </form>
-  </div>
+        {/* Bottom Action Footer */}
+        <div className="pt-8 pb-20 border-t border-zinc-100">
+          <button
+            disabled={isPublishDisabled}
+            type="submit"
+            className="w-full bg-zinc-900 text-white py-8 text-sm font-black uppercase tracking-[0.3em] hover:bg-zinc-800 transition-all shadow-xl disabled:opacity-10 disabled:grayscale disabled:cursor-not-allowed"
+          >
+            {isPending ? "Archiving..." : "Publish to Marketplace"}
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }

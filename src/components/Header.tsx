@@ -17,10 +17,10 @@ export default function Header() {
             <Link href="/inventory" className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-blue-600 transition-colors">
               Catalog
             </Link>
-            <Link href="/archives" className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-blue-600 transition-colors">
+            {/* <Link href="/archives" className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-blue-600 transition-colors">
               Archives
-            </Link>
-            <Link href="/login" className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-blue-600 transition-colors">
+            </Link> */}
+            <Link href="/dashboard" className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-blue-600 transition-colors">
               Portal
             </Link>
           </nav>

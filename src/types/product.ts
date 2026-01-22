@@ -30,6 +30,7 @@ export interface Artifact {
   quantity_available: number;
   condition?: string;
   purchase_price: string;
+  classification: string | null;
 }
 
 export interface GalleryItem {

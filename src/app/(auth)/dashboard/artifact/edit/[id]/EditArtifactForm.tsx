@@ -13,11 +13,12 @@ import {
 } from "@/app/actions/artifacts";
 import { ArtifactFormState } from "@/types/dashboard";
 import GalleryWrapper from "@/components/dashboard/GalleryWrapper";
-import { CategorySelect } from "@/components/dashboard/CategorySelect";
-import { ConfirmDeleteModal } from "@/components/dashboard/ConfirmDeleteModal";
+import { CategorySelect } from "@/components/dashboard/controls/CategorySelect";
+import { ConfirmDeleteModal } from "@/components/dashboard/modals/ConfirmDeleteModal";
 import { Category } from "@/types/category";
-import { useToast } from "@/context/ToastContext"; // Using your new global hook
+import { useToast } from "@/context/ToastContext";
 import { Artifact } from "@/types/product";
+import { EraClassification } from "@/components/dashboard/controls/EraClassification";
 
 export default function EditArtifactForm({
   artifact,
@@ -31,55 +32,43 @@ export default function EditArtifactForm({
   const formId = "edit-artifact-form";
   const { showToast } = useToast();
 
-  // --- UI States ---
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // --- Data Parsing ---
   const initialCategoryId =
     typeof artifact.category === "object" && artifact.category !== null
       ? String((artifact.category as Category).id)
       : String(artifact.category ?? "");
 
   const cleanDescription = (artifact.description ?? "").replace(/<[^>]*>/g, "");
+  const initialClassification = artifact.classification ?? "";
 
-  // --- Form State ---
   const [name, setName] = useState(artifact.name || "");
   const [price, setPrice] = useState(String(artifact.price || ""));
   const [description, setDescription] = useState(cleanDescription);
-  const [selectedCategoryId, setSelectedCategoryId] =
-    useState(initialCategoryId);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(initialCategoryId);
+  const [classification, setClassification] = useState(initialClassification);
 
-  // --- Server Action ---
   const updateWithId = (state: ArtifactFormState | null, formData: FormData) =>
     updateArtifactAction(id, state, formData);
 
   const [state, formAction, isPending] = useActionState(updateWithId, null);
 
-  // --- Global Success Trigger ---
   useEffect(() => {
     if (state?.success) {
       showToast("Artifact Updated Successfully");
     }
   }, [state?.success, showToast]);
 
-  // --- The "Dirty Check" ---
   const isDirty = useMemo(() => {
     return (
       name !== (artifact.name || "") ||
       price !== String(artifact.price || "") ||
       description !== cleanDescription ||
-      selectedCategoryId !== initialCategoryId
+      selectedCategoryId !== initialCategoryId ||
+      classification !== initialClassification
     );
-  }, [
-    name,
-    price,
-    description,
-    selectedCategoryId,
-    artifact,
-    initialCategoryId,
-    cleanDescription,
-  ]);
+  }, [name, price, description, selectedCategoryId, classification, artifact, initialCategoryId, initialClassification, cleanDescription]);
 
   const handleConfirmDelete = () => {
     setIsDeleting(true);
@@ -112,7 +101,7 @@ export default function EditArtifactForm({
         isPending={isDeleting}
       />
 
-      <div className="flex items-center justify-between border-b border-zinc-100 pb-8 mb-10">
+      <div className="flex items-center justify-between border-b border-zinc-100 pb-1 mb-10">
         <div className="flex flex-col">
           <h1 className="text-3xl font-light tracking-tighter text-zinc-900 italic">
             Edit Artifact
@@ -142,7 +131,7 @@ export default function EditArtifactForm({
         </div>
       </div>
 
-      <form id={formId} action={formAction} className="space-y-12">
+      <form id={formId} action={formAction} className="space-y-10">
         {state?.error && (
           <div className="bg-red-50 border border-red-200 p-4 text-sm font-bold text-red-700">
             {state.error}
@@ -155,17 +144,14 @@ export default function EditArtifactForm({
           </label>
           <GalleryWrapper
             initialItems={[
-              ...(artifact.thumbnail
-                ? [{ directus_files_id: artifact.thumbnail }]
-                : []),
-              ...(artifact.photo_gallery || []).filter(
-                (item) => item.directus_files_id !== artifact.thumbnail,
-              ),
+              ...(artifact.thumbnail ? [{ directus_files_id: artifact.thumbnail }] : []),
+              ...(artifact.photo_gallery || []).filter(item => item.directus_files_id !== artifact.thumbnail),
             ]}
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pt-8 border-t border-zinc-100">
+        {/* Removed pt-8 and border-t */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           <div className="space-y-3">
             <label className="block text-xs font-black uppercase tracking-widest text-zinc-800">
               Artifact Name
@@ -196,6 +182,14 @@ export default function EditArtifactForm({
           </div>
         </div>
 
+        {/* Removed pt-8 and border-t, kept spacing consistent */}
+        <div>
+          <EraClassification
+            currentValue={classification}
+            onChange={(val) => setClassification(val)}
+          />
+        </div>
+
         <div className="space-y-3">
           <label className="block text-xs font-black uppercase tracking-widest text-zinc-800">
             Category
@@ -215,7 +209,7 @@ export default function EditArtifactForm({
 
         <div className="space-y-3">
           <label className="block text-xs font-black uppercase tracking-widest text-zinc-800">
-            Archive Description
+            Description
           </label>
           <textarea
             name="description"
@@ -226,6 +220,7 @@ export default function EditArtifactForm({
           />
         </div>
 
+        {/* Kept the bottom border for the primary CTA section */}
         <div className="pt-10 pb-20 border-t border-zinc-100">
           <button
             disabled={isSaveDisabled}

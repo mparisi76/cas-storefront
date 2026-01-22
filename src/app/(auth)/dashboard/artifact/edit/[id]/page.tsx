@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
 import EditArtifactForm from "./EditArtifactForm";
 import Link from "next/link";
-import directus from "@/lib/directus";
-import { readItem, readItems } from "@directus/sdk";
+// import directus from "@/lib/directus";
+import { createDirectus, readItem, readItems, rest, staticToken } from "@directus/sdk";
 import { Artifact } from "@/types/product";
 import { Category } from "@/types/category";
+import { cookies } from "next/headers";
 
 export default async function EditPage({
   params,
@@ -13,13 +14,22 @@ export default async function EditPage({
 }) {
   const { id } = await params;
 
+  // 1. Get the token from the user's browser cookie
+  const cookieStore = await cookies();
+  const token = cookieStore.get("directus_session")?.value;
+
+  // 2. Initialize the client using that specific token
+  const directus = createDirectus(process.env.NEXT_PUBLIC_DIRECTUS_URL!)
+    .with(staticToken(token || '')) // Fallback to empty string to trigger 401/404 if missing
+    .with(rest());
+
   // Fetch both the Artifact and the Categories list
   // Note: We include 'category.*' to get the nested id for the select defaultValue
   const [artifact, categories] = await Promise.all([
     directus.request<Artifact>(
       readItem("props", id, {
         fields: [
-          "*", 
+          "*",
           { photo_gallery: ["directus_files_id"] },
           { category: ["id", "name"] }
         ],
