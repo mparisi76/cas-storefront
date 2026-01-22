@@ -31,7 +31,7 @@ async function getShopItems() {
         "thumbnail",
         "purchase_price",
         "availability",
-        "classification", // CRITICAL: Added so the filter has data to work with
+        "classification",
         { category: ["id", "slug", "name", { parent: ["id", "slug"] }] },
       ],
     }),
@@ -54,7 +54,6 @@ export default async function ShopPage({
 
   const categoryTree = getCategoryTree(categories, allItems as Artifact[]);
 
-  // Filtering logic using the classification field now included in the query
   const filteredItems = allItems.filter((item) => {
     const matchesCategory =
       !activeSlug ||
@@ -69,6 +68,7 @@ export default async function ShopPage({
   });
 
   const eraOptions = ["all", "antique", "vintage", "modern"];
+  const isFiltered = (activeSlug && activeSlug !== "all") || (activeEra && activeEra !== "all");
 
   return (
     <main className="bg-[#F9F8F6] min-h-screen pt-10 px-10">
@@ -78,16 +78,32 @@ export default async function ShopPage({
         </div>
 
         <div className="flex-1">
+          {/* HEADER SECTION */}
           <div className="mb-12 flex justify-between items-end">
             <div>
-              <h2 className="text-[11px] font-black uppercase tracking-[0.4em] text-zinc-600 mb-2 leading-none">
-                {activeSlug
-                  ? activeSlug.replace(/-/g, " ")
-                  : "Complete Inventory"}
-              </h2>
-              <p className="text-3xl font-bold uppercase tracking-tighter text-zinc-600 italic leading-none">
-                {activeSlug ? "Categorized Finds" : "Selected Artifacts"}
-              </p>
+              <div className="flex items-center gap-3 mb-2">
+                <h2 className="text-[11px] font-black uppercase tracking-[0.4em] text-zinc-500 leading-none">
+                  {activeSlug && activeSlug !== "all" 
+                    ? "Category" 
+                    : "Complete Inventory"}
+                </h2>
+                
+                {isFiltered && (
+                  <Link 
+                    href="/inventory"
+                    className="text-[10px] font-bold uppercase tracking-widest text-blue-600 hover:text-zinc-900 flex items-center gap-1 border border-blue-100 px-2 py-0.5 bg-blue-50/40 transition-colors"
+                  >
+                    <span className="text-[8px]">✕</span>
+                    <span>Clear</span>
+                  </Link>
+                )}
+              </div>
+              
+              <h1 className="text-4xl font-bold uppercase tracking-tighter text-zinc-800 italic leading-none">
+                {activeSlug && activeSlug !== "all" 
+                  ? activeSlug.replace(/-/g, " ") 
+                  : "Selected Artifacts"}
+              </h1>
             </div>
 
             <div className="flex items-baseline gap-8 border-b border-zinc-200 pb-2">
@@ -155,7 +171,7 @@ export default async function ShopPage({
 
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600 mb-2">
+                      <p className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-600 mb-2">
                         CAS—{String(item.id).padStart(4, "0")}
                       </p>
                       <h3
@@ -170,7 +186,7 @@ export default async function ShopPage({
                     </div>
                     <div className="text-right">
                       <span
-                        className={`${isSold ? "text-zinc-600 font-mono text-[11px] italic" : "text-blue-600"}`}
+                        className={`${isSold ? "text-zinc-600 font-mono text-[11px] italic" : "text-blue-600 font-medium"}`}
                       >
                         {isSold
                           ? "[ OUT OF STOCK ]"

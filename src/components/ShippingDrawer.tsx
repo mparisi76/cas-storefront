@@ -4,13 +4,14 @@ import { useState, useEffect } from "react";
 import { X, Calculator, Truck, Mail } from "lucide-react";
 import { ShippingRate } from "@/app/api/shipping/types";
 
-interface ShippingProps {
-  id: string | number;
-  itemName: string;
+interface ShippingDrawerProps {
   weight: number;
   length: number;
   width: number;
   height: number;
+  itemName: string;
+  id: string | number;
+  disabled?: boolean; // Now properly utilized
 }
 
 export default function ShippingDrawer({
@@ -20,7 +21,8 @@ export default function ShippingDrawer({
   length,
   width,
   height,
-}: ShippingProps) {
+  disabled, // Destructured here
+}: ShippingDrawerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [zipCode, setZipCode] = useState("");
   const [loading, setLoading] = useState(false);
@@ -28,7 +30,6 @@ export default function ShippingDrawer({
   const [error, setError] = useState<string | null>(null);
   const [isFreight, setIsFreight] = useState(false);
 
-  // Prevent background scrolling when drawer is active
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -57,7 +58,6 @@ export default function ShippingDrawer({
 
       const data = await res.json();
 
-      // Handle the Freight Gatekeeper from the API
       if (data.error === "Freight Required") {
         setIsFreight(true);
       } else if (data.error) {
@@ -75,13 +75,13 @@ export default function ShippingDrawer({
 
   const handleFreightInquiry = () => {
     const subject = encodeURIComponent(
-      `Freight Quote Request: CAS-${String(id).padStart(4, "0")}`,
+      `Freight Quote Request: CAS—${String(id).padStart(4, "0")}`,
     );
     const body = encodeURIComponent(
       `Hello Catskill Architectural Salvage,\n\n` +
         `I am interested in a freight quote for the following item:\n\n` +
         `Item: ${itemName}\n` +
-        `Inventory ID: CAS-${String(id).padStart(4, "0")}\n` +
+        `Inventory ID: CAS—${String(id).padStart(4, "0")}\n` +
         `Dimensions: ${length}" x ${width}" x ${height}"\n` +
         `Weight: ${weight} lbs\n` +
         `Destination Zip Code: ${zipCode}\n\n` +
@@ -92,13 +92,18 @@ export default function ShippingDrawer({
 
   return (
     <>
-      {/* Trigger Button */}
+      {/* Trigger Button - Correctly using disabled state */}
       <button
-        onClick={() => setIsOpen(true)}
-        className="w-full border border-zinc-300 py-4 text-sm font-bold uppercase tracking-[0.2em] text-zinc-500 hover:bg-zinc-800 hover:text-white hover:border-zinc-800 transition-all flex items-center justify-center gap-3 cursor-pointer"
+        onClick={() => !disabled && setIsOpen(true)}
+        disabled={disabled}
+        className={`w-full border py-4 text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 ${
+          disabled 
+            ? "border-zinc-200 text-zinc-300 bg-zinc-50 cursor-not-allowed" 
+            : "border-zinc-300 text-zinc-500 hover:bg-zinc-800 hover:text-white hover:border-zinc-800 cursor-pointer"
+        }`}
       >
-        <Calculator size={16} />
-        Calculate Shipping
+        <Calculator size={14} />
+        {disabled ? "Freight Inquiry Only" : "Calculate Shipping"}
       </button>
 
       {/* Drawer Overlay System */}
@@ -107,7 +112,6 @@ export default function ShippingDrawer({
           isOpen ? "visible" : "invisible"
         }`}
       >
-        {/* Dark Backdrop */}
         <div
           className={`absolute inset-0 bg-zinc-900/40 backdrop-blur-sm transition-opacity duration-500 ${
             isOpen ? "opacity-100" : "opacity-0"
@@ -115,7 +119,6 @@ export default function ShippingDrawer({
           onClick={() => setIsOpen(false)}
         />
 
-        {/* Sliding Panel */}
         <div
           className={`absolute right-0 top-0 h-full w-full max-w-md bg-[#F9F8F6] shadow-2xl transition-transform duration-500 ease-out p-10 flex flex-col ${
             isOpen ? "translate-x-0" : "translate-x-full"
@@ -127,7 +130,7 @@ export default function ShippingDrawer({
               <h2 className="text-2xl font-bold uppercase tracking-tighter text-zinc-600 italic">
                 Shipping
               </h2>
-              <p className="text-[10px] uppercase tracking-widest text-zinc-600 font-bold">
+              <p className="text-[11px] uppercase tracking-widest text-zinc-600 font-bold">
                 Logistics Estimate
               </p>
             </div>
@@ -142,20 +145,22 @@ export default function ShippingDrawer({
           <div className="space-y-10">
             {/* Item Summary Card */}
             <div className="bg-white border border-zinc-200 p-6 shadow-sm">
-              <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mb-3">
+              <p className="text-[11px] font-black uppercase tracking-widest text-zinc-600 mb-3">
                 Item Specifications
               </p>
               <div className="flex justify-between items-end">
                 <p className="text-lg font-medium text-zinc-600 italic">
-                  {weight} lbs
+                  {weight > 0 ? `${weight} lbs` : "Weight Pending"}
                 </p>
-                <p className="text-sm font-mono text-zinc-600">{`${length}" × ${width}" × ${height}"`}</p>
+                <p className="text-sm font-mono text-zinc-600">
+                   {length > 0 ? `${length}" × ${width}" × ${height}"` : "Dimensions Pending"}
+                </p>
               </div>
             </div>
 
             {/* Zip Input Section */}
             <div className="space-y-4">
-              <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-600">
+              <label className="block text-[11px] font-black uppercase tracking-widest text-zinc-600">
                 Destination Zip Code
               </label>
               <div className="flex gap-2">
@@ -165,20 +170,18 @@ export default function ShippingDrawer({
                   placeholder="12401"
                   className="flex-1 bg-white border border-zinc-200 p-4 font-mono text-lg text-zinc-700 focus:border-blue-600 outline-none transition-colors"
                   value={zipCode}
-                  onChange={(e) =>
-                    setZipCode(e.target.value.replace(/\D/g, ""))
-                  }
+                  onChange={(e) => setZipCode(e.target.value.replace(/\D/g, ""))}
                 />
                 <button
                   onClick={calculateShipping}
                   disabled={loading}
-                  className="bg-zinc-800 text-white px-6 font-bold uppercase tracking-widest hover:bg-blue-600 transition-colors text-xs disabled:bg-zinc-300 cursor-pointer disabled:cursor-not-allowed"
+                  className="bg-zinc-800 text-white px-6 font-bold uppercase tracking-widest hover:bg-blue-600 transition-colors text-[11px] disabled:bg-zinc-300 cursor-pointer disabled:cursor-not-allowed"
                 >
                   {loading ? "..." : "Get Rates"}
                 </button>
               </div>
               {error && (
-                <p className="text-[10px] font-bold text-red-500 uppercase italic">
+                <p className="text-[11px] font-bold text-red-500 uppercase italic">
                   {error}
                 </p>
               )}
@@ -190,17 +193,17 @@ export default function ShippingDrawer({
                 <div className="bg-zinc-100 border border-zinc-200 p-8 text-center space-y-5">
                   <Truck size={32} className="mx-auto text-zinc-600" />
                   <div>
-                    <p className="text-xs font-black uppercase tracking-widest text-zinc-600">
+                    <p className="text-[11px] font-black uppercase tracking-widest text-zinc-600">
                       Freight Notice
                     </p>
-                    <p className="text-[12px] text-zinc-500 mt-2 leading-relaxed italic">
+                    <p className="text-[13px] text-zinc-500 mt-2 leading-relaxed italic">
                       Due to the weight of this piece, standard carrier service
                       is unavailable. We offer specialized freight handling.
                     </p>
                   </div>
                   <button
                     onClick={handleFreightInquiry}
-                    className="w-full bg-blue-600 text-white py-4 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-blue-700 transition-colors cursor-pointer"
+                    className="w-full bg-blue-600 text-white py-4 text-[11px] font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-blue-700 transition-colors cursor-pointer"
                   >
                     <Mail size={14} /> Request Freight Quote
                   </button>
@@ -213,7 +216,7 @@ export default function ShippingDrawer({
                   className="flex justify-between items-center bg-white border-l-4 border-l-blue-600 border border-zinc-200 p-5 shadow-sm"
                 >
                   <div>
-                    <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-1">
+                    <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-1">
                       {rate.provider} {rate.service}
                     </p>
                     <p className="text-sm font-bold text-zinc-600 italic">
@@ -231,7 +234,7 @@ export default function ShippingDrawer({
               {!loading && rates.length === 0 && !error && !isFreight && (
                 <div className="py-12 text-center border-2 border-dashed border-zinc-200">
                   <Truck size={32} className="mx-auto text-zinc-600 mb-2" />
-                  <p className="text-[10px] uppercase font-bold text-zinc-600Acquisition tracking-widest">
+                  <p className="text-[11px] uppercase font-bold text-zinc-600 tracking-widest">
                     Enter zip to see rates
                   </p>
                 </div>
@@ -240,7 +243,7 @@ export default function ShippingDrawer({
           </div>
 
           <div className="mt-auto border-t border-zinc-200 pt-8">
-            <p className="text-[10px] text-zinc-500 uppercase tracking-tight leading-relaxed italic">
+            <p className="text-[11px] text-zinc-500 uppercase tracking-tight leading-relaxed italic">
               * Rates include specialized packing for architectural transit.
               Final logistics confirmed at checkout.
             </p>
