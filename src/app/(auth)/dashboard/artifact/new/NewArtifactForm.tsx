@@ -2,11 +2,11 @@
 
 import { useActionState, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { createArtifactAction } from "@/app/actions/artifacts";
 import GalleryWrapper from "@/components/dashboard/GalleryWrapper";
 import { CategorySelect } from "@/components/dashboard/controls/CategorySelect";
 import { Category } from "@/types/category";
 import { EraClassification } from "@/components/dashboard/controls/EraClassification";
+import { createArtifactAction } from "@/app/actions/artifacts/create-artifact";
 
 export default function NewArtifactForm({
   categories,

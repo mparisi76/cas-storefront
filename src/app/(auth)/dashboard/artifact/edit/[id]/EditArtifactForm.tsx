@@ -7,10 +7,6 @@ import {
   useMemo,
   useEffect,
 } from "react";
-import {
-  updateArtifactAction,
-  deleteArtifactAction,
-} from "@/app/actions/artifacts";
 import { ArtifactFormState } from "@/types/dashboard";
 import GalleryWrapper from "@/components/dashboard/GalleryWrapper";
 import { CategorySelect } from "@/components/dashboard/controls/CategorySelect";
@@ -19,6 +15,8 @@ import { Category } from "@/types/category";
 import { useToast } from "@/context/ToastContext";
 import { Artifact } from "@/types/product";
 import { EraClassification } from "@/components/dashboard/controls/EraClassification";
+import { deleteArtifactAction } from "@/app/actions/artifacts/delete-artifact";
+import { updateArtifactAction } from "@/app/actions/artifacts/update-artifact";
 
 export default function EditArtifactForm({
   artifact,
@@ -35,6 +33,7 @@ export default function EditArtifactForm({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // ... (keeping your existing logic for category/description/classification)
   const initialCategoryId =
     typeof artifact.category === "object" && artifact.category !== null
       ? String((artifact.category as Category).id)
@@ -46,7 +45,8 @@ export default function EditArtifactForm({
   const [name, setName] = useState(artifact.name || "");
   const [price, setPrice] = useState(String(artifact.price || ""));
   const [description, setDescription] = useState(cleanDescription);
-  const [selectedCategoryId, setSelectedCategoryId] = useState(initialCategoryId);
+  const [selectedCategoryId, setSelectedCategoryId] =
+    useState(initialCategoryId);
   const [classification, setClassification] = useState(initialClassification);
 
   const updateWithId = (state: ArtifactFormState | null, formData: FormData) =>
@@ -68,18 +68,36 @@ export default function EditArtifactForm({
       selectedCategoryId !== initialCategoryId ||
       classification !== initialClassification
     );
-  }, [name, price, description, selectedCategoryId, classification, artifact, initialCategoryId, initialClassification, cleanDescription]);
+  }, [
+    name,
+    price,
+    description,
+    selectedCategoryId,
+    classification,
+    artifact,
+    initialCategoryId,
+    initialClassification,
+    cleanDescription,
+  ]);
 
+  // FIXED DELETE HANDLER
   const handleConfirmDelete = () => {
     setIsDeleting(true);
     startTransition(async () => {
-      try {
-        await deleteArtifactAction(id);
-      } catch {
+      const result = await deleteArtifactAction(id);
+
+      // Since deleteArtifactAction returns an object with an error key
+      if (result?.error) {
         setIsDeleting(false);
-        setShowDeleteModal(false);
-        showToast("Error deleting artifact");
+        // Map the error code to a readable message
+        const message =
+          result.error === "PERMISSION_DENIED"
+            ? "Permission Denied: You cannot delete this."
+            : "Error deleting artifact";
+
+        showToast(message);
       }
+      // On success, the redirect inside the action handles the transition
     });
   };
 
@@ -106,7 +124,7 @@ export default function EditArtifactForm({
           <h1 className="text-3xl font-light tracking-tighter text-zinc-900 italic">
             Edit Artifact
           </h1>
-          <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium mt-1">
+          <p className="text-[11px] text-zinc-400 uppercase tracking-widest font-medium mt-1">
             Ref: {id.slice(0, 8)}
           </p>
         </div>
@@ -116,7 +134,7 @@ export default function EditArtifactForm({
             form={formId}
             type="submit"
             disabled={isSaveDisabled}
-            className="bg-zinc-900 px-8 py-2.5 text-[10px] font-black uppercase tracking-widest text-white hover:bg-zinc-800 transition-all disabled:opacity-20 disabled:grayscale"
+            className="bg-zinc-900 px-8 py-2.5 text-[11px] font-black uppercase tracking-widest text-white hover:bg-zinc-800 transition-all disabled:opacity-20 disabled:grayscale"
           >
             {isPending ? "Saving..." : "Save Changes"}
           </button>
@@ -124,7 +142,7 @@ export default function EditArtifactForm({
           <button
             onClick={() => setShowDeleteModal(true)}
             type="button"
-            className="border border-zinc-200 px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-red-600/80 hover:text-red-600 hover:border-zinc-300 hover:bg-zinc-50 transition-all bg-white"
+            className="border border-zinc-200 px-5 py-2.5 text-[11px] font-black uppercase tracking-widest text-red-600/80 hover:text-red-600 hover:border-zinc-300 hover:bg-zinc-50 transition-all bg-white"
           >
             Delete
           </button>
@@ -133,27 +151,30 @@ export default function EditArtifactForm({
 
       <form id={formId} action={formAction} className="space-y-10">
         {state?.error && (
-          <div className="bg-red-50 border border-red-200 p-4 text-sm font-bold text-red-700">
+          <div className="bg-red-50 border border-red-200 p-4 text-[13px] font-bold text-red-700">
             {state.error}
           </div>
         )}
 
         <div className="space-y-4">
-          <label className="block text-xs font-black uppercase tracking-widest text-zinc-800">
+          <label className="block text-[13px] font-black uppercase tracking-widest text-zinc-800">
             Manage photos
           </label>
           <GalleryWrapper
             initialItems={[
-              ...(artifact.thumbnail ? [{ directus_files_id: artifact.thumbnail }] : []),
-              ...(artifact.photo_gallery || []).filter(item => item.directus_files_id !== artifact.thumbnail),
+              ...(artifact.thumbnail
+                ? [{ directus_files_id: artifact.thumbnail }]
+                : []),
+              ...(artifact.photo_gallery || []).filter(
+                (item) => item.directus_files_id !== artifact.thumbnail,
+              ),
             ]}
           />
         </div>
 
-        {/* Removed pt-8 and border-t */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           <div className="space-y-3">
-            <label className="block text-xs font-black uppercase tracking-widest text-zinc-800">
+            <label className="block text-[13px] font-black uppercase tracking-widest text-zinc-800">
               Artifact Name
             </label>
             <input
@@ -167,7 +188,7 @@ export default function EditArtifactForm({
           </div>
 
           <div className="space-y-3">
-            <label className="block text-xs font-black uppercase tracking-widest text-zinc-800">
+            <label className="block text-[13px] font-black uppercase tracking-widest text-zinc-800">
               Price (USD)
             </label>
             <input
@@ -182,7 +203,6 @@ export default function EditArtifactForm({
           </div>
         </div>
 
-        {/* Removed pt-8 and border-t, kept spacing consistent */}
         <div>
           <EraClassification
             currentValue={classification}
@@ -191,7 +211,7 @@ export default function EditArtifactForm({
         </div>
 
         <div className="space-y-3">
-          <label className="block text-xs font-black uppercase tracking-widest text-zinc-800">
+          <label className="block text-[13px] font-black uppercase tracking-widest text-zinc-800">
             Category
           </label>
           <input
@@ -208,7 +228,7 @@ export default function EditArtifactForm({
         </div>
 
         <div className="space-y-3">
-          <label className="block text-xs font-black uppercase tracking-widest text-zinc-800">
+          <label className="block text-[13px] font-black uppercase tracking-widest text-zinc-800">
             Description
           </label>
           <textarea
@@ -220,12 +240,11 @@ export default function EditArtifactForm({
           />
         </div>
 
-        {/* Kept the bottom border for the primary CTA section */}
         <div className="pt-10 pb-20 border-t border-zinc-100">
           <button
             disabled={isSaveDisabled}
             type="submit"
-            className="w-full bg-zinc-900 text-white py-8 text-sm font-black uppercase tracking-[0.4em] hover:bg-zinc-800 transition-all shadow-xl disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed"
+            className="w-full bg-zinc-900 text-white py-8 text-[15px] font-black uppercase tracking-[0.4em] hover:bg-zinc-800 transition-all shadow-xl disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed"
           >
             {isPending ? "Updating Archive..." : "Save Changes"}
           </button>

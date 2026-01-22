@@ -24,7 +24,7 @@ async function getVendorData(token: string): Promise<{ data: DirectusUser | null
 async function getVendorItems(token: string): Promise<{ data: Artifact[] }> {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/items/props?fields=id,name,availability,price,date_created&filter[status][_eq]=published`,
+      `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/items/props?fields=id,name,availability,purchase_price,date_created&filter[status][_eq]=published`,
       {
         headers: { Authorization: `Bearer ${token}` },
         cache: "no-store",
@@ -52,7 +52,7 @@ export default async function PortalPage() {
 
   const items = itemData.data;
 
-  const totalRevenue = items.reduce((acc, i) => acc + (Number(i.price) || 0), 0);
+  const totalRevenue = items.reduce((acc, i) => acc + (Number(i.purchase_price) || 0), 0);
   const formattedRevenue = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -130,7 +130,7 @@ export default async function PortalPage() {
                     </span>
                   </td>
                   <td className="px-6 py-6 text-sm text-zinc-600 text-right font-mono">
-                    ${Number(item.price).toFixed(2)}
+                    ${Number(item.purchase_price).toFixed(2)}
                   </td>
                   <td className="px-6 py-6 text-right">
                     <Link
