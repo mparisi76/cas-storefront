@@ -131,7 +131,7 @@ export default async function ShopPage({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-px border-t border-zinc-200">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-px border-zinc-200">
             {filteredItems.map((item) => {
               const isSold = item.availability === "sold";
 
