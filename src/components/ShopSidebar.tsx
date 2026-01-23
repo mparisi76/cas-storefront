@@ -12,8 +12,6 @@ export default function ShopSidebar({ tree }: { tree: CategoryTree }) {
   const searchParams = useSearchParams();
   const activeSlug = searchParams.get("category") || "all";
 
-  // 1. Initialize state with a function (lazy initialization)
-  // This runs once and calculates which parent should be open based on the URL
   const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>(
     () => {
       const initialExpanded: Record<string, boolean> = {};
@@ -33,11 +31,8 @@ export default function ShopSidebar({ tree }: { tree: CategoryTree }) {
     },
   );
 
-  // State to track expanded parent categories
-  // const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({});
-
   const toggleExpand = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent triggerring the category filter
+    e.stopPropagation();
     setExpandedIds((prev) => ({
       ...prev,
       [id]: !prev[id],
@@ -45,7 +40,6 @@ export default function ShopSidebar({ tree }: { tree: CategoryTree }) {
   };
 
   const setCategory = (slug: string, id?: string) => {
-    // 1. If we are already on this category, don't push again
     if (activeSlug === slug && window.location.pathname === "/inventory") {
       if (id) setExpandedIds((prev) => ({ ...prev, [id]: !prev[id] }));
       return;
@@ -85,8 +79,17 @@ export default function ShopSidebar({ tree }: { tree: CategoryTree }) {
           </button>
 
           {Object.entries(tree).map(([id, parent]: [string, TreeParent]) => {
+            // HIDE PARENT IF IT HAS NO ITEMS IN CURRENT CLASSIFICATION
+            if (parent.totalCount === 0) return null;
+
             const isExpanded = expandedIds[id];
-            const hasChildren = Object.keys(parent.children).length > 0;
+
+            // Filter out children with 0 counts
+            const visibleChildren = Object.entries(parent.children).filter(
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              ([_, child]) => child.count > 0,
+            );
+            const hasChildren = visibleChildren.length > 0;
 
             return (
               <div key={id} className="space-y-2">
@@ -101,7 +104,7 @@ export default function ShopSidebar({ tree }: { tree: CategoryTree }) {
                     }`}
                   >
                     {parent.name}
-                    <span className="ml-2 text-[9px] font-medium text-zinc-600 group-hover:text-blue-400 transition-colors">
+                    <span className="ml-2 text-[10px] font-medium text-zinc-400 group-hover:text-blue-400 transition-colors">
                       ({parent.totalCount})
                     </span>
                   </button>
@@ -131,19 +134,19 @@ export default function ShopSidebar({ tree }: { tree: CategoryTree }) {
                 >
                   <div className="overflow-hidden">
                     <div className="flex flex-col gap-3 pl-4 border-l border-zinc-200">
-                      {Object.entries(parent.children).map(
+                      {visibleChildren.map(
                         ([childId, child]: [string, TreeChild]) => (
                           <button
                             key={childId}
                             onClick={() => setCategory(child.slug)}
-                            className={`flex justify-between items-center w-full text-left text-[10px] uppercase tracking-wider cursor-pointer transition-colors ${
+                            className={`flex justify-between items-center w-full text-left text-[11px] uppercase tracking-wider cursor-pointer transition-colors ${
                               activeSlug === child.slug
                                 ? "text-blue-600 font-black"
                                 : "text-zinc-500 hover:text-zinc-600"
                             }`}
                           >
                             <span>{child.name}</span>
-                            <span className="opacity-80 font-mono text-[9px]">
+                            <span className="opacity-80 font-mono text-[10px]">
                               [{child.count}]
                             </span>
                           </button>

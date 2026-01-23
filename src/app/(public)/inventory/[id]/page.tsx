@@ -139,7 +139,7 @@ export default async function ProductPage({
               <div
                 dangerouslySetInnerHTML={{
                   __html:
-                    item.description || "Inquiry for historical provenance.",
+                    item.description || "",
                 }}
               />
             </div>

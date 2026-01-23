@@ -7,6 +7,7 @@ export interface Category {
     name: string;
     slug: string;
   } | null;
+  count?: number;
 }
 
 export interface CategoryTree {

@@ -1,211 +1,145 @@
-/* eslint-disable @next/next/no-img-element */
-import directus from "@/lib/directus";
-import { readItems } from "@directus/sdk";
 import Link from "next/link";
 import ShopSidebar from "@/components/ShopSidebar";
+import MobileFilters from "@/components/MobileFilters";
+import EraSelector from "@/components/EraSelector";
+import ArtifactCard from "@/components/ArtifactCard";
+import Pagination from "@/components/Pagination";
 import { getCategoryTree } from "@/lib/utils";
-import { Category } from "@/types/category";
-import { Artifact } from "@/types/product";
-
-async function getCategories() {
-  return await directus.request<Category[]>(
-    readItems("categories", {
-      fields: ["id", "name", "slug", { parent: ["id", "slug"] }],
-      limit: -1,
-    }),
-  );
-}
-
-async function getShopItems() {
-  return await directus.request<Artifact[]>(
-    readItems("props", {
-      filter: {
-        _and: [
-          { status: { _eq: "published" } },
-          { availability: { _in: ["available", "sold"] } },
-        ],
-      },
-      fields: [
-        "id",
-        "name",
-        "thumbnail",
-        "purchase_price",
-        "availability",
-        "classification",
-        { category: ["id", "slug", "name", { parent: ["id", "slug"] }] },
-      ],
-    }),
-  );
-}
+import { getShopItems } from "@/services/artifacts";
+import { getCategories, getCategoryCounts } from "@/services/categories";
 
 export default async function ShopPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string; classification?: string }>;
+  searchParams: Promise<{
+    category?: string;
+    classification?: string;
+    search?: string;
+    page?: string;
+  }>;
 }) {
   const params = await searchParams;
-  const activeSlug = params.category;
-  const activeEra = params.classification;
+  
+  // 1. Extract params with defaults
+  const activeSlug = params.category || "all";
+  const activeEra = params.classification || "all";
+  const activeSearch = params.search || "";
+  const currentPage = Number(params.page) || 1;
+  const itemsPerPage = 12;
 
-  const [allItems, categories] = await Promise.all([
-    getShopItems(),
+  // 2. Fetch all data in parallel
+  // Added getCategoryCounts() to ensure sidebar numbers are accurate
+  const [{ data: items, meta }, categories, counts] = await Promise.all([
+    getShopItems({
+      category: activeSlug,
+      classification: activeEra,
+      search: activeSearch,
+      page: currentPage,
+      limit: itemsPerPage,
+    }),
     getCategories(),
+    getCategoryCounts(),
   ]);
 
-  const categoryTree = getCategoryTree(categories, allItems as Artifact[]);
+  // 3. UI State & Pagination calculations
+  const totalCount = meta?.filter_count || 0;
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
+  
+  // 4. Map the counts to the categories so the tree builder has access to them
+  const categoriesWithCounts = categories.map(cat => ({
+    ...cat,
+    count: counts[String(cat.id)] || 0
+  }));
 
-  const filteredItems = allItems.filter((item) => {
-    const matchesCategory =
-      !activeSlug ||
-      activeSlug === "all" ||
-      item.category?.slug === activeSlug ||
-      item.category?.parent?.slug === activeSlug;
-
-    const matchesEra =
-      !activeEra || activeEra === "all" || item.classification === activeEra;
-
-    return matchesCategory && matchesEra;
-  });
+  // Passing the categories with counts and an empty array for items
+  const categoryTree = getCategoryTree(categoriesWithCounts, []);
 
   const eraOptions = ["all", "antique", "vintage", "modern"];
-  const isFiltered = (activeSlug && activeSlug !== "all") || (activeEra && activeEra !== "all");
+  const isFiltered = activeSlug !== "all" || activeEra !== "all" || activeSearch !== "";
+
+  console.log(items);
 
   return (
-    <main className="bg-[#F9F8F6] min-h-screen pt-10 px-10">
-      <div className="flex gap-16 items-start">
-        <div className="w-64 sticky top-10 shrink-0">
+    <main className="bg-[#F9F8F6] min-h-screen pt-6 md:pt-10 px-4 md:px-10">
+      <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start">
+        
+        {/* DESKTOP SIDEBAR */}
+        <div className="hidden lg:block w-64 sticky top-10 shrink-0">
           <ShopSidebar tree={categoryTree} />
         </div>
 
-        <div className="flex-1">
+        <div
+          className="flex-1 w-full animate-in-view"
+          key={`${activeSlug}-${activeEra}-${activeSearch}-${currentPage}`}
+        >
           {/* HEADER SECTION */}
-          <div className="mb-12 flex justify-between items-end">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <h2 className="text-[11px] font-black uppercase tracking-[0.4em] text-zinc-500 leading-none">
-                  {activeSlug && activeSlug !== "all" 
-                    ? "Category" 
-                    : "Complete Inventory"}
+          <div className="mb-8 md:mb-12 flex flex-col md:flex-row md:justify-between md:items-end gap-6 md:gap-0">
+            <div className="flex flex-col justify-end">
+              <div className="flex items-center gap-3 h-6 mb-2">
+                <h2 className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.4em] text-zinc-500 leading-none">
+                  {activeSearch 
+                    ? `Results for "${activeSearch}"` 
+                    : activeSlug !== "all" ? "Category" : "Complete Inventory"}
+                  <span className="ml-2 text-zinc-300">({totalCount})</span>
                 </h2>
-                
+
                 {isFiltered && (
-                  <Link 
+                  <Link
                     href="/inventory"
-                    className="text-[10px] font-bold uppercase tracking-widest text-blue-600 hover:text-zinc-900 flex items-center gap-1 border border-blue-100 px-2 py-0.5 bg-blue-50/40 transition-colors"
+                    className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-blue-600 hover:text-zinc-900 flex items-center gap-1 border border-blue-100 px-2 py-1 bg-blue-50/40 transition-colors"
                   >
-                    <span className="text-[8px]">✕</span>
+                    <span>✕</span>
                     <span>Clear</span>
                   </Link>
                 )}
               </div>
-              
-              <h1 className="text-4xl font-bold uppercase tracking-tighter text-zinc-800 italic leading-none">
-                {activeSlug && activeSlug !== "all" 
-                  ? activeSlug.replace(/-/g, " ") 
-                  : "Selected Artifacts"}
+
+              <h1 className="text-3xl md:text-4xl font-bold uppercase tracking-tighter text-zinc-800 italic leading-none">
+                {activeSearch 
+                  ? "Filtered Search" 
+                  : activeSlug !== "all" ? activeSlug.replace(/-/g, " ") : "Selected Artifacts"}
               </h1>
             </div>
 
-            <div className="flex items-baseline gap-8 border-b border-zinc-200 pb-2">
-              <span className="text-[12px] font-black uppercase tracking-[0.2em] text-zinc-800 leading-none">
-                Era:
-              </span>
-              <div className="flex items-baseline gap-6">
-                {eraOptions.map((era) => (
-                  <Link
-                    key={era}
-                    href={{
-                      pathname: "/inventory",
-                      query: { ...params, classification: era },
-                    }}
-                    className={`text-[11px] font-bold uppercase tracking-[0.2em] transition-all relative pb-1 leading-none ${
-                      activeEra === era || (!activeEra && era === "all")
-                        ? "text-blue-600 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-blue-600"
-                        : "text-zinc-400 hover:text-zinc-800"
-                    }`}
-                  >
-                    {era}
-                  </Link>
-                ))}
-              </div>
+            <div className="hidden lg:block">
+              <EraSelector activeEra={activeEra} params={params} eraOptions={eraOptions} />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-px border-zinc-200">
-            {filteredItems.map((item) => {
-              const isSold = item.availability === "sold";
-
-              return (
-                <Link
-                  href={`/inventory/${item.id}`}
-                  key={item.id}
-                  className={`group bg-white border-r border-b border-zinc-200 p-10 transition-all ${
-                    isSold ? "opacity-90" : "hover:bg-zinc-50/50"
-                  }`}
-                >
-                  <div className="aspect-4/5 bg-zinc-100 overflow-hidden mb-8 relative">
-                    {isSold && (
-                      <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#F9F8F6]/40 backdrop-blur-[1px]">
-                        <div className="border-2 border-zinc-800 px-4 py-1 text-zinc-800 font-black uppercase tracking-[0.3em] -rotate-12 text-xs shadow-sm bg-white">
-                          Sold
-                        </div>
-                      </div>
-                    )}
-
-                    {item.thumbnail ? (
-                      <img
-                        src={`${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${item.thumbnail}?width=800&height=1000&fit=inside`}
-                        alt={item.name}
-                        className={`object-contain w-full h-full transition-all duration-1000 ease-in-out ${
-                          isSold
-                            ? "grayscale contrast-75"
-                            : "grayscale group-hover:grayscale-0"
-                        }`}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-zinc-300 uppercase tracking-[0.2em] text-[11px] font-bold">
-                        Image Pending
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-600 mb-2">
-                        CAS—{String(item.id).padStart(4, "0")}
-                      </p>
-                      <h3
-                        className={`font-bold uppercase text-lg leading-tight transition-colors tracking-tight ${
-                          isSold
-                            ? "text-zinc-600"
-                            : "text-zinc-600 group-hover:text-blue-600"
-                        }`}
-                      >
-                        {item.name}
-                      </h3>
-                    </div>
-                    <div className="text-right">
-                      <span
-                        className={`${isSold ? "text-zinc-600 font-mono text-[11px] italic" : "text-blue-600 font-medium"}`}
-                      >
-                        {isSold
-                          ? "[ OUT OF STOCK ]"
-                          : item.purchase_price
-                            ? `$${Number(item.purchase_price).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`
-                            : "POA"}
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
+          <div className="lg:hidden contents">
+            <EraSelector activeEra={activeEra} params={params} eraOptions={eraOptions} />
+            <MobileFilters tree={categoryTree} activeSlug={activeSlug} />
           </div>
 
-          {filteredItems.length === 0 && (
-            <div className="py-20 text-center border border-dashed border-zinc-200 bg-white">
-              <p className="text-[11px] uppercase tracking-widest text-zinc-600 font-bold">
-                No items found for this selection
-              </p>
+          <div className="mt-8 lg:mt-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-px border-zinc-200">
+              {items.map((item) => (
+                <ArtifactCard key={item.id} item={item} />
+              ))}
+            </div>
+
+            {/* PAGINATION */}
+            <Pagination 
+              currentPage={currentPage} 
+              totalPages={totalPages}
+            />
+          </div>
+
+          {/* EMPTY STATE */}
+          {items.length === 0 && (
+            <div className="py-20 md:py-32 text-center border border-dashed border-zinc-200 bg-white/50 animate-in fade-in zoom-in-95 duration-500 mt-4">
+              <div className="max-w-xs mx-auto space-y-6 px-6">
+                <p className="text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-zinc-400 font-bold">
+                  No artifacts match your current selection
+                </p>
+                <div className="h-px w-8 bg-zinc-200 mx-auto" />
+                <Link
+                  href="/inventory"
+                  className="inline-block text-[10px] font-black uppercase tracking-[0.2em] text-blue-600 border border-blue-200 px-6 py-3 hover:bg-blue-600 hover:text-white transition-all active:scale-95"
+                >
+                  Clear All Filters
+                </Link>
+              </div>
             </div>
           )}
         </div>
