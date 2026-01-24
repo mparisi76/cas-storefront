@@ -22,7 +22,6 @@ export default function PublicLayout({
       <Suspense fallback={<div className="h-20 bg-[#F9F8F6] border-b border-zinc-200 w-full" />}>
         <Header />
       </Suspense>
-      <Header />
       <main className="flex-1">{children}</main>
       <Footer />
     </>
