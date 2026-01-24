@@ -56,6 +56,8 @@ export default function ShopSidebar({ tree }: { tree: CategoryTree }) {
       setExpandedIds((prev) => ({ ...prev, [id]: true }));
     }
 
+    params.set('page', '1');
+
     router.push(`/inventory?${params.toString()}`, { scroll: false });
   };
 

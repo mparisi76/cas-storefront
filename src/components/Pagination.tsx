@@ -14,38 +14,42 @@ export default function Pagination({
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // Hide component if there is only one page
   if (totalPages <= 1) return null;
 
   const handlePageChange = (page: number) => {
-    // This reads the CURRENT filters (category, era, search) from the URL
+    // Read the current filters from the URL to preserve search/category/era
     const params = new URLSearchParams(searchParams.toString());
 
-    // Updates only the page
+    // Update the page parameter
     params.set("page", page.toString());
 
-    // Pushes the new state, triggering the Server Component to re-fetch
+    // Navigate to the updated URL and scroll to top for better UX
     router.push(`/inventory?${params.toString()}`, { scroll: true });
   };
 
   return (
-    <div className="flex flex-col items-center gap-6 mt-20 mb-12">
+    <div className="flex flex-col items-center gap-6">
+      {/* Decorative Divider */}
       <div className="h-px w-12 bg-zinc-200" />
 
       <div className="flex items-center gap-1 md:gap-2">
+        {/* Previous Button */}
         <button
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 disabled:opacity-0 hover:text-blue-600 transition-colors"
+          className="px-3 md:px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 disabled:opacity-0 hover:text-blue-600 transition-colors shrink-0"
         >
           Prev
         </button>
 
+        {/* Page Numbers */}
         <div className="flex items-center">
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
             <button
               key={page}
               onClick={() => handlePageChange(page)}
-              className={`w-10 h-10 flex items-center justify-center text-[11px] font-bold transition-all
+              className={`w-9 h-9 md:w-10 md:h-10 flex items-center justify-center text-[11px] font-bold transition-all shrink-0
                 ${
                   currentPage === page
                     ? "bg-zinc-800 text-white"
@@ -57,10 +61,11 @@ export default function Pagination({
           ))}
         </div>
 
+        {/* Next Button */}
         <button
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 disabled:opacity-0 hover:text-blue-600 transition-colors"
+          className="px-3 md:px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 disabled:opacity-0 hover:text-blue-600 transition-colors shrink-0"
         >
           Next
         </button>

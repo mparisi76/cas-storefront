@@ -30,6 +30,7 @@ export default function Header() {
     
     const params = new URLSearchParams(searchParams.toString());
     params.set("search", searchQuery.trim());
+    params.set('page', '1');
     
     setIsSearchOpen(false);
     setSearchQuery('');

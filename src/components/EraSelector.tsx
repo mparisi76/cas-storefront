@@ -22,8 +22,13 @@ export default function EraSelector({ activeEra, params, eraOptions }: EraSelect
               key={era}
               href={{
                 pathname: "/inventory",
-                query: { ...params, classification: era },
+                query: {
+									...params,
+									classification: era,
+      						page: 1
+								},
               }}
+							
               className={`text-[10px] md:text-[11px] font-bold uppercase tracking-[0.2em] transition-all relative pb-1 leading-none shrink-0 ${
                 activeEra === era || (!activeEra && era === "all")
                   ? "text-blue-600 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-blue-600"
