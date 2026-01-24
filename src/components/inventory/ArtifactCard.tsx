@@ -1,9 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
-'use client';
+"use client";
 
 import { useState } from "react";
 import Link from "next/link";
-import { Artifact } from "@/types/product";
+import { Artifact } from "@/types/artifact";
 import { ImageIcon } from "lucide-react";
 
 export default function ArtifactCard({ item }: { item: Artifact }) {
@@ -13,13 +13,12 @@ export default function ArtifactCard({ item }: { item: Artifact }) {
   return (
     <Link
       href={`/inventory/${item.id}`}
-      className={`group bg-white border-r border-b border-zinc-200 p-6 md:p-10 transition-all ${
-        isSold ? "opacity-90" : "hover:bg-zinc-50/50"
+      className={`group block bg-white border border-zinc-200 p-6 md:p-10 transition-all h-full ${
+        isSold ? "opacity-90" : "hover:bg-zinc-50/50 hover:shadow-sm"
       }`}
     >
       <div className="aspect-4/5 bg-zinc-100 overflow-hidden mb-6 md:mb-8 relative">
-        
-        {/* SKELETON LAYER (z-0) */}
+        {/* SKELETON LAYER */}
         {!isLoaded && item.thumbnail && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-50 z-0">
             <div className="animate-pulse flex flex-col items-center">
@@ -44,18 +43,9 @@ export default function ArtifactCard({ item }: { item: Artifact }) {
             src={`${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${item.thumbnail}?width=800&height=1000&fit=inside`}
             alt={item.name}
             onLoad={() => setIsLoaded(true)}
-            // REF CALLBACK: This is the secret. It checks the cache during the render 
-            // process and updates state safely once the element exists in the DOM.
-            ref={(img) => {
-              if (img && img.complete && !isLoaded) {
-                setIsLoaded(true);
-              }
-            }}
             className={`relative z-10 object-contain w-full h-full bg-white transition-all duration-700 ease-in-out ${
               isLoaded ? "opacity-100 scale-100" : "opacity-0 scale-[1.02]"
-            } ${
-              isSold ? "grayscale contrast-75" : "grayscale group-hover:grayscale-0"
-            }`}
+            } ${isSold ? "grayscale contrast-75" : "grayscale group-hover:grayscale-0"}`}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-zinc-300 uppercase tracking-[0.2em] text-[11px] font-bold">
@@ -70,8 +60,8 @@ export default function ArtifactCard({ item }: { item: Artifact }) {
             CAS—{String(item.id).padStart(4, "0")}
           </p>
           <h3 className={`font-bold uppercase text-base md:text-lg leading-tight transition-colors tracking-tight ${
-              isSold ? "text-zinc-500" : "text-zinc-600 group-hover:text-blue-600"
-            }`}>
+            isSold ? "text-zinc-500" : "text-zinc-600 group-hover:text-blue-600"
+          }`}>
             {item.name}
           </h3>
         </div>

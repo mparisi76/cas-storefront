@@ -1,11 +1,14 @@
-import ShippingDrawer from "@/components/ShippingDrawer";
-import ArtifactGallery from "@/components/ArtifactGallery";
+import ShippingDrawer from "@/components/inventory/ShippingDrawer";
+import ArtifactGallery from "@/components/inventory/ArtifactGallery";
+import RelatedArtifacts from "@/components/inventory/RelatedArtifacts";
 import directus from "@/lib/directus";
 import { readItem } from "@directus/sdk";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createCheckout } from "@/app/actions/checkout";
 import type { Metadata } from "next";
+import ViewTracker from "@/components/inventory/ViewTracker";
+import RecentlyViewed from "@/components/inventory/RecentlyViewed";
 
 export async function generateMetadata({
   params,
@@ -51,7 +54,7 @@ export default async function ProductPage({
         "photo_gallery.*",
         "availability",
         "date_sold",
-        { category: ["name", "slug"] },
+        { category: ["id", "name", "slug"] },
       ],
     }),
   );
@@ -61,15 +64,16 @@ export default async function ProductPage({
   const isSold = item.availability === "sold";
 
   // Logic for shipping availability
-  const hasDimensions = 
-    Number(item.weight) > 0 && 
-    Number(item.length) > 0 && 
-    Number(item.width) > 0 && 
+  const hasDimensions =
+    Number(item.weight) > 0 &&
+    Number(item.length) > 0 &&
+    Number(item.width) > 0 &&
     Number(item.height) > 0;
 
   return (
     <main className="min-h-full w-full bg-[#F9F8F6] text-zinc-700 selection:bg-blue-100 pb-24">
-      <div className="max-w-6xl mx-auto px-8 py-12 lg:py-16">
+      <ViewTracker id={id} />
+      <div className="max-w-6xl mx-auto px-8 py-12 lg:py-8">
         {/* Navigation - Font Bumped to 11px */}
         <nav className="mb-10 border-b border-zinc-200 pb-4 flex items-center gap-2">
           <Link
@@ -138,8 +142,7 @@ export default async function ProductPage({
             <div className="mb-10 text-zinc-500 leading-relaxed border-l-2 border-zinc-200 pl-6 italic text-base">
               <div
                 dangerouslySetInnerHTML={{
-                  __html:
-                    item.description || "",
+                  __html: item.description || "",
                 }}
               />
             </div>
@@ -171,7 +174,11 @@ export default async function ProductPage({
                 </button>
               ) : item.purchase_price ? (
                 <form action={createCheckout}>
-                  <input type="hidden" name="price" value={item.purchase_price} />
+                  <input
+                    type="hidden"
+                    name="price"
+                    value={item.purchase_price}
+                  />
                   <input type="hidden" name="itemName" value={item.name} />
                   <input type="hidden" name="itemId" value={item.id} />
                   <button
@@ -200,11 +207,13 @@ export default async function ProductPage({
                     height={Number(item.height) || 0}
                     itemName={item.name}
                     id={item.id}
-                    disabled={!hasDimensions} // You'll need to update ShippingDrawer to accept this prop
+                    disabled={!hasDimensions}
                   />
                   {!hasDimensions && (
                     <p className="mt-3 text-[11px] text-zinc-400 italic leading-snug">
-                      Shipping calculation unavailable: Please contact the gallery for a custom freight quote for oversized or unweighted items.
+                      Shipping calculation unavailable: Please contact the
+                      gallery for a custom freight quote for oversized or
+                      unweighted items.
                     </p>
                   )}
                 </div>
@@ -212,6 +221,17 @@ export default async function ProductPage({
             </div>
           </section>
         </div>
+
+        {/* RELATED ITEMS COMPONENT */}
+        {item.category && (
+          <RelatedArtifacts
+            categoryId={item.category.id}
+            categoryName={item.category.name}
+            categorySlug={item.category.slug}
+            currentId={id}
+          />
+        )}
+        <RecentlyViewed currentId={id} />
       </div>
     </main>
   );

@@ -19,7 +19,7 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GalleryItem } from "@/types/product";
+import { GalleryItem } from "@/types/artifact";
 import { DirectusFile } from "@directus/sdk";
 
 /**
@@ -123,11 +123,11 @@ export default function GalleryEditor({
         method: "POST",
         body: formData,
       });
-      
+
       if (!response.ok) throw new Error("Upload failed");
 
       const result = await response.json();
-      
+
       // Type-safe extraction of IDs from Directus response
       const newIds = Array.isArray(result)
         ? result.map((f: DirectusFile) => f.id)

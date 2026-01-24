@@ -1,20 +1,27 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { GalleryItem } from "@/types/product";
+import { GalleryItem } from "@/types/artifact";
 
 const GalleryEditor = dynamic(() => import("./GalleryEditor"), {
   ssr: false,
   loading: () => (
     <div className="flex flex-wrap gap-4 min-h-40 p-1">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="aspect-4/5 w-32 border border-zinc-100 bg-zinc-50/50 animate-pulse" />
+        <div
+          key={i}
+          className="aspect-4/5 w-32 border border-zinc-100 bg-zinc-50/50 animate-pulse"
+        />
       ))}
     </div>
   ),
 });
 
-export default function GalleryWrapper({ initialItems = [] }: { initialItems?: GalleryItem[] }) {
+export default function GalleryWrapper({
+  initialItems = [],
+}: {
+  initialItems?: GalleryItem[];
+}) {
   return (
     <div className="space-y-6">
       <GalleryEditor initialItems={initialItems} />

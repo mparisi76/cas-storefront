@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { GalleryItem } from "@/types/product";
+import { GalleryItem } from "@/types/artifact";
 import { AlertCircle, Image as ImageIcon } from "lucide-react";
 
 interface ArtifactGalleryProps {

@@ -2,10 +2,12 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { DirectusUser } from "@/types/dashboard";
-import { Artifact } from "@/types/product";
+import { Artifact } from "@/types/artifact";
 import { ToastListener } from "@/components/dashboard/ToastListener"; // Import here
 
-async function getVendorData(token: string): Promise<{ data: DirectusUser | null }> {
+async function getVendorData(
+  token: string,
+): Promise<{ data: DirectusUser | null }> {
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/users/me?fields=first_name,last_name,id`,
@@ -52,13 +54,18 @@ export default async function PortalPage() {
 
   const items = itemData.data;
 
-  const totalRevenue = items.reduce((acc, i) => acc + (Number(i.purchase_price) || 0), 0);
+  const totalRevenue = items.reduce(
+    (acc, i) => acc + (Number(i.purchase_price) || 0),
+    0,
+  );
   const formattedRevenue = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
   }).format(totalRevenue);
 
-  const activeCount = items.filter((i) => i.availability === "available").length;
+  const activeCount = items.filter(
+    (i) => i.availability === "available",
+  ).length;
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-0 text-zinc-900">
@@ -114,7 +121,10 @@ export default async function PortalPage() {
           <tbody className="divide-y divide-zinc-100">
             {items.length > 0 ? (
               items.map((item) => (
-                <tr key={item.id} className="hover:bg-zinc-50/50 transition-colors">
+                <tr
+                  key={item.id}
+                  className="hover:bg-zinc-50/50 transition-colors"
+                >
                   <td className="px-6 py-6 text-sm font-medium text-zinc-800">
                     {item.name}
                   </td>

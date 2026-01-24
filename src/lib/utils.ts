@@ -1,5 +1,5 @@
 import { Category, CategoryTree } from "@/types/category";
-import { Artifact } from "@/types/product";
+import { Artifact } from "@/types/artifact";
 
 export function getCategoryTree(
   categories: Category[],

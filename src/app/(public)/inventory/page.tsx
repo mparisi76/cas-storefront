@@ -1,9 +1,9 @@
 import Link from "next/link";
-import ShopSidebar from "@/components/ShopSidebar";
-import MobileFilters from "@/components/MobileFilters";
-import EraSelector from "@/components/EraSelector";
-import ArtifactCard from "@/components/ArtifactCard";
-import Pagination from "@/components/Pagination";
+import ShopSidebar from "@/components/inventory/ShopSidebar";
+import MobileFilters from "@/components/inventory/MobileFilters";
+import EraSelector from "@/components/inventory/EraSelector";
+import ArtifactCard from "@/components/inventory/ArtifactCard";
+import Pagination from "@/components/inventory/Pagination";
 import { getCategoryTree } from "@/lib/utils";
 import { getCategoryCounts, getShopItems } from "@/services/artifacts";
 import { getCategories } from "@/services/categories";
@@ -55,12 +55,12 @@ export default async function ShopPage({
 
   const categoryTree = getCategoryTree(categoriesWithCounts, []);
   const eraOptions = ["all", "antique", "vintage", "modern"];
-  const isFiltered = activeSlug !== "all" || activeEra !== "all" || activeSearch !== "";
+  const isFiltered =
+    activeSlug !== "all" || activeEra !== "all" || activeSearch !== "";
 
   return (
     <main className="bg-[#F9F8F6] min-h-screen pt-6 md:pt-10 px-4 md:px-10">
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start">
-        
         {/* DESKTOP SIDEBAR */}
         <div className="hidden lg:block w-64 sticky top-10 shrink-0">
           <ShopSidebar tree={categoryTree} />
@@ -126,15 +126,16 @@ export default async function ShopPage({
           <div className="flex flex-col gap-12">
             {items.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-px border-zinc-200">
-                  {items.map((item) => (
-                    <ArtifactCard key={item.id} item={item} />
-                  ))}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 bg-zinc-200 gap-px border border-zinc-200">
+                  {items.map(item => <ArtifactCard key={item.id} item={item} />)}
                 </div>
 
                 {/* PAGINATION WRAPPER - Added padding for mobile accessibility */}
                 <div className="pb-20 lg:pb-12 pt-4 border-t border-zinc-100">
-                  <Pagination currentPage={currentPage} totalPages={totalPages} />
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                  />
                 </div>
               </>
             ) : (

@@ -1,12 +1,7 @@
 import directus from "@/lib/directus";
 import { readItems, aggregate } from "@directus/sdk";
-import { Artifact } from "@/types/product";
+import { Artifact } from "@/types/artifact";
 import { cache } from "react";
-
-// interface DirectusResponse {
-//   data: Artifact[];
-//   meta: { filter_count: number };
-// }
 
 interface CategoryCountResult {
   category: string | null;

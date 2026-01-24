@@ -2,8 +2,14 @@ import { notFound } from "next/navigation";
 import EditArtifactForm from "./EditArtifactForm";
 import Link from "next/link";
 // import directus from "@/lib/directus";
-import { createDirectus, readItem, readItems, rest, staticToken } from "@directus/sdk";
-import { Artifact } from "@/types/product";
+import {
+  createDirectus,
+  readItem,
+  readItems,
+  rest,
+  staticToken,
+} from "@directus/sdk";
+import { Artifact } from "@/types/artifact";
 import { Category } from "@/types/category";
 import { cookies } from "next/headers";
 
@@ -20,29 +26,33 @@ export default async function EditPage({
 
   // 2. Initialize the client using that specific token
   const directus = createDirectus(process.env.NEXT_PUBLIC_DIRECTUS_URL!)
-    .with(staticToken(token || '')) // Fallback to empty string to trigger 401/404 if missing
+    .with(staticToken(token || "")) // Fallback to empty string to trigger 401/404 if missing
     .with(rest());
 
   // Fetch both the Artifact and the Categories list
   // Note: We include 'category.*' to get the nested id for the select defaultValue
   const [artifact, categories] = await Promise.all([
-    directus.request<Artifact>(
-      readItem("props", id, {
-        fields: [
-          "*",
-          { photo_gallery: ["directus_files_id"] },
-          { category: ["id", "name"] }
-        ],
-      })
-    ).catch(() => null),
-    
+    directus
+      .request<Artifact>(
+        readItem("props", id, {
+          fields: [
+            "*",
+            { photo_gallery: ["directus_files_id"] },
+            { category: ["id", "name"] },
+          ],
+        }),
+      )
+      .catch(() => null),
+
     // ADD THE TYPE HERE: <Category[]>
-    directus.request<Category[]>(
-      readItems("categories", {
-        fields: ["id", "name", "slug", { parent: ["id", "name", "slug"] }],
-        sort: ["parent.name", "name"], 
-      })
-    ).catch(() => [])
+    directus
+      .request<Category[]>(
+        readItems("categories", {
+          fields: ["id", "name", "slug", { parent: ["id", "name", "slug"] }],
+          sort: ["parent.name", "name"],
+        }),
+      )
+      .catch(() => []),
   ]);
 
   if (!artifact) {

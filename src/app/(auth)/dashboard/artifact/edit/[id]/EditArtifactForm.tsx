@@ -13,7 +13,7 @@ import { CategorySelect } from "@/components/dashboard/controls/CategorySelect";
 import { ConfirmDeleteModal } from "@/components/dashboard/modals/ConfirmDeleteModal";
 import { Category } from "@/types/category";
 import { useToast } from "@/context/ToastContext";
-import { Artifact } from "@/types/product";
+import { Artifact } from "@/types/artifact";
 import { EraClassification } from "@/components/dashboard/controls/EraClassification";
 import { deleteArtifactAction } from "@/app/actions/artifacts/delete-artifact";
 import { updateArtifactAction } from "@/app/actions/artifacts/update-artifact";
