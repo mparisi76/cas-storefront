@@ -1,14 +1,29 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Artifact } from "@/types/artifact";
-import { ImageIcon } from "lucide-react";
+import { ImageIcon, AlertCircle } from "lucide-react";
 
 export default function ArtifactCard({ item }: { item: Artifact }) {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
   const isSold = item.availability === "sold";
+
+  // The "Gallery Clue": Handle cache hits and hard reloads
+  useEffect(() => {
+    if (imgRef.current?.complete) {
+      // requestAnimationFrame ensures the state update happens 
+      // AFTER the initial paint to prevent the loader getting "stuck"
+      requestAnimationFrame(() => {
+        setIsLoaded(true);
+      });
+    }
+  }, [item.thumbnail]); 
+
+  const imageUrl = `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${item.thumbnail}?width=800&height=1000&fit=inside&format=webp`;
 
   return (
     <Link
@@ -18,9 +33,10 @@ export default function ArtifactCard({ item }: { item: Artifact }) {
       }`}
     >
       <div className="aspect-4/5 bg-zinc-100 overflow-hidden mb-6 md:mb-8 relative">
-        {/* SKELETON LAYER */}
-        {!isLoaded && item.thumbnail && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-50 z-0">
+        
+        {/* Loader: Only shows if not loaded and no error */}
+        {!isLoaded && !hasError && item.thumbnail && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-50 z-20">
             <div className="animate-pulse flex flex-col items-center">
               <ImageIcon className="text-zinc-400 mb-2" size={24} strokeWidth={1} />
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
@@ -30,8 +46,18 @@ export default function ArtifactCard({ item }: { item: Artifact }) {
           </div>
         )}
 
+        {/* Error State: Prevents infinite loading if image is missing */}
+        {hasError && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-50 z-20">
+            <AlertCircle className="text-zinc-300 mb-1" size={20} />
+            <span className="text-[8px] font-bold uppercase tracking-widest text-zinc-400">
+              Asset Missing
+            </span>
+          </div>
+        )}
+
         {isSold && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#F9F8F6]/40 backdrop-blur-[1px]">
+          <div className="absolute inset-0 z-30 flex items-center justify-center bg-[#F9F8F6]/40 backdrop-blur-[1px]">
             <div className="border-2 border-zinc-800 px-4 py-1 text-zinc-800 font-black uppercase tracking-[0.3em] -rotate-12 text-xs shadow-sm bg-white">
               Sold
             </div>
@@ -40,11 +66,14 @@ export default function ArtifactCard({ item }: { item: Artifact }) {
 
         {item.thumbnail ? (
           <img
-            src={`${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${item.thumbnail}?width=800&height=1000&fit=inside`}
+            ref={imgRef}
+            src={imageUrl}
             alt={item.name}
             onLoad={() => setIsLoaded(true)}
-            className={`relative z-10 object-contain w-full h-full bg-white transition-all duration-700 ease-in-out ${
-              isLoaded ? "opacity-100 scale-100" : "opacity-0 scale-[1.02]"
+            onError={() => setHasError(true)}
+            loading="lazy"
+            className={`relative z-10 object-contain w-full h-full bg-white transition-all duration-500 ease-out ${
+              isLoaded ? "opacity-100 scale-100" : "opacity-0 scale-95"
             } ${isSold ? "grayscale contrast-75" : "grayscale group-hover:grayscale-0"}`}
           />
         ) : (
