@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState } from "react";
@@ -16,111 +15,14 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
   rectSortingStrategy,
-  useSortable,
 } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import { GalleryItem } from "@/types/artifact";
 import { DirectusFile } from "@directus/sdk";
-
-function SortablePhoto({
-  id,
-  url,
-  isPrimary,
-  onRemove,
-  onPromote,
-}: {
-  id: string;
-  url: string;
-  isPrimary: boolean;
-  onRemove: (id: string) => void;
-  onPromote: (id: string) => void;
-}) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    zIndex: isDragging ? 50 : 0,
-    touchAction: "none" as const,
-  };
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={`group relative aspect-4/5 w-32 border transition-all duration-200 ${
-        isPrimary 
-          ? "border-zinc-900 ring-1 ring-zinc-900 shadow-md" 
-          : "border-zinc-200 bg-white shadow-sm"
-      }`}
-    >
-      {/* 1. The Drag Handle Layer (Attributes and Listeners moved here) */}
-      <div
-        {...attributes}
-        {...listeners}
-        className="absolute inset-0 z-0 cursor-grab active:cursor-grabbing"
-      >
-        <div className="w-full h-full bg-zinc-50 flex items-center justify-center overflow-hidden">
-          <img
-            src={url}
-            alt=""
-            className="w-full h-full object-contain pointer-events-none"
-          />
-        </div>
-      </div>
-
-      {/* 2. The "Set as Primary" Overlay */}
-      {!isPrimary && (
-        <div
-          // CHANGE: Changed from <button> to <div> and added pointer-events-none
-          className="absolute inset-0 bg-zinc-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 z-10 pointer-events-none"
-        >
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation(); // Prevent drag from triggering
-              onPromote(id);
-            }}
-            // CHANGE: Added pointer-events-auto to the actual text link
-            className="text-[8px] font-black uppercase tracking-[0.2em] text-white border border-white/40 px-2 py-1.5 hover:bg-white hover:text-zinc-900 transition-colors pointer-events-auto cursor-pointer"
-          >
-            Set as Primary
-          </button>
-        </div>
-      )}
-
-      {/* 3. Primary Label */}
-      {isPrimary && (
-        <div className="absolute bottom-0 left-0 right-0 bg-zinc-900 text-[8px] text-white font-black uppercase tracking-[0.2em] py-1.5 text-center pointer-events-none z-10">
-          Primary
-        </div>
-      )}
-
-      {/* 4. Remove Button */}
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          onRemove(id);
-        }}
-        className="absolute -top-2 -right-2 bg-white text-zinc-900 border border-zinc-200 rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 hover:text-red-600 shadow-sm z-20"
-      >
-        ×
-      </button>
-    </div>
-  );
-}
+import { SortablePhoto } from "./SortablePhoto"; // Import our new file
 
 export default function GalleryEditor({
   initialItems = [],
-  onChange, // New Prop to notify Parent
+  onChange,
 }: {
   initialItems?: GalleryItem[];
   onChange?: (items: string[]) => void;
@@ -130,7 +32,6 @@ export default function GalleryEditor({
   );
   const [isUploading, setIsUploading] = useState(false);
 
-  // Centralized state updater
   const updateItems = (newItems: string[]) => {
     setItems(newItems);
     if (onChange) onChange(newItems);
@@ -156,7 +57,6 @@ export default function GalleryEditor({
         method: "POST",
         body: formData,
       });
-
       if (!response.ok) throw new Error("Upload failed");
 
       const result = await response.json();
@@ -212,7 +112,14 @@ export default function GalleryEditor({
             ))}
           </SortableContext>
 
-          <div className="relative aspect-4/5 w-32 border-2 border-dashed border-zinc-200 flex flex-col items-center justify-center bg-zinc-50/50 hover:bg-zinc-100 hover:border-zinc-400 transition-all cursor-pointer">
+          {/* New Industrial Upload Slot */}
+          <div
+            className={`relative aspect-4/5 w-32 border-2 border-dashed flex flex-col items-center justify-center transition-all cursor-pointer ${
+              isUploading
+                ? "border-zinc-400 bg-zinc-100"
+                : "border-zinc-200 bg-zinc-50/50 hover:bg-zinc-100 hover:border-zinc-400"
+            }`}
+          >
             <input
               type="file"
               multiple
@@ -221,16 +128,30 @@ export default function GalleryEditor({
               className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed z-10"
               disabled={isUploading}
             />
-            <div className="text-center space-y-1">
-              <span className="block text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                {isUploading ? "Uploading" : "+ Add"}
+            <div className="text-center space-y-2 px-2">
+              <span
+                className={`block text-[10px] font-black uppercase tracking-widest ${isUploading ? "text-zinc-900 animate-pulse" : "text-zinc-400"}`}
+              >
+                {isUploading ? "Syncing..." : "+ Add"}
               </span>
+              {isUploading && (
+                <div className="w-16 h-1 bg-zinc-200 mx-auto rounded-full overflow-hidden relative">
+                  <div
+                    className="absolute inset-0 bg-zinc-900 animate-loading-shimmer"
+                    style={{ width: "100%", transformOrigin: "left" }}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
       </DndContext>
 
-      <input type="hidden" name="ordered_gallery" value={JSON.stringify(items)} />
+      <input
+        type="hidden"
+        name="ordered_gallery"
+        value={JSON.stringify(items)}
+      />
       <input type="hidden" name="thumbnail" value={items[0] || ""} />
     </div>
   );
