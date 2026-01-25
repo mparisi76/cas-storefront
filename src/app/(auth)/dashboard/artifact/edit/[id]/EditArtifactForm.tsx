@@ -20,6 +20,20 @@ import { IdentityFields } from "@/components/dashboard/controls/IdentityFields";
 import { deleteArtifactAction } from "@/app/actions/artifacts/delete-artifact";
 import { updateArtifactAction } from "@/app/actions/artifacts/update-artifact";
 
+// 1. Define specific types to satisfy ESLint and provide type safety
+type ArtifactFormData = {
+  name: string;
+  purchase_price: string;
+  description: string;
+  category: string;
+  classification: string;
+  weight: string;
+  length: string;
+  width: string;
+  height: string;
+  gallery: string[];
+};
+
 export default function EditArtifactForm({
   artifact,
   id,
@@ -41,10 +55,27 @@ export default function EditArtifactForm({
 
   const cleanDescription = (artifact.description ?? "").replace(/<[^>]*>/g, "");
 
+  const initialGalleryIds = useMemo(() => {
+    const galleryIds = (artifact.photo_gallery || []).map(
+      (g) => g.directus_files_id,
+    );
+    return artifact.thumbnail
+      ? [
+          artifact.thumbnail,
+          ...galleryIds.filter((fid) => fid !== artifact.thumbnail),
+        ]
+      : galleryIds;
+  }, [artifact]);
+
   // --- Consolidated Form State ---
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<ArtifactFormData>({
     name: artifact.name || "",
-    purchase_price: String(artifact.purchase_price || ""),
+    
+    // Format to 2 decimal places and remove trailing zeros
+    purchase_price: artifact.purchase_price 
+      ? parseFloat(String(artifact.purchase_price)).toFixed(2).replace(/\.00$/, '') 
+      : "",
+      
     description: cleanDescription,
     category: initialCategoryId,
     classification: artifact.classification ?? "vintage",
@@ -52,10 +83,15 @@ export default function EditArtifactForm({
     length: String(artifact.length ?? ""),
     width: String(artifact.width ?? ""),
     height: String(artifact.height ?? ""),
+    gallery: initialGalleryIds,
   });
 
-  const handleField = (field: string, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
+  // 2. Updated handleField to avoid 'any'
+  const handleField = (field: string, value: string | string[]) => {
+    setForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   };
 
   // --- Server Action Setup ---
@@ -70,20 +106,28 @@ export default function EditArtifactForm({
     }
   }, [state?.success, showToast]);
 
-  // --- Dirty Check for Save Button ---
+  // --- Dirty Check ---
   const isDirty = useMemo(() => {
-    return (
+    // Parse both to numbers for a true mathematical comparison
+    const priceFromForm = parseFloat(form.purchase_price) || 0;
+    const priceFromArtifact = parseFloat(String(artifact.purchase_price || 0));
+
+    const basicFieldsChanged =
       form.name !== (artifact.name || "") ||
-      form.purchase_price !== String(artifact.purchase_price || "") ||
+      priceFromForm !== priceFromArtifact || // Numerical comparison
       form.description !== cleanDescription ||
       form.category !== initialCategoryId ||
       form.classification !== (artifact.classification ?? "vintage") ||
       form.weight !== String(artifact.weight ?? "") ||
       form.length !== String(artifact.length ?? "") ||
       form.width !== String(artifact.width ?? "") ||
-      form.height !== String(artifact.height ?? "")
-    );
-  }, [form, artifact, initialCategoryId, cleanDescription]);
+      form.height !== String(artifact.height ?? "");
+
+    const galleryChanged =
+      JSON.stringify(form.gallery) !== JSON.stringify(initialGalleryIds);
+
+    return basicFieldsChanged || galleryChanged;
+  }, [form, artifact, initialCategoryId, cleanDescription, initialGalleryIds]);
 
   const handleConfirmDelete = () => {
     setIsDeleting(true);
@@ -106,16 +150,21 @@ export default function EditArtifactForm({
     parent: cat.parent?.id ? String(cat.parent.id) : null,
   }));
 
-  const lastUpdated = artifact.date_updated 
-    ? new Intl.DateTimeFormat('en-US', {
-        month: 'short', day: 'numeric', year: 'numeric',
-        hour: '2-digit', minute: '2-digit'
+  const lastUpdated = artifact.date_updated
+    ? new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
       }).format(new Date(artifact.date_updated))
     : "No updates recorded";
 
   const dateCreated = artifact.date_created
-    ? new Intl.DateTimeFormat('en-US', {
-        month: 'short', day: 'numeric', year: 'numeric'
+    ? new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
       }).format(new Date(artifact.date_created))
     : "Unknown";
 
@@ -129,26 +178,28 @@ export default function EditArtifactForm({
         isPending={isDeleting}
       />
 
-      {/* Header Section */}
       <div className="flex items-center justify-between border-b border-zinc-100 pb-6 mb-10">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-light tracking-tighter text-zinc-900 italic leading-none">
             Edit Artifact
           </h1>
-          
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-            <div className="flex items-center gap-1.5">
-              <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Ref:</span>
-              <span className="text-[10px] font-mono font-bold text-zinc-600">{id.slice(0, 8)}</span>
+            <div className="flex items-center gap-1.5 font-mono text-[10px]">
+              <span className="uppercase text-zinc-400">Ref:</span>
+              <span className="font-bold text-zinc-600">{id.slice(0, 8)}</span>
             </div>
-            
             <div className="flex items-center gap-1.5">
-              <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Catalogued:</span>
-              <span className="text-[10px] font-medium text-zinc-600">{dateCreated}</span>
+              <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">
+                Catalogued:
+              </span>
+              <span className="text-[10px] font-medium text-zinc-600">
+                {dateCreated}
+              </span>
             </div>
-
             <div className="flex items-center gap-1.5">
-              <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Last Modified:</span>
+              <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">
+                Modified:
+              </span>
               <span className="text-[10px] font-medium text-zinc-600 italic bg-zinc-50 px-1.5 py-0.5 border border-zinc-100">
                 {lastUpdated}
               </span>
@@ -157,7 +208,6 @@ export default function EditArtifactForm({
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Buttons remain same */}
           <button
             form="edit-form"
             type="submit"
@@ -183,24 +233,18 @@ export default function EditArtifactForm({
           </div>
         )}
 
-        {/* 1. Photos */}
         <section>
           <label className="block text-[13px] font-black uppercase tracking-widest text-zinc-800 mb-4">
             Manage photos
           </label>
           <GalleryWrapper
-            initialItems={[
-              ...(artifact.thumbnail
-                ? [{ directus_files_id: artifact.thumbnail }]
-                : []),
-              ...(artifact.photo_gallery || []).filter(
-                (item) => item.directus_files_id !== artifact.thumbnail,
-              ),
-            ]}
+            initialItems={form.gallery.map((fid) => ({
+              directus_files_id: fid,
+            }))}
+            onChange={(newIds) => handleField("gallery", newIds)}
           />
         </section>
 
-        {/* 2. Classification */}
         <section>
           <EraClassification
             currentValue={form.classification}
@@ -213,7 +257,6 @@ export default function EditArtifactForm({
           />
         </section>
 
-        {/* 3. Identity (SHARED COMPONENT) */}
         <IdentityFields
           name={form.name}
           price={form.purchase_price}
@@ -221,7 +264,6 @@ export default function EditArtifactForm({
           onPriceChange={(val) => handleField("purchase_price", val)}
         />
 
-        {/* 4. Technical Specs (SHARED COMPONENT) */}
         <TechnicalSpecs
           weight={form.weight}
           length={form.length}
@@ -230,7 +272,6 @@ export default function EditArtifactForm({
           onChange={handleField}
         />
 
-        {/* 5. Category */}
         <section className="space-y-3 relative">
           <label className="block text-[13px] font-black uppercase tracking-widest text-zinc-800">
             Category
@@ -243,7 +284,6 @@ export default function EditArtifactForm({
           />
         </section>
 
-        {/* 6. Description */}
         <section className="space-y-3">
           <label className="block text-[13px] font-black uppercase tracking-widest text-zinc-800">
             Description

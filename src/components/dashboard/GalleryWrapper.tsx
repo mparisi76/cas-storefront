@@ -19,12 +19,14 @@ const GalleryEditor = dynamic(() => import("./GalleryEditor"), {
 
 export default function GalleryWrapper({
   initialItems = [],
+  onChange, // Add this
 }: {
   initialItems?: GalleryItem[];
+  onChange?: (items: string[]) => void; // Add this
 }) {
   return (
     <div className="space-y-6">
-      <GalleryEditor initialItems={initialItems} />
+      <GalleryEditor initialItems={initialItems} onChange={onChange} />
     </div>
   );
 }

@@ -19,14 +19,16 @@ export async function createArtifactAction(
   try {
     const galleryJson = formData.get("ordered_gallery") as string;
     const galleryIds: string[] = galleryJson ? JSON.parse(galleryJson) : [];
-    const primaryThumbnail = galleryIds.length > 0 ? galleryIds[0] : null;
-    const classification = formData.get("classification") as string;
     
-    // Extracting fields - matching the 'name' attributes in your NewArtifactForm
+    // Pull the explicit thumbnail ID from our new GalleryEditor hidden input
+    const explicitThumbnail = formData.get("thumbnail") as string;
+    const primaryThumbnail = explicitThumbnail || (galleryIds.length > 0 ? galleryIds[0] : null);
+    
+    const classification = formData.get("classification") as string;
     const priceRaw = formData.get("purchase_price") as string; 
     const categoryId = formData.get("category") as string;
     
-    // New Logistic Fields
+    // Logistic Fields
     const weightRaw = formData.get("weight") as string;
     const lengthRaw = formData.get("length") as string;
     const widthRaw = formData.get("width") as string;
@@ -43,7 +45,7 @@ export async function createArtifactAction(
     await userClient.request(
       createItem("props", {
         name: formData.get("name") as string,
-        purchase_price: parseFloat(priceRaw) || 0,
+        purchase_price: priceRaw ? parseFloat(priceRaw) : null,
         category: categoryId ? parseInt(categoryId, 10) : null,
         description: formData.get("description") as string,
         availability: "available",
@@ -53,8 +55,7 @@ export async function createArtifactAction(
         classification: classification || "vintage",
         type: "for_sale",
         
-        // Mapping new numeric fields to Directus
-        // We use || null if they are empty so Directus treats them as empty/null rather than 0
+        // Logistics
         weight: weightRaw ? parseFloat(weightRaw) : null,
         length: lengthRaw ? parseFloat(lengthRaw) : null,
         width: widthRaw ? parseFloat(widthRaw) : null,
@@ -64,7 +65,7 @@ export async function createArtifactAction(
 
     revalidatePath("/artifacts");
     revalidatePath("/dashboard");
-    revalidatePath("/inventory"); // Added to refresh the public shop
+    revalidatePath("/inventory");
   } catch (e) {
     return handleActionError(e);
   }

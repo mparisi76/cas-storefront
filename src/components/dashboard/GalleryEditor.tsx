@@ -22,20 +22,18 @@ import { CSS } from "@dnd-kit/utilities";
 import { GalleryItem } from "@/types/artifact";
 import { DirectusFile } from "@directus/sdk";
 
-/**
- * SortablePhoto component handles the individual image cards
- * and their drag-and-drop behavior.
- */
 function SortablePhoto({
   id,
   url,
   isPrimary,
   onRemove,
+  onPromote,
 }: {
   id: string;
   url: string;
   isPrimary: boolean;
   onRemove: (id: string) => void;
+  onPromote: (id: string) => void;
 }) {
   const {
     attributes,
@@ -57,7 +55,11 @@ function SortablePhoto({
     <div
       ref={setNodeRef}
       style={style}
-      className="group relative aspect-4/5 w-32 border bg-white border-zinc-200 shadow-sm transition-shadow"
+      className={`group relative aspect-4/5 w-32 border transition-all duration-200 ${
+        isPrimary 
+          ? "border-zinc-900 ring-1 ring-zinc-900 shadow-md" 
+          : "border-zinc-200 bg-white shadow-sm"
+      }`}
     >
       <div
         {...attributes}
@@ -68,19 +70,33 @@ function SortablePhoto({
           <img
             src={url}
             alt=""
-            className="w-full h-full object-contain transition-all duration-300"
+            className="w-full h-full object-contain pointer-events-none"
           />
         </div>
       </div>
+
+      {!isPrimary && (
+        <button
+          type="button"
+          onClick={() => onPromote(id)}
+          className="absolute inset-0 bg-zinc-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 z-10"
+        >
+          <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white border border-white/40 px-2 py-1.5 hover:bg-white hover:text-zinc-900 transition-colors">
+            Set as Primary
+          </span>
+        </button>
+      )}
+
       {isPrimary && (
-        <div className="absolute bottom-0 left-0 right-0 bg-zinc-900 text-[8px] text-white font-black uppercase tracking-widest py-1 text-center pointer-events-none">
+        <div className="absolute bottom-0 left-0 right-0 bg-zinc-900 text-[8px] text-white font-black uppercase tracking-[0.2em] py-1.5 text-center pointer-events-none z-10">
           Primary
         </div>
       )}
+
       <button
         type="button"
         onClick={() => onRemove(id)}
-        className="absolute -top-2 -right-2 bg-white text-zinc-900 border border-zinc-200 rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 hover:text-red-600 z-20"
+        className="absolute -top-2 -right-2 bg-white text-zinc-900 border border-zinc-200 rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 hover:text-red-600 shadow-sm z-20"
       >
         ×
       </button>
@@ -88,20 +104,23 @@ function SortablePhoto({
   );
 }
 
-/**
- * GalleryEditor - Modular component for managing photo galleries
- * Works for both creating new artifacts and editing existing ones.
- */
 export default function GalleryEditor({
-  initialItems = [], // Default to empty array for "New Artifact" page
+  initialItems = [],
+  onChange, // New Prop to notify Parent
 }: {
   initialItems?: GalleryItem[];
+  onChange?: (items: string[]) => void;
 }) {
-  // Initialize state from existing items (if any)
   const [items, setItems] = useState<string[]>(
     initialItems.map((item) => item.directus_files_id),
   );
   const [isUploading, setIsUploading] = useState(false);
+
+  // Centralized state updater
+  const updateItems = (newItems: string[]) => {
+    setItems(newItems);
+    if (onChange) onChange(newItems);
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -127,18 +146,15 @@ export default function GalleryEditor({
       if (!response.ok) throw new Error("Upload failed");
 
       const result = await response.json();
-
-      // Type-safe extraction of IDs from Directus response
       const newIds = Array.isArray(result)
         ? result.map((f: DirectusFile) => f.id)
         : [result.id];
 
-      setItems((prev) => [...prev, ...newIds]);
+      updateItems([...items, ...newIds]);
     } catch {
-      alert("Upload failed. Image might be too large or server is busy.");
+      alert("Upload failed.");
     } finally {
       setIsUploading(false);
-      // Reset input value so same file can be uploaded again if needed
       e.target.value = "";
     }
   };
@@ -146,12 +162,19 @@ export default function GalleryEditor({
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
-      setItems((prev) => {
-        const oldIndex = prev.indexOf(active.id as string);
-        const newIndex = prev.indexOf(over.id as string);
-        return arrayMove(prev, oldIndex, newIndex);
-      });
+      const oldIndex = items.indexOf(active.id as string);
+      const newIndex = items.indexOf(over.id as string);
+      updateItems(arrayMove(items, oldIndex, newIndex));
     }
+  };
+
+  const handlePromote = (idToPromote: string) => {
+    const filtered = items.filter((id) => id !== idToPromote);
+    updateItems([idToPromote, ...filtered]);
+  };
+
+  const handleRemove = (idToRemove: string) => {
+    updateItems(items.filter((i) => i !== idToRemove));
   };
 
   return (
@@ -169,38 +192,32 @@ export default function GalleryEditor({
                 id={id}
                 url={`${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${id}?width=300&quality=75`}
                 isPrimary={index === 0}
-                onRemove={(idToRemove) =>
-                  setItems((prev) => prev.filter((i) => i !== idToRemove))
-                }
+                onRemove={handleRemove}
+                onPromote={handlePromote}
               />
             ))}
           </SortableContext>
 
-          {/* Upload Button */}
-          <div className="relative aspect-4/5 w-32 border-2 border-dashed border-zinc-200 flex flex-col items-center justify-center bg-zinc-50/50 hover:bg-zinc-100 transition-colors">
+          <div className="relative aspect-4/5 w-32 border-2 border-dashed border-zinc-200 flex flex-col items-center justify-center bg-zinc-50/50 hover:bg-zinc-100 hover:border-zinc-400 transition-all cursor-pointer">
             <input
               type="file"
               multiple
               accept="image/*"
               onChange={handleFileUpload}
-              className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed"
+              className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed z-10"
               disabled={isUploading}
             />
-            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-              {isUploading ? "..." : "+ ADD"}
-            </span>
+            <div className="text-center space-y-1">
+              <span className="block text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                {isUploading ? "Uploading" : "+ Add"}
+              </span>
+            </div>
           </div>
         </div>
       </DndContext>
 
-      {/* This hidden input provides the JSON string of IDs to the form action.
-          Directus will use this array to sync the junction table.
-      */}
-      <input
-        type="hidden"
-        name="ordered_gallery"
-        value={JSON.stringify(items)}
-      />
+      <input type="hidden" name="ordered_gallery" value={JSON.stringify(items)} />
+      <input type="hidden" name="thumbnail" value={items[0] || ""} />
     </div>
   );
 }

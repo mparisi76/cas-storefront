@@ -16,18 +16,19 @@ export async function updateArtifactAction(
   const token = cookieStore.get("directus_session")?.value;
   if (!token) return { error: "AUTH_EXPIRED" };
 
-  // Core Fields - Note: using 'purchase_price' to match your form name change
+  // 1. Core Fields
   const name = formData.get("name") as string;
   const priceRaw = formData.get("purchase_price") as string;
   const description = formData.get("description") as string;
   const categoryId = formData.get("category") as string;
   const classification = formData.get("classification") as string;
   
-  // Gallery Logic
+  // 2. Gallery Logic (Handling the JSON array from our new GalleryEditor)
   const orderedGalleryRaw = formData.get("ordered_gallery") as string;
+  const thumbnailId = formData.get("thumbnail") as string; // From our new hidden input
   const finalIdList: string[] = JSON.parse(orderedGalleryRaw || "[]");
 
-  // NEW: Logistics Fields extraction
+  // 3. Technical Specs
   const weightRaw = formData.get("weight") as string;
   const lengthRaw = formData.get("length") as string;
   const widthRaw = formData.get("width") as string;
@@ -35,7 +36,11 @@ export async function updateArtifactAction(
 
   try {
     const numericId = parseInt(id, 10);
-    const primaryThumbnail = finalIdList.length > 0 ? finalIdList[0] : null;
+    
+    /**
+     * NOTE: For Directus Many-to-Many relationships, passing the array 
+     * like this typically replaces the entire collection for that item.
+     */
     const galleryUpdate = finalIdList.map((uuid) => ({
       directus_files_id: uuid,
     }));
@@ -50,11 +55,15 @@ export async function updateArtifactAction(
         purchase_price: priceRaw ? parseFloat(priceRaw) : null,
         category: categoryId ? parseInt(categoryId, 10) : null,
         description,
-        thumbnail: primaryThumbnail,
-        photo_gallery: galleryUpdate,
         classification: classification || null,
         
-        // Mapping technical specs to Directus schema
+        // Use the explicit thumbnail ID sent by the GalleryEditor
+        thumbnail: thumbnailId || (finalIdList.length > 0 ? finalIdList[0] : null),
+        
+        // Update the junction table
+        photo_gallery: galleryUpdate,
+        
+        // Logistics
         weight: weightRaw ? parseFloat(weightRaw) : null,
         length: lengthRaw ? parseFloat(lengthRaw) : null,
         width: widthRaw ? parseFloat(widthRaw) : null,
@@ -62,13 +71,15 @@ export async function updateArtifactAction(
       }),
     );
 
+    // Refresh all relevant cache paths
     revalidatePath(`/dashboard/artifact/edit/${id}`);
     revalidatePath("/dashboard");
-    revalidatePath("/inventory"); // Ensure public shop shows updated specs
-    revalidatePath(`/inventory/${id}`); // Refresh the specific product page
+    revalidatePath("/inventory"); 
+    revalidatePath(`/inventory/${id}`); 
   } catch (err) {
     return handleActionError(err);
   }
   
+  // Success redirect
   redirect("/dashboard?success=true&action=update");
 }
