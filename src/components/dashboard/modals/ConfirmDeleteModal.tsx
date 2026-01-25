@@ -1,4 +1,3 @@
-// components/dashboard/ConfirmDeleteModal.tsx
 "use client";
 
 import { Modal } from "@/components/ui/Modal";
@@ -22,7 +21,6 @@ export function ConfirmDeleteModal({
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="space-y-6">
         <div className="space-y-2">
-          {/* Font bumped to 13px */}
           <h2 className="text-[13px] font-black uppercase tracking-[0.3em] text-red-600">
             Confirm Delete
           </h2>
@@ -31,9 +29,8 @@ export function ConfirmDeleteModal({
           </p>
         </div>
         
-        {/* Font bumped to 15px (base sm is usually 14, so this fits) */}
         <p className="text-[15px] text-zinc-500 leading-relaxed">
-          Are you sure you want to remove this artifact from the archive? This action is permanent.
+          Are you sure you want to remove this selection from the archive? This action is permanent and cannot be undone.
         </p>
 
         <div className="flex flex-col gap-3 pt-2">

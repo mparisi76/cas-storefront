@@ -5,7 +5,7 @@ import EraSelector from "@/components/inventory/EraSelector";
 import ArtifactCard from "@/components/inventory/ArtifactCard";
 import Pagination from "@/components/inventory/Pagination";
 import { getCategoryTree } from "@/lib/utils";
-import { getCategoryCounts, getShopItems } from "@/services/artifacts";
+import { getCategoryCounts, getShopItems } from "@/services/(public)/artifacts";
 import { getCategories } from "@/services/categories";
 
 export default async function ShopPage({
@@ -131,8 +131,8 @@ export default async function ShopPage({
                 */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 -ml-px -mt-px">
                   {items.map((item) => (
-                    <div 
-                      key={item.id} 
+                    <div
+                      key={item.id}
                       className="border-t border-r border-b border-l border-zinc-200 bg-white -ml-px -mt-px overflow-hidden"
                     >
                       <ArtifactCard item={item} />
