@@ -41,15 +41,15 @@ export function EraClassification({
               }`}
             >
               <span
-                className={`text-[10px] font-bold uppercase tracking-widest ${
+                className={`text-[11px] font-bold uppercase tracking-widest ${
                   isSelected ? "text-zinc-900" : "text-zinc-400"
                 }`}
               >
                 {opt.label}
               </span>
               <span
-                className={`text-[8px] uppercase tracking-tighter transition-opacity ${
-                  isSelected ? "text-zinc-400 opacity-100" : "opacity-0"
+                className={`text-[10px] uppercase tracking-tighter transition-opacity ${
+                  isSelected ? "text-zinc-600 opacity-100" : "opacity-0"
                 }`}
               >
                 {opt.sub}

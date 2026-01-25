@@ -31,6 +31,10 @@ export interface Artifact {
   condition?: string;
   purchase_price: string;
   classification: string | null;
+  weight: string;
+  length: string;
+  width: string;
+  height: string;
 }
 
 export interface GalleryItem {

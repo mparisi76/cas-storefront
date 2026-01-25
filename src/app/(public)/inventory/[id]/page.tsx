@@ -63,18 +63,18 @@ export default async function ProductPage({
 
   const isSold = item.availability === "sold";
 
-  // Logic for shipping availability
+  // Refined logic for shipping availability
   const hasDimensions =
-    Number(item.weight) > 0 &&
-    Number(item.length) > 0 &&
-    Number(item.width) > 0 &&
-    Number(item.height) > 0;
+    Boolean(item.weight) &&
+    Boolean(item.length) &&
+    Boolean(item.width) &&
+    Boolean(item.height);
 
   return (
     <main className="min-h-full w-full bg-[#F9F8F6] text-zinc-700 selection:bg-blue-100 pb-24">
       <ViewTracker id={id} />
       <div className="max-w-6xl mx-auto px-8 py-12 lg:py-8">
-        {/* BREADCRUMBS: Architectural Labeling */}
+        {/* BREADCRUMBS */}
         <nav className="mb-10 border-b border-zinc-200 pb-4 flex items-center gap-3">
           <Link
             href="/inventory"
@@ -111,14 +111,26 @@ export default async function ProductPage({
 
           <section className="lg:col-span-5">
             <div className="mb-10">
-              <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center gap-3 mb-4 flex-wrap">
                 <span className="text-[10px] font-mono font-bold uppercase tracking-[0.2em] bg-zinc-800 text-white px-2 py-0.5">
                   CAS—{String(item.id).padStart(4, "0")}
                 </span>
+                
+                {/* NEW: Era Classification Badge */}
+                {item.classification && (
+                  <>
+                    <span className="text-zinc-300 text-[10px]">|</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 italic">
+                      {item.classification}
+                    </span>
+                  </>
+                )}
+
+                <span className="text-zinc-300 text-[10px]">|</span>
                 <span
                   className={`text-[10px] font-black uppercase tracking-[0.2em] ${isSold ? "text-zinc-400" : "text-blue-600"}`}
                 >
-                  {isSold ? "Status: Archived" : "Status: Available"}
+                  {isSold ? "Archived" : "Available"}
                 </span>
               </div>
 
@@ -144,7 +156,6 @@ export default async function ProductPage({
               </div>
             </div>
 
-            {/* DESCRIPTION: Museum Style Plaque */}
             <div className="mb-12 text-zinc-500 leading-relaxed border-l border-zinc-200 pl-8 text-base font-medium max-w-prose">
               <div
                 className="prose prose-zinc prose-sm italic"
@@ -169,21 +180,15 @@ export default async function ProductPage({
                 <p className="text-sm font-bold text-zinc-600 font-mono">
                   {item.length && item.width && item.height
                     ? `${item.length}" × ${item.width}" × ${item.height}"`
-                    : "PENDING MEASUREMENT"}
+                    : "—"}
                 </p>
               </div>
             </div>
 
-            {/* ACTIONS */}
             <div className="space-y-4">
-              {/* ... Action form/buttons as before, but with updated colors ... */}
               {!isSold && item.purchase_price ? (
                 <form action={createCheckout}>
-                  <input
-                    type="hidden"
-                    name="price"
-                    value={item.purchase_price}
-                  />
+                  <input type="hidden" name="price" value={item.purchase_price} />
                   <input type="hidden" name="itemName" value={item.name} />
                   <input type="hidden" name="itemId" value={item.id} />
                   <button
@@ -204,7 +209,6 @@ export default async function ProductPage({
                 )
               )}
 
-              {/* ARCHIVED STATE */}
               {isSold && (
                 <div className="w-full bg-zinc-100 text-zinc-400 py-5 text-[12px] font-black uppercase tracking-[0.4em] border border-zinc-200 text-center cursor-not-allowed">
                   Item Out of Circulation
@@ -228,7 +232,6 @@ export default async function ProductPage({
           </section>
         </div>
 
-        {/* RELATED & RECENT */}
         <div className="mt-24 space-y-24">
           {item.category && (
             <RelatedArtifacts

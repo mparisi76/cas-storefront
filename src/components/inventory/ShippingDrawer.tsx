@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Calculator, Truck, Mail } from "lucide-react";
+import { X, Calculator, Truck, Mail, AlertCircle } from "lucide-react";
 import { ShippingRate } from "@/app/api/shipping/types";
 
 interface ShippingDrawerProps {
@@ -11,7 +11,7 @@ interface ShippingDrawerProps {
   height: number;
   itemName: string;
   id: string | number;
-  disabled?: boolean; // Now properly utilized
+  disabled?: boolean;
 }
 
 export default function ShippingDrawer({
@@ -21,7 +21,7 @@ export default function ShippingDrawer({
   length,
   width,
   height,
-  disabled, // Destructured here
+  disabled,
 }: ShippingDrawerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [zipCode, setZipCode] = useState("");
@@ -29,6 +29,13 @@ export default function ShippingDrawer({
   const [rates, setRates] = useState<ShippingRate[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isFreight, setIsFreight] = useState(false);
+
+  // Auto-trigger Freight mode if dimensions are missing or excessively large
+  useEffect(() => {
+    if (disabled) {
+      setIsFreight(true);
+    }
+  }, [disabled]);
 
   useEffect(() => {
     if (isOpen) {
@@ -58,194 +65,145 @@ export default function ShippingDrawer({
 
       const data = await res.json();
 
-      if (data.error === "Freight Required") {
+      if (data.error === "Freight Required" || weight > 150) {
         setIsFreight(true);
       } else if (data.error) {
-        setError("Shipping calculation unavailable for this zip code.");
+        setError(data.message || "Shipping calculation unavailable.");
+      } else if (data.length === 0) {
+        setError("No standard rates found. Freight inquiry recommended.");
       } else {
         setRates(data);
       }
-    } catch (err) {
-      setError("Unable to connect to shipping service.");
-      console.error(err);
+    } catch {
+      setError("Connectivity issue with shipping carrier.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleFreightInquiry = () => {
-    const subject = encodeURIComponent(
-      `Freight Quote Request: CAS—${String(id).padStart(4, "0")}`,
-    );
+    const subject = encodeURIComponent(`Freight Inquiry: CAS—${String(id).padStart(4, "0")}`);
     const body = encodeURIComponent(
-      `Hello Catskill Architectural Salvage,\n\n` +
-        `I am interested in a freight quote for the following item:\n\n` +
-        `Item: ${itemName}\n` +
-        `Inventory ID: CAS—${String(id).padStart(4, "0")}\n` +
-        `Dimensions: ${length}" x ${width}" x ${height}"\n` +
-        `Weight: ${weight} lbs\n` +
-        `Destination Zip Code: ${zipCode}\n\n` +
-        `Please provide an estimated shipping cost and timeline for this piece.`,
+      `Inquiry regarding logistics for: ${itemName}\n` +
+      `Reference: CAS—${String(id).padStart(4, "0")}\n` +
+      `Destination Zip: ${zipCode || "[Enter Zip]"}\n\n` +
+      `Specs: ${weight} lbs | ${length}" x ${width}" x ${height}"`
     );
-    window.location.href = `mailto:info@catskillsalvage.com?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:info@catskillas.com?subject=${subject}&body=${body}`;
   };
 
   return (
     <>
-      {/* Trigger Button - Correctly using disabled state */}
       <button
-        onClick={() => !disabled && setIsOpen(true)}
-        disabled={disabled}
+        onClick={() => setIsOpen(true)}
         className={`w-full border py-4 text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 ${
           disabled 
-            ? "border-zinc-200 text-zinc-300 bg-zinc-50 cursor-not-allowed" 
-            : "border-zinc-300 text-zinc-500 hover:bg-zinc-800 hover:text-white hover:border-zinc-800 cursor-pointer"
+            ? "border-zinc-200 text-zinc-400 bg-zinc-50 hover:bg-zinc-100" 
+            : "border-zinc-300 text-zinc-500 hover:bg-zinc-800 hover:text-white hover:border-zinc-800"
         }`}
       >
-        <Calculator size={14} />
-        {disabled ? "Freight Inquiry Only" : "Calculate Shipping"}
+        {disabled ? <Mail size={14} /> : <Calculator size={14} />}
+        {disabled ? "Request Freight Quote" : "Calculate Shipping"}
       </button>
 
-      {/* Drawer Overlay System */}
-      <div
-        className={`fixed inset-0 z-50 transition-visibility duration-300 ${
-          isOpen ? "visible" : "invisible"
-        }`}
-      >
-        <div
-          className={`absolute inset-0 bg-zinc-900/40 backdrop-blur-sm transition-opacity duration-500 ${
-            isOpen ? "opacity-100" : "opacity-0"
-          }`}
-          onClick={() => setIsOpen(false)}
+      <div className={`fixed inset-0 z-50 transition-visibility duration-300 ${isOpen ? "visible" : "invisible"}`}>
+        <div 
+          className={`absolute inset-0 bg-zinc-900/40 backdrop-blur-sm transition-opacity duration-500 ${isOpen ? "opacity-100" : "opacity-0"}`} 
+          onClick={() => setIsOpen(false)} 
         />
 
-        <div
-          className={`absolute right-0 top-0 h-full w-full max-w-md bg-[#F9F8F6] shadow-2xl transition-transform duration-500 ease-out p-10 flex flex-col ${
-            isOpen ? "translate-x-0" : "translate-x-full"
-          }`}
-        >
-          {/* Header */}
+        <div className={`absolute right-0 top-0 h-full w-full max-w-md bg-[#F9F8F6] shadow-2xl transition-transform duration-500 ease-out p-10 flex flex-col ${isOpen ? "translate-x-0" : "translate-x-full"}`}>
+          
           <div className="flex justify-between items-center mb-12">
             <div>
-              <h2 className="text-2xl font-bold uppercase tracking-tighter text-zinc-600 italic">
-                Shipping
-              </h2>
-              <p className="text-[11px] uppercase tracking-widest text-zinc-600 font-bold">
-                Logistics Estimate
-              </p>
+              <h2 className="text-2xl font-bold uppercase tracking-tighter text-zinc-800 italic leading-none">Logistics</h2>
+              <p className="text-[10px] uppercase tracking-widest text-zinc-400 font-bold mt-1">Registry Estimate</p>
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="p-2 hover:bg-zinc-200 rounded-full transition-colors cursor-pointer"
-            >
-              <X size={24} className="text-zinc-600" />
+            <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-zinc-200 rounded-full transition-colors cursor-pointer">
+              <X size={24} className="text-zinc-400" />
             </button>
           </div>
 
           <div className="space-y-10">
             {/* Item Summary Card */}
-            <div className="bg-white border border-zinc-200 p-6 shadow-sm">
-              <p className="text-[11px] font-black uppercase tracking-widest text-zinc-600 mb-3">
-                Item Specifications
-              </p>
-              <div className="flex justify-between items-end">
-                <p className="text-lg font-medium text-zinc-600 italic">
-                  {weight > 0 ? `${weight} lbs` : "Weight Pending"}
-                </p>
-                <p className="text-sm font-mono text-zinc-600">
-                   {length > 0 ? `${length}" × ${width}" × ${height}"` : "Dimensions Pending"}
-                </p>
+            <div className="bg-white border border-zinc-200 p-6">
+              <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-4 border-b border-zinc-50 pb-2">Artifact Manifest</p>
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-zinc-800">{itemName}</p>
+                <div className="flex justify-between items-center pt-2">
+                  <span className="text-[11px] font-mono text-zinc-500 uppercase">{weight || "—"} LBS</span>
+                  <span className="text-[11px] font-mono text-zinc-500 uppercase">Size: {length || "0"}&rdquo;×{width || "0"}&rdquo;×{height || "0"}&rdquo;</span>
+                </div>
               </div>
             </div>
 
-            {/* Zip Input Section */}
-            <div className="space-y-4">
-              <label className="block text-[11px] font-black uppercase tracking-widest text-zinc-600">
-                Destination Zip Code
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  maxLength={5}
-                  placeholder="12401"
-                  className="flex-1 bg-white border border-zinc-200 p-4 font-mono text-lg text-zinc-700 focus:border-blue-600 outline-none transition-colors"
-                  value={zipCode}
-                  onChange={(e) => setZipCode(e.target.value.replace(/\D/g, ""))}
-                />
-                <button
-                  onClick={calculateShipping}
-                  disabled={loading}
-                  className="bg-zinc-800 text-white px-6 font-bold uppercase tracking-widest hover:bg-blue-600 transition-colors text-[11px] disabled:bg-zinc-300 cursor-pointer disabled:cursor-not-allowed"
-                >
-                  {loading ? "..." : "Get Rates"}
-                </button>
+            {/* Input Section */}
+            {!disabled && (
+              <div className="space-y-4">
+                <label className="block text-[11px] font-black uppercase tracking-widest text-zinc-800">Destination Zip Code</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    maxLength={5}
+                    placeholder="12401"
+                    className="flex-1 bg-white border border-zinc-200 p-4 font-mono text-lg text-zinc-700 focus:border-zinc-900 outline-none transition-colors"
+                    value={zipCode}
+                    onChange={(e) => setZipCode(e.target.value.replace(/\D/g, ""))}
+                  />
+                  <button
+                    onClick={calculateShipping}
+                    disabled={loading}
+                    className="bg-zinc-900 text-white px-8 font-bold uppercase tracking-widest hover:bg-blue-600 transition-colors text-[11px] disabled:bg-zinc-200"
+                  >
+                    {loading ? "..." : "Get Rates"}
+                  </button>
+                </div>
+                {error && <p className="text-[10px] font-bold text-red-600 uppercase italic flex items-center gap-2"><AlertCircle size={12}/> {error}</p>}
               </div>
-              {error && (
-                <p className="text-[11px] font-bold text-red-500 uppercase italic">
-                  {error}
-                </p>
-              )}
-            </div>
+            )}
 
-            {/* Rates/Freight Display */}
-            <div className="space-y-4 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
-              {isFreight && (
-                <div className="bg-zinc-100 border border-zinc-200 p-8 text-center space-y-5">
-                  <Truck size={32} className="mx-auto text-zinc-600" />
+            {/* Results Display */}
+            <div className="space-y-4 max-h-[45vh] overflow-y-auto pr-2">
+              {isFreight || disabled ? (
+                <div className="bg-white border border-zinc-200 p-8 text-center space-y-6">
+                  <Truck size={32} className="mx-auto text-zinc-800" strokeWidth={1} />
                   <div>
-                    <p className="text-[11px] font-black uppercase tracking-widest text-zinc-600">
-                      Freight Notice
-                    </p>
-                    <p className="text-[13px] text-zinc-500 mt-2 leading-relaxed italic">
-                      Due to the weight of this piece, standard carrier service
-                      is unavailable. We offer specialized freight handling.
+                    <p className="text-[11px] font-black uppercase tracking-widest text-zinc-800">Specialized Handling Required</p>
+                    <p className="text-[12px] text-zinc-500 mt-3 leading-relaxed italic">
+                      Due to the architectural scale or weight of this piece, standard parcel service is unavailable. We utilize specialized crate-and-freight carriers.
                     </p>
                   </div>
                   <button
                     onClick={handleFreightInquiry}
-                    className="w-full bg-blue-600 text-white py-4 text-[11px] font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-blue-700 transition-colors cursor-pointer"
+                    className="w-full bg-zinc-900 text-white py-4 text-[11px] font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-blue-600 transition-all"
                   >
-                    <Mail size={14} /> Request Freight Quote
+                    <Mail size={14} /> Request Manual Quote
                   </button>
                 </div>
+              ) : (
+                rates.map((rate, i) => (
+                  <div key={i} className="flex justify-between items-center bg-white border border-zinc-200 p-5 hover:border-zinc-900 transition-colors">
+                    <div>
+                      <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">{rate.provider} • {rate.service}</p>
+                      <p className="text-sm font-bold text-zinc-800 italic">Est. {rate.estimated_days} Day Delivery</p>
+                    </div>
+                    <p className="text-xl font-light text-zinc-900">${parseFloat(rate.price).toFixed(2)}</p>
+                  </div>
+                ))
               )}
 
-              {rates.map((rate, i) => (
-                <div
-                  key={i}
-                  className="flex justify-between items-center bg-white border-l-4 border-l-blue-600 border border-zinc-200 p-5 shadow-sm"
-                >
-                  <div>
-                    <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-1">
-                      {rate.provider} {rate.service}
-                    </p>
-                    <p className="text-sm font-bold text-zinc-600 italic">
-                      Est. {rate.estimated_days} Days Delivery
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xl font-light text-blue-600">
-                      ${parseFloat(rate.price).toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-              ))}
-
-              {!loading && rates.length === 0 && !error && !isFreight && (
-                <div className="py-12 text-center border-2 border-dashed border-zinc-200">
-                  <Truck size={32} className="mx-auto text-zinc-600 mb-2" />
-                  <p className="text-[11px] uppercase font-bold text-zinc-600 tracking-widest">
-                    Enter zip to see rates
-                  </p>
+              {!loading && rates.length === 0 && !error && !isFreight && !disabled && (
+                <div className="py-16 text-center border border-dashed border-zinc-200 opacity-50">
+                  <Truck size={24} className="mx-auto text-zinc-400 mb-3" />
+                  <p className="text-[10px] uppercase font-black text-zinc-400 tracking-widest">Awaiting Destination</p>
                 </div>
               )}
             </div>
           </div>
 
           <div className="mt-auto border-t border-zinc-200 pt-8">
-            <p className="text-[11px] text-zinc-500 uppercase tracking-tight leading-relaxed italic">
-              * Rates include specialized packing for architectural transit.
-              Final logistics confirmed at checkout.
+            <p className="text-[10px] text-zinc-400 uppercase tracking-tight leading-relaxed italic">
+              * rates include white-glove packaging. definitive transit costs finalized upon invoice.
             </p>
           </div>
         </div>
