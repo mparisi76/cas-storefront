@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import "./globals.css";
+import { ToastProvider } from "@/context/ToastContext";
 
 export default function RootLayout({
   children,
@@ -19,7 +20,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="flex flex-col min-h-screen bg-[#F9F8F6] text-zinc-700 antialiased">
-        <main className="flex-1">{children}</main>
+        <main className="flex-1">
+          <ToastProvider>
+            {children}
+          </ToastProvider>
+        </main>
       </body>
     </html>
   );

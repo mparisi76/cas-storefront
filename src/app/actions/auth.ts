@@ -1,7 +1,6 @@
 // src/app/actions/auth.ts
 "use server";
 
-import { AuthResponse } from "@/types/dashboard";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -45,7 +44,7 @@ export async function loginAction(
   }
 
   // Redirects must happen outside of try/catch blocks in Server Actions
-  redirect("/dashboard");
+  redirect("/portal");
 }
 
 // src/app/actions/auth.ts
@@ -101,7 +100,7 @@ export async function registerAction(
     }
 
     // Redirecting is handled outside of the return for TypeScript clarity
-  } catch {
+  } catch (e) {
     return { error: "An unexpected error occurred during registration." };
   }
 

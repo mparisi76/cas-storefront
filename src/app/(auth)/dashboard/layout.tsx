@@ -1,7 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { isSessionValid } from "@/lib/directus-auth";
-import { ToastProvider } from "@/context/ToastContext";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { KeepAlive } from "@/components/dashboard/KeepAlive";
 import { createDirectus, rest, staticToken, readMe } from "@directus/sdk";
@@ -58,7 +57,7 @@ export default async function DashboardLayout({
   }
 
   return (
-    <ToastProvider>
+    <>
       <KeepAlive />
       <div className="min-h-screen bg-white flex flex-col">
         <DashboardHeader user={userData} />
@@ -66,6 +65,6 @@ export default async function DashboardLayout({
           {children}
         </main>
       </div>
-    </ToastProvider>
+    </>
   );
 }

@@ -2,8 +2,8 @@
 "use client";
 
 import { useActionState } from "react";
-import { registerAction } from "@/app/actions/auth";
 import Link from "next/link";
+import { registerAction } from "@/app/actions/auth/register";
 
 export default function RegisterPage() {
   const [state, formAction, isPending] = useActionState(registerAction, null);
