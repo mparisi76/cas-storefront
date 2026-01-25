@@ -126,21 +126,21 @@ export default async function ShopPage({
           <div className="flex flex-col gap-12">
             {items.length > 0 ? (
               <>
-                {/* 1. Removed the outer border-t and border-l from this container.
-                    2. We use a negative margin on the grid itself to prevent "double borders" 
-                      between the sidebar and the cards.
+                {/* The grid container is transparent and has no borders.
+                  Negative margins allow the item borders to overlap perfectly.
                 */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 -ml-px">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 -ml-px -mt-px">
                   {items.map((item) => (
                     <div 
                       key={item.id} 
-                      className="border-t border-r border-b border-l border-zinc-200 bg-white -ml-px -mt-px"
+                      className="border-t border-r border-b border-l border-zinc-200 bg-white -ml-px -mt-px overflow-hidden"
                     >
                       <ArtifactCard item={item} />
                     </div>
                   ))}
                 </div>
 
+                {/* PAGINATION WRAPPER */}
                 <div className="pb-20 lg:pb-12 pt-4">
                   <Pagination
                     currentPage={currentPage}

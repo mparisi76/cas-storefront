@@ -74,34 +74,34 @@ export default async function ProductPage({
     <main className="min-h-full w-full bg-[#F9F8F6] text-zinc-700 selection:bg-blue-100 pb-24">
       <ViewTracker id={id} />
       <div className="max-w-6xl mx-auto px-8 py-12 lg:py-8">
-        {/* Navigation - Font Bumped to 11px */}
-        <nav className="mb-10 border-b border-zinc-200 pb-4 flex items-center gap-2">
+        {/* BREADCRUMBS: Architectural Labeling */}
+        <nav className="mb-10 border-b border-zinc-200 pb-4 flex items-center gap-3">
           <Link
             href="/inventory"
-            className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-600 hover:text-blue-600 transition-colors"
+            className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.3em] text-zinc-400 hover:text-blue-600 transition-colors"
           >
-            Catalog
+            Registry
           </Link>
-          <span className="text-zinc-300 text-[11px]">/</span>
+          <span className="text-zinc-300 text-[10px]">—</span>
           {item.category ? (
             <Link
               href={`/inventory?category=${item.category.slug}`}
-              className="text-[11px] font-black uppercase tracking-[0.3em] text-blue-600 bg-blue-50/50 px-2 py-0.5 transition-colors"
+              className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.3em] text-blue-600 transition-colors"
             >
               {item.category.name}
             </Link>
           ) : (
-            <span className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-300">
-              Salvage
+            <span className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.3em] text-zinc-300">
+              General Salvage
             </span>
           )}
-          <span className="text-zinc-300 text-[11px]">/</span>
-          <span className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-800 truncate max-w-75">
+          <span className="text-zinc-300 text-[10px]">—</span>
+          <span className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.3em] text-zinc-800 truncate max-w-50 md:max-w-none">
             {item.name}
           </span>
         </nav>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start">
           <ArtifactGallery
             thumbnail={item.thumbnail}
             photo_gallery={item.photo_gallery}
@@ -109,70 +109,75 @@ export default async function ProductPage({
             isSold={isSold}
           />
 
-          <section className="lg:col-span-6 lg:pl-6">
-            <div className="mb-8">
-              <span className="text-[13px] font-mono text-zinc-600 mb-2 block uppercase">
-                Inventory Ref:{" "}
-                <span className="text-zinc-600 font-bold">
+          <section className="lg:col-span-5">
+            <div className="mb-10">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-[0.2em] bg-zinc-800 text-white px-2 py-0.5">
                   CAS—{String(item.id).padStart(4, "0")}
                 </span>
-              </span>
+                <span
+                  className={`text-[10px] font-black uppercase tracking-[0.2em] ${isSold ? "text-zinc-400" : "text-blue-600"}`}
+                >
+                  {isSold ? "Status: Archived" : "Status: Available"}
+                </span>
+              </div>
+
               <h1
-                className={`text-3xl md:text-4xl font-bold uppercase tracking-tight leading-tight mb-4 italic ${isSold ? "text-zinc-400" : "text-zinc-600"}`}
+                className={`text-4xl md:text-5xl font-bold uppercase tracking-tighter italic leading-[0.9] mb-6 ${isSold ? "text-zinc-400" : "text-zinc-800"}`}
               >
                 {item.name}
               </h1>
-              <div className="flex items-center gap-4">
+
+              <div className="flex items-baseline gap-4">
                 <span
-                  className={`text-3xl font-light ${isSold ? "text-zinc-300 line-through" : "text-blue-600"}`}
+                  className={`text-4xl font-light tracking-tighter ${isSold ? "text-zinc-300 line-through" : "text-zinc-800"}`}
                 >
                   {item.purchase_price
                     ? `$${Number(item.purchase_price).toLocaleString()}`
                     : "POA"}
                 </span>
-                {/* Status Badge - Font Bumped to 11px */}
-                <span
-                  className={`text-[11px] font-bold uppercase tracking-widest border px-3 py-1 ${isSold ? "border-zinc-200 text-zinc-400 bg-zinc-50" : "border-blue-100 text-blue-600 bg-blue-50"}`}
-                >
-                  {isSold ? "Sold" : "Available"}
-                </span>
+                {!isSold && item.purchase_price && (
+                  <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                    USD + Shipping
+                  </span>
+                )}
               </div>
             </div>
 
-            <div className="mb-10 text-zinc-500 leading-relaxed border-l-2 border-zinc-200 pl-6 italic text-base">
+            {/* DESCRIPTION: Museum Style Plaque */}
+            <div className="mb-12 text-zinc-500 leading-relaxed border-l border-zinc-200 pl-8 text-base font-medium max-w-prose">
               <div
-                dangerouslySetInnerHTML={{
-                  __html: item.description || "",
-                }}
+                className="prose prose-zinc prose-sm italic"
+                dangerouslySetInnerHTML={{ __html: item.description || "" }}
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-8 py-6 border-y border-zinc-200 mb-10">
-              <div>
-                <h4 className="text-[11px] uppercase font-black tracking-widest text-zinc-600 mb-1">
-                  Weight
+            {/* SPECIFICATIONS: Manifest Table */}
+            <div className="grid grid-cols-1 border-t border-zinc-200 mb-12">
+              <div className="flex justify-between py-4 border-b border-zinc-100 items-baseline">
+                <h4 className="text-[10px] uppercase font-black tracking-[0.3em] text-zinc-400">
+                  Object Weight
                 </h4>
-                <p className="text-lg font-medium text-zinc-600">
-                  {item.weight || "—"} <span className="text-xs">lbs</span>
+                <p className="text-sm font-bold text-zinc-600 font-mono">
+                  {item.weight ? `${item.weight} LBS` : "—"}
                 </p>
               </div>
-              <div>
-                <h4 className="text-[11px] uppercase font-black tracking-widest text-zinc-600 mb-1">
-                  Dimensions
+              <div className="flex justify-between py-4 border-b border-zinc-100 items-baseline">
+                <h4 className="text-[10px] uppercase font-black tracking-[0.3em] text-zinc-400">
+                  Dimensions (L×W×H)
                 </h4>
-                <p className="text-lg font-medium text-zinc-600">{`${item.length || 0}" × ${item.width || 0}" × ${item.height || 0}"`}</p>
+                <p className="text-sm font-bold text-zinc-600 font-mono">
+                  {item.length && item.width && item.height
+                    ? `${item.length}" × ${item.width}" × ${item.height}"`
+                    : "PENDING MEASUREMENT"}
+                </p>
               </div>
             </div>
 
-            <div className="space-y-3">
-              {isSold ? (
-                <button
-                  disabled
-                  className="w-full bg-zinc-100 text-zinc-600 py-4 text-lg font-bold uppercase tracking-widest border border-zinc-200 cursor-not-allowed"
-                >
-                  Archived
-                </button>
-              ) : item.purchase_price ? (
+            {/* ACTIONS */}
+            <div className="space-y-4">
+              {/* ... Action form/buttons as before, but with updated colors ... */}
+              {!isSold && item.purchase_price ? (
                 <form action={createCheckout}>
                   <input
                     type="hidden"
@@ -183,21 +188,29 @@ export default async function ProductPage({
                   <input type="hidden" name="itemId" value={item.id} />
                   <button
                     type="submit"
-                    className="w-full bg-zinc-800 text-white py-4 text-lg font-bold uppercase tracking-widest hover:bg-blue-600 transition-all shadow-sm"
+                    className="w-full bg-zinc-800 text-white py-5 text-[12px] font-black uppercase tracking-[0.4em] hover:bg-blue-600 transition-all shadow-xl active:scale-[0.98]"
                   >
-                    Purchase Now
+                    Purchase
                   </button>
                 </form>
               ) : (
-                <a
-                  href={`mailto:info@catskillas.com?subject=Inquiry: ${item.name} (Ref: CAS-${item.id})`}
-                  className="w-full bg-zinc-800 text-white py-4 text-lg font-bold uppercase tracking-widest hover:bg-blue-600 transition-all text-center block shadow-sm"
-                >
-                  Inquire for Price
-                </a>
+                !isSold && (
+                  <a
+                    href={`mailto:info@catskillas.com?subject=Inquiry: ${item.name} (Ref: CAS-${item.id})`}
+                    className="w-full bg-zinc-800 text-white py-5 text-[12px] font-black uppercase tracking-[0.4em] hover:bg-blue-600 transition-all text-center block"
+                  >
+                    Request Pricing
+                  </a>
+                )
               )}
 
-              {/* SHIPPING CALCULATION */}
+              {/* ARCHIVED STATE */}
+              {isSold && (
+                <div className="w-full bg-zinc-100 text-zinc-400 py-5 text-[12px] font-black uppercase tracking-[0.4em] border border-zinc-200 text-center cursor-not-allowed">
+                  Item Out of Circulation
+                </div>
+              )}
+
               {!isSold && (
                 <div className="pt-2">
                   <ShippingDrawer
@@ -209,29 +222,24 @@ export default async function ProductPage({
                     id={item.id}
                     disabled={!hasDimensions}
                   />
-                  {!hasDimensions && (
-                    <p className="mt-3 text-[11px] text-zinc-400 italic leading-snug">
-                      Shipping calculation unavailable: Please contact the
-                      gallery for a custom freight quote for oversized or
-                      unweighted items.
-                    </p>
-                  )}
                 </div>
               )}
             </div>
           </section>
         </div>
 
-        {/* RELATED ITEMS COMPONENT */}
-        {item.category && (
-          <RelatedArtifacts
-            categoryId={item.category.id}
-            categoryName={item.category.name}
-            categorySlug={item.category.slug}
-            currentId={id}
-          />
-        )}
-        <RecentlyViewed currentId={id} />
+        {/* RELATED & RECENT */}
+        <div className="mt-24 space-y-24">
+          {item.category && (
+            <RelatedArtifacts
+              categoryId={item.category.id}
+              categoryName={item.category.name}
+              categorySlug={item.category.slug}
+              currentId={id}
+            />
+          )}
+          <RecentlyViewed currentId={id} />
+        </div>
       </div>
     </main>
   );

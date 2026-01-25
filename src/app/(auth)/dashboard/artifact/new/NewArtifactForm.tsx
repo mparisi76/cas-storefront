@@ -28,6 +28,12 @@ export default function NewArtifactForm({
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [classification, setClassification] = useState("vintage");
   const [description, setDescription] = useState("");
+  
+  // Logistics Specs State
+  const [weight, setWeight] = useState("");
+  const [length, setLength] = useState("");
+  const [width, setWidth] = useState("");
+  const [height, setHeight] = useState("");
 
   // --- Validation Logic ---
   const isFormValid = useMemo(() => {
@@ -78,7 +84,7 @@ export default function NewArtifactForm({
         </div>
       </div>
 
-      <form id={formId} action={formAction} className="space-y-10">
+      <form id={formId} action={formAction} className="space-y-12">
         {state?.error && (
           <div className="bg-red-50 border border-red-200 p-4 text-sm font-bold text-red-700">
             {state.error}
@@ -102,6 +108,8 @@ export default function NewArtifactForm({
             currentValue={classification}
             onChange={(val) => setClassification(val)}
           />
+          {/* Ensure the value is sent in the form */}
+          <input type="hidden" name="classification" value={classification} />
         </div>
 
         {/* Identity & Pricing Grid */}
@@ -124,7 +132,7 @@ export default function NewArtifactForm({
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. 19th Century Cast Iron Pulley"
               required
-              className="w-full border-b border-zinc-200 py-4 outline-none focus:border-zinc-900 text-lg bg-transparent text-zinc-900 font-medium placeholder:text-zinc-300 transition-colors"
+              className="w-full border-b border-zinc-200 py-4 outline-none focus:border-zinc-900 text-lg bg-transparent text-zinc-900 font-medium placeholder:text-zinc-400 transition-colors"
             />
           </div>
 
@@ -133,14 +141,14 @@ export default function NewArtifactForm({
               Price (USD) <span className="text-red-500">*</span>
             </label>
             <input
-              name="price"
+              name="purchase_price"
               type="number"
               step="0.01"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
               placeholder="0.00"
               required
-              className="w-full border-b border-zinc-200 py-4 outline-none focus:border-zinc-900 text-lg bg-transparent text-zinc-900 font-mono placeholder:text-zinc-300 transition-colors"
+              className="w-full border-b border-zinc-200 py-4 outline-none focus:border-zinc-900 text-lg bg-transparent text-zinc-900 font-mono placeholder:text-zinc-400 transition-colors"
             />
           </div>
         </div>
@@ -163,6 +171,75 @@ export default function NewArtifactForm({
           />
         </div>
 
+        {/* LOGISTICS & SPECS SECTION */}
+        <div className="pt-4 space-y-8">
+          <div className="flex items-center gap-4">
+            <div className="h-px flex-1 bg-zinc-100" />
+            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 shrink-0">
+              Logistics & Specs
+            </h3>
+            <div className="h-px flex-1 bg-zinc-100" />
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
+            <div className="space-y-3">
+              <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                Weight (LBS)
+              </label>
+              <input
+                name="weight"
+                type="number"
+                value={weight}
+                onChange={(e) => setWeight(e.target.value)}
+                placeholder="0"
+                className="w-full border-b border-zinc-100 py-3 outline-none focus:border-zinc-900 text-base bg-transparent text-zinc-900 font-mono placeholder:text-zinc-400 transition-colors"
+              />
+            </div>
+
+            <div className="space-y-3">
+              <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                Length (IN)
+              </label>
+              <input
+                name="length"
+                type="number"
+                value={length}
+                onChange={(e) => setLength(e.target.value)}
+                placeholder="0"
+                className="w-full border-b border-zinc-100 py-3 outline-none focus:border-zinc-900 text-base bg-transparent text-zinc-900 font-mono placeholder:text-zinc-400 transition-colors"
+              />
+            </div>
+
+            <div className="space-y-3">
+              <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                Width (IN)
+              </label>
+              <input
+                name="width"
+                type="number"
+                value={width}
+                onChange={(e) => setWidth(e.target.value)}
+                placeholder="0"
+                className="w-full border-b border-zinc-100 py-3 outline-none focus:border-zinc-900 text-base bg-transparent text-zinc-900 font-mono placeholder:text-zinc-400 transition-colors"
+              />
+            </div>
+
+            <div className="space-y-3">
+              <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                Height (IN)
+              </label>
+              <input
+                name="height"
+                type="number"
+                value={height}
+                onChange={(e) => setHeight(e.target.value)}
+                placeholder="0"
+                className="w-full border-b border-zinc-100 py-3 outline-none focus:border-zinc-900 text-base bg-transparent text-zinc-900 font-mono placeholder:text-zinc-400 transition-colors"
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Description Field */}
         <div className="space-y-3">
           <label className="block text-xs font-black uppercase tracking-widest text-zinc-800">
@@ -174,7 +251,7 @@ export default function NewArtifactForm({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Describe the provenance, material, and history..."
-            className="w-full border border-zinc-200 p-4 outline-none focus:border-zinc-900 text-base bg-transparent text-zinc-900 leading-relaxed placeholder:text-zinc-300 transition-colors"
+            className="w-full border border-zinc-200 p-4 outline-none focus:border-zinc-900 text-base bg-transparent text-zinc-900 leading-relaxed placeholder:text-zinc-400 transition-colors"
           />
         </div>
 

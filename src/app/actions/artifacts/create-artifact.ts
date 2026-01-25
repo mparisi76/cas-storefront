@@ -1,4 +1,3 @@
-// src/app/actions/artifacts.ts
 "use server";
 
 import { cookies } from "next/headers";
@@ -22,15 +21,21 @@ export async function createArtifactAction(
     const galleryIds: string[] = galleryJson ? JSON.parse(galleryJson) : [];
     const primaryThumbnail = galleryIds.length > 0 ? galleryIds[0] : null;
     const classification = formData.get("classification") as string;
-    const priceRaw = formData.get("price") as string;
+    
+    // Extracting fields - matching the 'name' attributes in your NewArtifactForm
+    const priceRaw = formData.get("purchase_price") as string; 
     const categoryId = formData.get("category") as string;
+    
+    // New Logistic Fields
+    const weightRaw = formData.get("weight") as string;
+    const lengthRaw = formData.get("length") as string;
+    const widthRaw = formData.get("width") as string;
+    const heightRaw = formData.get("height") as string;
 
     const photoGalleryPayload = galleryIds.map((id) => ({
       directus_files_id: id,
     }));
 
-    // --- NEW LOGIC: Use the User's Token ---
-    // Create a client specifically for this user's session
     const userClient = createDirectus(process.env.NEXT_PUBLIC_DIRECTUS_URL!)
       .with(staticToken(token))
       .with(rest());
@@ -47,15 +52,20 @@ export async function createArtifactAction(
         photo_gallery: photoGalleryPayload,
         classification: classification || "vintage",
         type: "for_sale",
+        
+        // Mapping new numeric fields to Directus
+        // We use || null if they are empty so Directus treats them as empty/null rather than 0
+        weight: weightRaw ? parseFloat(weightRaw) : null,
+        length: lengthRaw ? parseFloat(lengthRaw) : null,
+        width: widthRaw ? parseFloat(widthRaw) : null,
+        height: heightRaw ? parseFloat(heightRaw) : null,
       }),
     );
-    // --- END NEW LOGIC ---
 
     revalidatePath("/artifacts");
     revalidatePath("/dashboard");
+    revalidatePath("/inventory"); // Added to refresh the public shop
   } catch (e) {
-    // If the userClient fails, it might be because the Vendor role
-    // lacks "Create" permissions. Ensure Vendor has Create access.
     return handleActionError(e);
   }
 
