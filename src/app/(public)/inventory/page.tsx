@@ -80,7 +80,7 @@ export default async function ShopPage({
                     : activeSlug !== "all"
                       ? "Category"
                       : "Complete Inventory"}
-                  <span className="ml-2 text-zinc-300">({totalCount})</span>
+                  <span className="ml-2 text-zinc-500">({totalCount})</span>
                 </h2>
 
                 {isFiltered && (
