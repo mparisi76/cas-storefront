@@ -232,12 +232,18 @@ export default function EditArtifactForm({
           </div>
         )}
 
+        {/* 1. Photos */}
         <section>
           <label className="block text-[13px] font-black uppercase tracking-widest text-zinc-800 mb-4">
             Manage photos
           </label>
           <GalleryWrapper
-            initialItems={form.gallery.map((fid) => ({ directus_files_id: fid }))}
+            // Use a key based on the artifact ID so it only resets if the artifact changes,
+            // not every time a single field in the form changes.
+            key={artifact.id} 
+            initialItems={initialGalleryIds.map((fid) => ({
+              directus_files_id: fid,
+            }))}
             onChange={(newIds) => handleField("gallery", newIds)}
           />
         </section>

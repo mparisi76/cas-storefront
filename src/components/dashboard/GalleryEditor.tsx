@@ -61,10 +61,11 @@ function SortablePhoto({
           : "border-zinc-200 bg-white shadow-sm"
       }`}
     >
+      {/* 1. The Drag Handle Layer (Attributes and Listeners moved here) */}
       <div
         {...attributes}
         {...listeners}
-        className="w-full h-full cursor-grab active:cursor-grabbing"
+        className="absolute inset-0 z-0 cursor-grab active:cursor-grabbing"
       >
         <div className="w-full h-full bg-zinc-50 flex items-center justify-center overflow-hidden">
           <img
@@ -75,27 +76,40 @@ function SortablePhoto({
         </div>
       </div>
 
+      {/* 2. The "Set as Primary" Overlay */}
       {!isPrimary && (
-        <button
-          type="button"
-          onClick={() => onPromote(id)}
-          className="absolute inset-0 bg-zinc-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 z-10"
+        <div
+          // CHANGE: Changed from <button> to <div> and added pointer-events-none
+          className="absolute inset-0 bg-zinc-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 z-10 pointer-events-none"
         >
-          <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white border border-white/40 px-2 py-1.5 hover:bg-white hover:text-zinc-900 transition-colors">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent drag from triggering
+              onPromote(id);
+            }}
+            // CHANGE: Added pointer-events-auto to the actual text link
+            className="text-[8px] font-black uppercase tracking-[0.2em] text-white border border-white/40 px-2 py-1.5 hover:bg-white hover:text-zinc-900 transition-colors pointer-events-auto cursor-pointer"
+          >
             Set as Primary
-          </span>
-        </button>
+          </button>
+        </div>
       )}
 
+      {/* 3. Primary Label */}
       {isPrimary && (
         <div className="absolute bottom-0 left-0 right-0 bg-zinc-900 text-[8px] text-white font-black uppercase tracking-[0.2em] py-1.5 text-center pointer-events-none z-10">
           Primary
         </div>
       )}
 
+      {/* 4. Remove Button */}
       <button
         type="button"
-        onClick={() => onRemove(id)}
+        onClick={(e) => {
+          e.stopPropagation();
+          onRemove(id);
+        }}
         className="absolute -top-2 -right-2 bg-white text-zinc-900 border border-zinc-200 rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 hover:text-red-600 shadow-sm z-20"
       >
         ×
