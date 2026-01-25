@@ -79,7 +79,7 @@ export default function NewArtifactForm({ categories }: { categories: Category[]
         />
 
         <section className="space-y-3 relative">
-          <label className="block text-xs font-black uppercase tracking-widest text-zinc-800">Category *</label>
+          <label className="block text-xs font-black uppercase tracking-widest text-zinc-800">Category <span className="text-red-500">*</span></label>
           <input type="hidden" name="category" value={form.category} required />
           <CategorySelect categories={formattedCategories} value={form.category} onChange={(id) => handleField("category", id)} />
         </section>

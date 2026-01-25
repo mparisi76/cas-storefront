@@ -16,11 +16,13 @@ export async function createArtifactAction(
 
   if (!token) return { error: "AUTH_EXPIRED" };
 
+  // This variable will hold the ID of the newly created item
+  let newId: string | number;
+
   try {
     const galleryJson = formData.get("ordered_gallery") as string;
     const galleryIds: string[] = galleryJson ? JSON.parse(galleryJson) : [];
     
-    // Pull the explicit thumbnail ID from our new GalleryEditor hidden input
     const explicitThumbnail = formData.get("thumbnail") as string;
     const primaryThumbnail = explicitThumbnail || (galleryIds.length > 0 ? galleryIds[0] : null);
     
@@ -28,7 +30,6 @@ export async function createArtifactAction(
     const priceRaw = formData.get("purchase_price") as string; 
     const categoryId = formData.get("category") as string;
     
-    // Logistic Fields
     const weightRaw = formData.get("weight") as string;
     const lengthRaw = formData.get("length") as string;
     const widthRaw = formData.get("width") as string;
@@ -42,7 +43,8 @@ export async function createArtifactAction(
       .with(staticToken(token))
       .with(rest());
 
-    await userClient.request(
+    // Capture the result of the creation
+    const result = await userClient.request(
       createItem("props", {
         name: formData.get("name") as string,
         purchase_price: priceRaw ? parseFloat(priceRaw) : null,
@@ -55,7 +57,6 @@ export async function createArtifactAction(
         classification: classification || "vintage",
         type: "for_sale",
         
-        // Logistics
         weight: weightRaw ? parseFloat(weightRaw) : null,
         length: lengthRaw ? parseFloat(lengthRaw) : null,
         width: widthRaw ? parseFloat(widthRaw) : null,
@@ -63,12 +64,18 @@ export async function createArtifactAction(
       }),
     );
 
+    newId = result.id;
+
     revalidatePath("/artifacts");
     revalidatePath("/dashboard");
     revalidatePath("/inventory");
+    // Ensure the edit page path is revalidated so it isn't blank
+    revalidatePath(`/dashboard/artifact/edit/${newId}`);
+
   } catch (e) {
     return handleActionError(e);
   }
 
-  redirect("/dashboard?success=true&action=create");
+  // Redirect to the Edit page instead of the Dashboard
+  redirect(`/dashboard/artifact/edit/${newId}`);
 }
