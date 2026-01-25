@@ -54,6 +54,7 @@ export function IdentityFields({
           placeholder="0.00"
           required
           className="w-full border-b border-zinc-200 py-4 outline-none focus:border-zinc-900 text-lg bg-transparent text-zinc-900 font-mono placeholder:text-zinc-400 transition-colors"
+          onWheel={(e) => (e.target as HTMLInputElement).blur()}
         />
       </div>
     </div>
