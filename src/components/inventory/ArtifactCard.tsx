@@ -12,11 +12,8 @@ export default function ArtifactCard({ item }: { item: Artifact }) {
   const imgRef = useRef<HTMLImageElement>(null);
   const isSold = item.availability === "sold";
 
-  // The "Gallery Clue": Handle cache hits and hard reloads
   useEffect(() => {
     if (imgRef.current?.complete) {
-      // requestAnimationFrame ensures the state update happens 
-      // AFTER the initial paint to prevent the loader getting "stuck"
       requestAnimationFrame(() => {
         setIsLoaded(true);
       });
@@ -28,13 +25,15 @@ export default function ArtifactCard({ item }: { item: Artifact }) {
   return (
     <Link
       href={`/inventory/${item.id}`}
-      className={`group block bg-white border border-zinc-200 p-6 md:p-10 transition-all h-full ${
-        isSold ? "opacity-90" : "hover:bg-zinc-50/50 hover:shadow-sm"
+      className={`group block p-6 md:p-10 transition-all duration-500 ease-out h-full ${
+        isSold 
+          ? "opacity-90 cursor-default" 
+          : "hover:bg-zinc-50/80"
       }`}
     >
       <div className="aspect-4/5 bg-zinc-100 overflow-hidden mb-6 md:mb-8 relative">
         
-        {/* Loader: Only shows if not loaded and no error */}
+        {/* Loader */}
         {!isLoaded && !hasError && item.thumbnail && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-50 z-20">
             <div className="animate-pulse flex flex-col items-center">
@@ -46,7 +45,7 @@ export default function ArtifactCard({ item }: { item: Artifact }) {
           </div>
         )}
 
-        {/* Error State: Prevents infinite loading if image is missing */}
+        {/* Error State */}
         {hasError && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-50 z-20">
             <AlertCircle className="text-zinc-300 mb-1" size={20} />
@@ -56,6 +55,7 @@ export default function ArtifactCard({ item }: { item: Artifact }) {
           </div>
         )}
 
+        {/* Sold Overlay */}
         {isSold && (
           <div className="absolute inset-0 z-30 flex items-center justify-center bg-[#F9F8F6]/40 backdrop-blur-[1px]">
             <div className="border-2 border-zinc-800 px-4 py-1 text-zinc-800 font-black uppercase tracking-[0.3em] -rotate-12 text-xs shadow-sm bg-white">
@@ -72,9 +72,13 @@ export default function ArtifactCard({ item }: { item: Artifact }) {
             onLoad={() => setIsLoaded(true)}
             onError={() => setHasError(true)}
             loading="lazy"
-            className={`relative z-10 object-contain w-full h-full bg-white transition-all duration-500 ease-out ${
-              isLoaded ? "opacity-100 scale-100" : "opacity-0 scale-95"
-            } ${isSold ? "grayscale contrast-75" : "grayscale group-hover:grayscale-0"}`}
+            className={`relative z-10 object-contain w-full h-full bg-white transition-all duration-700 ease-in-out ${
+              isLoaded ? "opacity-100" : "opacity-0"
+            } ${
+              isSold 
+                ? "grayscale contrast-75" 
+                : "grayscale group-hover:grayscale-0 group-hover:scale-105"
+            }`}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-zinc-300 uppercase tracking-[0.2em] text-[11px] font-bold">
@@ -83,6 +87,7 @@ export default function ArtifactCard({ item }: { item: Artifact }) {
         )}
       </div>
 
+      {/* Static Info Area */}
       <div className="flex justify-between items-start gap-4">
         <div>
           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 mb-1">

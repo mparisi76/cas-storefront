@@ -126,12 +126,22 @@ export default async function ShopPage({
           <div className="flex flex-col gap-12">
             {items.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 bg-zinc-200 gap-px border border-zinc-200">
-                  {items.map(item => <ArtifactCard key={item.id} item={item} />)}
+                {/* 1. Removed the outer border-t and border-l from this container.
+                    2. We use a negative margin on the grid itself to prevent "double borders" 
+                      between the sidebar and the cards.
+                */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 -ml-px">
+                  {items.map((item) => (
+                    <div 
+                      key={item.id} 
+                      className="border-t border-r border-b border-l border-zinc-200 bg-white -ml-px -mt-px"
+                    >
+                      <ArtifactCard item={item} />
+                    </div>
+                  ))}
                 </div>
 
-                {/* PAGINATION WRAPPER - Added padding for mobile accessibility */}
-                <div className="pb-20 lg:pb-12 pt-4 border-t border-zinc-100">
+                <div className="pb-20 lg:pb-12 pt-4">
                   <Pagination
                     currentPage={currentPage}
                     totalPages={totalPages}

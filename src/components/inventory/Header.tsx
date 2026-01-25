@@ -114,7 +114,7 @@ export default function Header() {
             type="submit"
             className="hidden md:block text-[10px] font-black uppercase tracking-widest text-blue-600 hover:text-zinc-900 transition-colors shrink-0"
           >
-            Execute Search
+            Search
           </button>
         </form>
       </div>
