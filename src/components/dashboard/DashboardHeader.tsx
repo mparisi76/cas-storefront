@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from "react";
 import { logoutAction } from "@/app/actions/auth";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, Settings, User, LogOut, ChevronDown } from "lucide-react";
+import { Menu, X, Settings, LogOut, ChevronDown } from "lucide-react";
 
 const navItems = [
   { name: "Catalog", href: "/inventory" },
