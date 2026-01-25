@@ -88,7 +88,15 @@ export default function GalleryEditor({
   };
 
   const handleRemove = (idToRemove: string) => {
-    updateItems(items.filter((i) => i !== idToRemove));
+    const newItems = items.filter((i) => i !== idToRemove);
+    
+    // If the user deleted the primary and there's a backup,
+    // we could log it or trigger a specific UI state.
+    if (items[0] === idToRemove && newItems.length > 0) {
+      console.log("Primary photo deleted. Promoting:", newItems[0]);
+    }
+    
+    updateItems(newItems);
   };
 
   return (
