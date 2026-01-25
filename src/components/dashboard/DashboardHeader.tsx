@@ -9,8 +9,8 @@ import { Menu, X } from "lucide-react"; // Assuming you use lucide-react, otherw
 
 const navItems = [
   { name: "Catalog", href: "/inventory" },
-  { name: "Sales", href: "/dashboard/sales" },
-  { name: "Settings", href: "/dashboard/settings" },
+  // { name: "Sales", href: "/dashboard/sales" },
+  // { name: "Settings", href: "/dashboard/settings" },
 ];
 
 export function DashboardHeader() {
