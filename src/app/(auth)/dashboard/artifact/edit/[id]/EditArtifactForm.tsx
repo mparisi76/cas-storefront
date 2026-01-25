@@ -1,6 +1,12 @@
 "use client";
 
-import { useActionState, startTransition, useState, useMemo, useEffect } from "react";
+import {
+  useActionState,
+  startTransition,
+  useState,
+  useMemo,
+  useEffect,
+} from "react";
 import { ArtifactFormState } from "@/types/dashboard";
 import GalleryWrapper from "@/components/dashboard/GalleryWrapper";
 import { CategorySelect } from "@/components/dashboard/controls/CategorySelect";
@@ -85,7 +91,11 @@ export default function EditArtifactForm({
       const result = await deleteArtifactAction(id);
       if (result?.error) {
         setIsDeleting(false);
-        showToast(result.error === "PERMISSION_DENIED" ? "Permission Denied" : "Error deleting artifact");
+        showToast(
+          result.error === "PERMISSION_DENIED"
+            ? "Permission Denied"
+            : "Error deleting artifact",
+        );
       }
     });
   };
@@ -95,6 +105,19 @@ export default function EditArtifactForm({
     name: cat.name,
     parent: cat.parent?.id ? String(cat.parent.id) : null,
   }));
+
+  const lastUpdated = artifact.date_updated 
+    ? new Intl.DateTimeFormat('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      }).format(new Date(artifact.date_updated))
+    : "No updates recorded";
+
+  const dateCreated = artifact.date_created
+    ? new Intl.DateTimeFormat('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric'
+      }).format(new Date(artifact.date_created))
+    : "Unknown";
 
   return (
     <div className="relative">
@@ -107,13 +130,34 @@ export default function EditArtifactForm({
       />
 
       {/* Header Section */}
-      <div className="flex items-center justify-between border-b border-zinc-100 pb-1 mb-10">
-        <div className="flex flex-col">
-          <h1 className="text-3xl font-light tracking-tighter text-zinc-900 italic">Edit Artifact</h1>
-          <p className="text-[11px] text-zinc-400 uppercase tracking-widest mt-1">Ref: {id.slice(0, 8)}</p>
+      <div className="flex items-center justify-between border-b border-zinc-100 pb-6 mb-10">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-3xl font-light tracking-tighter text-zinc-900 italic leading-none">
+            Edit Artifact
+          </h1>
+          
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Ref:</span>
+              <span className="text-[10px] font-mono font-bold text-zinc-600">{id.slice(0, 8)}</span>
+            </div>
+            
+            <div className="flex items-center gap-1.5">
+              <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Catalogued:</span>
+              <span className="text-[10px] font-medium text-zinc-600">{dateCreated}</span>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Last Modified:</span>
+              <span className="text-[10px] font-medium text-zinc-600 italic bg-zinc-50 px-1.5 py-0.5 border border-zinc-100">
+                {lastUpdated}
+              </span>
+            </div>
+          </div>
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Buttons remain same */}
           <button
             form="edit-form"
             type="submit"
@@ -122,7 +166,6 @@ export default function EditArtifactForm({
           >
             {isPending ? "Saving..." : "Save Changes"}
           </button>
-
           <button
             onClick={() => setShowDeleteModal(true)}
             type="button"
@@ -142,11 +185,17 @@ export default function EditArtifactForm({
 
         {/* 1. Photos */}
         <section>
-          <label className="block text-[13px] font-black uppercase tracking-widest text-zinc-800 mb-4">Manage photos</label>
+          <label className="block text-[13px] font-black uppercase tracking-widest text-zinc-800 mb-4">
+            Manage photos
+          </label>
           <GalleryWrapper
             initialItems={[
-              ...(artifact.thumbnail ? [{ directus_files_id: artifact.thumbnail }] : []),
-              ...(artifact.photo_gallery || []).filter(item => item.directus_files_id !== artifact.thumbnail),
+              ...(artifact.thumbnail
+                ? [{ directus_files_id: artifact.thumbnail }]
+                : []),
+              ...(artifact.photo_gallery || []).filter(
+                (item) => item.directus_files_id !== artifact.thumbnail,
+              ),
             ]}
           />
         </section>
@@ -157,7 +206,11 @@ export default function EditArtifactForm({
             currentValue={form.classification}
             onChange={(val) => handleField("classification", val)}
           />
-          <input type="hidden" name="classification" value={form.classification} />
+          <input
+            type="hidden"
+            name="classification"
+            value={form.classification}
+          />
         </section>
 
         {/* 3. Identity (SHARED COMPONENT) */}
@@ -179,7 +232,9 @@ export default function EditArtifactForm({
 
         {/* 5. Category */}
         <section className="space-y-3 relative">
-          <label className="block text-[13px] font-black uppercase tracking-widest text-zinc-800">Category</label>
+          <label className="block text-[13px] font-black uppercase tracking-widest text-zinc-800">
+            Category
+          </label>
           <input type="hidden" name="category" value={form.category} required />
           <CategorySelect
             categories={formattedCategories}
@@ -190,7 +245,9 @@ export default function EditArtifactForm({
 
         {/* 6. Description */}
         <section className="space-y-3">
-          <label className="block text-[13px] font-black uppercase tracking-widest text-zinc-800">Description</label>
+          <label className="block text-[13px] font-black uppercase tracking-widest text-zinc-800">
+            Description
+          </label>
           <textarea
             name="description"
             rows={8}

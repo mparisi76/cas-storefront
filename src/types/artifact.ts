@@ -35,6 +35,8 @@ export interface Artifact {
   length: string;
   width: string;
   height: string;
+  date_created: Date;
+  date_updated: Date;
 }
 
 export interface GalleryItem {
