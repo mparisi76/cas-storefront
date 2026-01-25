@@ -29,29 +29,32 @@ export default async function DashboardLayout({
   // Initialize as undefined instead of null to match 'UserProps | undefined'
   let userData: UserData | undefined = undefined;
 
+  // Inside DashboardLayout.tsx
   try {
     const client = createDirectus(process.env.NEXT_PUBLIC_DIRECTUS_URL!)
       .with(staticToken(token))
       .with(rest());
 
-    // Specify the types in the request to avoid 'any'
+    // Cast the response to a specific shape instead of 'any'
     const user = await client.request(readMe({
       fields: ['first_name', 'last_name', 'email', { role: ['name'] }]
     })) as { 
-      first_name: string; 
-      last_name: string; 
+      first_name: string | null; 
+      last_name: string | null; 
       email: string; 
       role?: { name: string } 
     };
 
     userData = {
       name: `${user.first_name || ""} ${user.last_name || ""}`.trim() || "Archivist",
-      email: user.email || "",
+      email: user.email,
       role: user.role?.name || "Vendor"
     };
-  } catch (e) {
-    console.error("Failed to fetch user data", e);
-    // userData remains undefined, which the Header handles gracefully
+  } catch (e: unknown) {
+    // Use 'unknown' and then check if it's an Error
+    if (e instanceof Error) {
+      console.error("Layout Session Error:", e.message);
+    }
   }
 
   return (

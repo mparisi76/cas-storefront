@@ -2,17 +2,8 @@
 import { cookies } from "next/headers";
 import { createDirectus, rest, staticToken, readMe } from "@directus/sdk";
 import { redirect } from "next/navigation";
-
-// Define the precise shape from Directus to satisfy ESLint
-interface DirectusUser {
-  first_name: string | null;
-  last_name: string | null;
-  email: string;
-  description: string | null;
-  role: {
-    name: string;
-  } | null;
-}
+import { ProfileForm } from "@/components/dashboard/ProfileForm";
+import { DirectusUser } from "@/types/user";
 
 export default async function SettingsPage() {
   const cookieStore = await cookies();
@@ -24,10 +15,22 @@ export default async function SettingsPage() {
     .with(staticToken(token))
     .with(rest());
 
-  // Explicitly cast the request to our interface
-  const user = await client.request(readMe({
-    fields: ['first_name', 'last_name', 'email', 'description', { role: ['name'] }]
-  })) as DirectusUser;
+  // Inside SettingsPage()
+  const user = (await client.request(
+    readMe({
+      fields: [
+        "first_name",
+        "last_name",
+        "email",
+        "description",
+        "shop_name",
+        "phone",
+        "city",
+        "state",
+        { role: ["name"] },
+      ],
+    }),
+  )) as DirectusUser;
 
   return (
     <div className="max-w-4xl space-y-12 pb-20">
@@ -45,44 +48,16 @@ export default async function SettingsPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
         {/* Left: Section Label */}
         <div className="space-y-1">
-          <h2 className="text-[11px] font-black uppercase tracking-widest text-zinc-900">Profile Information</h2>
+          <h2 className="text-[11px] font-black uppercase tracking-widest text-zinc-900">
+            Profile Information
+          </h2>
           <p className="text-[11px] text-zinc-500 leading-relaxed">
-            Your identity within the Catskill archive system.
+            Your identity within the CAS vendor system.
           </p>
         </div>
 
-        {/* Right: Form Fields */}
-        <div className="md:col-span-2 space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">First Name</label>
-              <input 
-                type="text" 
-                defaultValue={user.first_name ?? ""}
-                className="w-full bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:border-zinc-900 transition-colors" 
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Last Name</label>
-              <input 
-                type="text" 
-                defaultValue={user.last_name ?? ""}
-                className="w-full bg-zinc-50 border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:border-zinc-900 transition-colors" 
-              />
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Email Address</label>
-            <input 
-              type="email" 
-              readOnly
-              defaultValue={user.email}
-              className="w-full bg-zinc-100 border border-zinc-200 px-3 py-2 text-sm text-zinc-500 cursor-not-allowed" 
-            />
-            <p className="text-[11px] text-zinc-500 italic font-medium">Email is managed by the system administrator.</p>
-          </div>
-        </div>
+        {/* Right: The Client Form Component */}
+        <ProfileForm user={user} />
       </div>
 
       <div className="h-px w-full bg-zinc-100" />
@@ -90,7 +65,9 @@ export default async function SettingsPage() {
       {/* Security Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
         <div className="space-y-1">
-          <h2 className="text-[11px] font-black uppercase tracking-widest text-zinc-900">Security</h2>
+          <h2 className="text-[11px] font-black uppercase tracking-widest text-zinc-900">
+            Security
+          </h2>
           <p className="text-[11px] text-zinc-500 leading-relaxed">
             Update your password to keep the archive secure.
           </p>
@@ -108,7 +85,9 @@ export default async function SettingsPage() {
       {/* Role Badge Footer */}
       <div className="bg-zinc-50 border border-zinc-100 p-6 flex items-center justify-between">
         <div className="space-y-1">
-          <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Access Level</p>
+          <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400">
+            Access Level
+          </p>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-green-500" />
             <p className="text-sm font-bold text-zinc-900 uppercase tracking-widest">
@@ -117,7 +96,9 @@ export default async function SettingsPage() {
           </div>
         </div>
         <div className="text-right">
-          <p className="text-[11px] text-zinc-500 italic">Connected to {user.email}</p>
+          <p className="text-[11px] text-zinc-500 italic">
+            Connected to {user.email}
+          </p>
         </div>
       </div>
     </div>
