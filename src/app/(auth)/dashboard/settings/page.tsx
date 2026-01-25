@@ -4,6 +4,7 @@ import { createDirectus, rest, staticToken, readMe } from "@directus/sdk";
 import { redirect } from "next/navigation";
 import { ProfileForm } from "@/components/dashboard/ProfileForm";
 import { DirectusUser } from "@/types/user";
+import { PasswordResetRequest } from "@/components/dashboard/PasswordResetRequest";
 
 export default async function SettingsPage() {
   const cookieStore = await cookies();
@@ -69,15 +70,12 @@ export default async function SettingsPage() {
             Security
           </h2>
           <p className="text-[11px] text-zinc-500 leading-relaxed">
-            Update your password to keep the archive secure.
+            Update your password via secure email link.
           </p>
         </div>
 
-        <div className="md:col-span-2 space-y-4">
-          <button className="px-4 py-2 border border-zinc-900 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-zinc-900 hover:text-white transition-all shadow-sm">
-            Request Password Reset
-          </button>
-        </div>
+        {/* Real functional component */}
+        <PasswordResetRequest email={user.email} />
       </div>
 
       <div className="h-px w-full bg-zinc-100" />
