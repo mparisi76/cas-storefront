@@ -66,7 +66,7 @@ export default async function PortalPage() {
         </div>
       </header>
 
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-2">
         <StatCard label="Active Listings" value={activeCount} />
         <StatCard label="Items Sold" value={items.length - activeCount} />
         <StatCard label="Total Revenue" value={formattedRevenue} />

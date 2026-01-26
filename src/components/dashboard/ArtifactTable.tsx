@@ -71,39 +71,52 @@ export function ArtifactTable({ items, token }: ArtifactTableProps) {
     setIsProcessing(false);
   };
 
+  // Bumped to 64px (h-16 equivalent) to ensure full clearance of the sticky header
+  // const headerTopOffset = hasSelection ? "64px" : "0px";
+
   return (
     <div className="space-y-4">
-      {/* Selection Toolbar */}
-      <div className="h-14 overflow-hidden relative">
-        <div
-          className={`w-full flex items-center justify-between bg-zinc-900 text-white px-6 py-3 shadow-xl 
+      {/* 1. RESERVED SPACE TOOLBAR 
+          We keep the 64px height to prevent layout shift, 
+          but remove all labels/borders for a clean "empty" state.
+      */}
+      <div className="h-16 relative overflow-hidden">
+        <div 
+          className={`absolute inset-0 z-50 flex items-center justify-between bg-zinc-900 text-white px-6 h-full 
                      transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] transform ${
-                       hasSelection
-                         ? "translate-y-0 opacity-100"
-                         : "-translate-y-full opacity-0 pointer-events-none"
-                     }`}
+            hasSelection 
+              ? "translate-y-0 opacity-100" 
+              : "-translate-y-full opacity-0 pointer-events-none"
+          }`}
         >
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                Selected
-              </span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Selected</span>
               <span className="bg-zinc-700 text-white text-[10px] font-bold px-2 py-0.5 rounded">
                 {selectedIds.length}
               </span>
             </div>
+            
+            <div className="h-4 w-[1px] bg-zinc-700" />
 
-            <div className="h-4 w-px bg-zinc-700" />
+            <button 
+              onClick={() => setSelectedIds([])}
+              className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 hover:text-white transition-colors"
+            >
+              Clear
+            </button>
+
+            <div className="h-4 w-[1px] bg-zinc-700" />
 
             <div className="flex items-center gap-4">
-              <button
+              <button 
                 onClick={() => handleBulkStatusUpdate("available")}
                 disabled={isProcessing}
                 className="text-[9px] font-bold uppercase tracking-widest hover:text-green-400 transition-colors disabled:opacity-50"
               >
                 Mark Available
               </button>
-              <button
+              <button 
                 onClick={() => handleBulkStatusUpdate("sold")}
                 disabled={isProcessing}
                 className="text-[9px] font-bold uppercase tracking-widest hover:text-orange-400 transition-colors disabled:opacity-50"
@@ -113,7 +126,7 @@ export function ArtifactTable({ items, token }: ArtifactTableProps) {
             </div>
           </div>
 
-          <button
+          <button 
             onClick={() => setIsDeleteModalOpen(true)}
             disabled={isProcessing}
             className="text-[10px] font-black uppercase tracking-widest text-red-500 hover:text-red-400 transition-colors disabled:opacity-50"
@@ -121,36 +134,38 @@ export function ArtifactTable({ items, token }: ArtifactTableProps) {
             Delete Permanently
           </button>
         </div>
+        
+        {/* No placeholder content here—just pure white space until selection triggers the bar */}
       </div>
 
-      <div className="overflow-x-auto border border-zinc-100 shadow-sm">
-        <table className="w-full text-left border-collapse bg-white">
-          <thead className="bg-zinc-50 border-b border-zinc-200">
-            <tr>
-              <th className="px-6 py-4 w-12">
-                <input
-                  type="checkbox"
-                  className="accent-zinc-900 cursor-pointer"
-                  onChange={toggleSelectAll}
-                  checked={
-                    selectedIds.length === items.length && items.length > 0
-                  }
+      {/* 2. TABLE CONTAINER */}
+      <div className="border border-zinc-100 shadow-sm bg-white overflow-visible">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="border-b border-zinc-200">
+              <th className="sticky top-0 z-40 bg-zinc-50 px-6 py-4 w-12 border-b border-zinc-200">
+                <input 
+                  type="checkbox" 
+                  className="accent-zinc-900 cursor-pointer" 
+                  onChange={toggleSelectAll} 
+                  checked={selectedIds.length === items.length && items.length > 0} 
                 />
               </th>
-              <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500">
+              <th className="sticky top-0 z-40 bg-zinc-50 px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500 border-b border-zinc-200">
                 Artifact Description
               </th>
-              <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500">
+              <th className="sticky top-0 z-40 bg-zinc-50 px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500 border-b border-zinc-200">
                 Status
               </th>
-              <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500 text-right">
+              <th className="sticky top-0 z-40 bg-zinc-50 px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500 text-right border-b border-zinc-200">
                 Price
               </th>
-              <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500 text-right">
+              <th className="sticky top-0 z-40 bg-zinc-50 px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500 text-right border-b border-zinc-200">
                 Options
               </th>
             </tr>
           </thead>
+          {/* ... tbody ... */}
           <tbody className="divide-y divide-zinc-100">
             {items.length > 0 ? (
               items.map((item) => (

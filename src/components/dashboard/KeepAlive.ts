@@ -1,4 +1,3 @@
-// @/components/dashboard/KeepAlive.tsx
 "use client";
 
 import { useEffect } from "react";
@@ -8,29 +7,25 @@ export function KeepAlive() {
   const router = useRouter();
 
   useEffect(() => {
-    // 1. Tighten the interval to 5 minutes. 
-    // This ensures we hit the server well before a 15-min token expires.
-    const interval = setInterval(
-      async () => {
-        try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_DIRECTUS_URL}/users/me`, {
-            method: "GET",
-            // 2. CRITICAL: This tells the browser to send the 'directus_session' cookie.
-            // Without this, Directus doesn't know who is pinging.
-            credentials: "include", 
-          });
+    const interval = setInterval(async () => {
+      try {
+        // We fetch our internal API route. 
+        // No CORS or SameSite issues here because it's the same domain.
+        const response = await fetch("/api/auth/heartbeat", {
+          method: "GET",
+          cache: "no-store",
+        });
 
-          if (response.status === 401) {
-            // 3. If the server says "Unauthorized", the session is already dead.
-            // Instead of a broken UI, we force a refresh so DashboardLayout redirects us.
-            router.refresh();
-          }
-        } catch (error) {
-          console.error("KeepAlive heartbeat failed:", error);
+        if (response.status === 401) {
+          // If the internal proxy returns 401, the Directus session is dead.
+          // Refresh the page to trigger the layout-level redirect to /login.
+          router.refresh();
         }
-      },
-      1000 * 60 * 5 // 5 minutes
-    );
+      } catch (error) {
+        // We don't refresh on network errors, only on explicit 401s
+        console.error("KeepAlive heartbeat failed:", error);
+      }
+    }, 1000 * 60 * 1); // 5 minutes
 
     return () => clearInterval(interval);
   }, [router]);
