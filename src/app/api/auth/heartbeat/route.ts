@@ -10,33 +10,37 @@ export async function GET() {
   }
 
   try {
-    // 1. We prepare the request to Directus
-    // We send BOTH the Cookie header and the Bearer header to cover all config bases
-    const response = await fetch(`${process.env.NEXT_PUBLIC_DIRECTUS_URL}/users/me`, {
-      method: "GET",
+    // 1. Instead of just checking /users/me, we hit the refresh endpoint.
+    // This tells Directus to extend the session and issue a NEW cookie.
+    const response = await fetch(`${process.env.NEXT_PUBLIC_DIRECTUS_URL}/auth/refresh`, {
+      method: "POST",
       headers: {
-        "Cookie": `directus_session=${sessionCookie.value}`,
-        "Authorization": `Bearer ${sessionCookie.value}`,
-        "Accept": "application/json",
-        "Cache-Control": "no-cache",
-        // Directus sometimes checks the Origin even in server-to-server calls
+        "Content-Type": "application/json",
         "Origin": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
       },
+      body: JSON.stringify({
+        refresh_token: sessionCookie.value, // Directus session cookies are usually refresh tokens
+        mode: "cookie", // This tells Directus to send back a Set-Cookie header
+      }),
     });
 
-    // 2. Debugging: If it's still 401, we want to know why
-    if (response.status === 401) {
-      console.error("Directus rejected heartbeat session cookie.");
+    if (!response.ok) {
+      // If refresh fails, the session is truly dead
       return NextResponse.json({ authenticated: false }, { status: 401 });
     }
 
-    if (!response.ok) {
-      return NextResponse.json({ authenticated: false }, { status: response.status });
+    // 2. IMPORTANT: Directus will send a NEW cookie in the response headers.
+    // We must pass that new cookie back to the browser.
+    const setCookieHeader = response.headers.get("set-cookie");
+    const apiResponse = NextResponse.json({ authenticated: true });
+
+    if (setCookieHeader) {
+      apiResponse.headers.set("set-cookie", setCookieHeader);
     }
 
-    return NextResponse.json({ authenticated: true });
+    return apiResponse;
   } catch (error) {
-    console.error("Heartbeat Proxy Critical Failure:", error);
+    console.error("Heartbeat Refresh Error:", error);
     return NextResponse.json({ authenticated: false }, { status: 500 });
   }
 }

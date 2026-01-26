@@ -99,9 +99,9 @@ export function ArtifactTable({ items, token }: ArtifactTableProps) {
               <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Selected</span>
               <span className="bg-zinc-700 text-white text-[10px] font-bold px-2 py-0.5 rounded">{selectedIds.length}</span>
             </div>
-            <div className="h-4 w-[1px] bg-zinc-700" />
+            <div className="h-4 w-px bg-zinc-700" />
             <button onClick={() => setSelectedIds([])} className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 hover:text-white transition-colors">Clear</button>
-            <div className="h-4 w-[1px] bg-zinc-700" />
+            <div className="h-4 w-px bg-zinc-700" />
             <div className="flex items-center gap-4">
               <button onClick={() => handleBulkStatusUpdate("available")} disabled={isProcessing} className="text-[9px] font-bold uppercase tracking-widest hover:text-green-400 transition-colors disabled:opacity-50">Mark Available</button>
               <button onClick={() => handleBulkStatusUpdate("sold")} disabled={isProcessing} className="text-[9px] font-bold uppercase tracking-widest hover:text-orange-400 transition-colors disabled:opacity-50">Mark Sold</button>
