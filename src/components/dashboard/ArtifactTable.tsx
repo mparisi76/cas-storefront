@@ -97,7 +97,7 @@ export function ArtifactTable({ items, token }: ArtifactTableProps) {
               </span>
             </div>
             
-            <div className="h-4 w-[1px] bg-zinc-700" />
+            <div className="h-4 w-px bg-zinc-700" />
 
             <button 
               onClick={() => setSelectedIds([])}
@@ -106,7 +106,7 @@ export function ArtifactTable({ items, token }: ArtifactTableProps) {
               Clear
             </button>
 
-            <div className="h-4 w-[1px] bg-zinc-700" />
+            <div className="h-4 w-px bg-zinc-700" />
 
             <div className="flex items-center gap-4">
               <button 

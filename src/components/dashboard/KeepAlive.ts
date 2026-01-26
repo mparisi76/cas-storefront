@@ -25,7 +25,7 @@ export function KeepAlive() {
         // We don't refresh on network errors, only on explicit 401s
         console.error("KeepAlive heartbeat failed:", error);
       }
-    }, 1000 * 60 * 1); // 5 minutes
+    }, 1000 * 60 * 5); // 5 minutes
 
     return () => clearInterval(interval);
   }, [router]);
