@@ -3,35 +3,40 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   const cookieStore = await cookies();
-  const token = cookieStore.get("directus_session")?.value;
+  const sessionCookie = cookieStore.get("directus_session");
 
-  // If there is no cookie, the user is already logged out
-  if (!token) {
+  if (!sessionCookie || !sessionCookie.value) {
     return NextResponse.json({ authenticated: false }, { status: 401 });
   }
 
   try {
-    // We call Directus from the server, where we can manually 
-    // pass the token in the Authorization header.
+    // 1. We prepare the request to Directus
+    // We send BOTH the Cookie header and the Bearer header to cover all config bases
     const response = await fetch(`${process.env.NEXT_PUBLIC_DIRECTUS_URL}/users/me`, {
       method: "GET",
       headers: {
-        "Authorization": `Bearer ${token}`,
+        "Cookie": `directus_session=${sessionCookie.value}`,
+        "Authorization": `Bearer ${sessionCookie.value}`,
+        "Accept": "application/json",
         "Cache-Control": "no-cache",
+        // Directus sometimes checks the Origin even in server-to-server calls
+        "Origin": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
       },
     });
 
+    // 2. Debugging: If it's still 401, we want to know why
     if (response.status === 401) {
+      console.error("Directus rejected heartbeat session cookie.");
       return NextResponse.json({ authenticated: false }, { status: 401 });
     }
 
     if (!response.ok) {
-      throw new Error("Directus heartbeat failed");
+      return NextResponse.json({ authenticated: false }, { status: response.status });
     }
 
     return NextResponse.json({ authenticated: true });
   } catch (error) {
-    console.error("Heartbeat Proxy Error:", error);
-    return NextResponse.json({ authenticated: false }, { status: 401 });
+    console.error("Heartbeat Proxy Critical Failure:", error);
+    return NextResponse.json({ authenticated: false }, { status: 500 });
   }
 }

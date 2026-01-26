@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ToastListener } from "@/components/dashboard/ToastListener";
 import { vendorArtifactService } from "@/services/(vendor)/artifacts";
-import { ArtifactTable } from "@/components/dashboard/ArtifactTable"; 
+import { ArtifactTable } from "@/components/dashboard/ArtifactTable";
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
@@ -18,16 +18,24 @@ function StatCard({ label, value }: { label: string; value: string | number }) {
   );
 }
 
-export default async function PortalPage() {
+export default async function PortalPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ sort?: string }>;
+}) {
   const cookieStore = await cookies();
   const token = cookieStore.get("directus_session")?.value;
+
+  // Await searchParams as required by Next.js 15
+  const { sort } = await searchParams;
 
   if (!token) return redirect("/login");
 
   // Fetch data using the centralized service
+  // We pass the sort parameter to getMyItems so Directus handles the order
   const [user, items] = await Promise.all([
-    vendorArtifactService.getVendorData(token), 
-    vendorArtifactService.getMyItems(token),
+    vendorArtifactService.getVendorData(token),
+    vendorArtifactService.getMyItems(token, sort),
   ]);
 
   if (!user) return redirect("/login");
@@ -36,7 +44,7 @@ export default async function PortalPage() {
     (acc, i) => acc + (Number(i.purchase_price) || 0),
     0,
   );
-  
+
   const formattedRevenue = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
