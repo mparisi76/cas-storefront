@@ -27,14 +27,12 @@ export function StatFilters({
       params.delete("availability");
     }
 
-    // Clear pagination when changing filters to prevent 404/Empty states
     params.delete("limit");
-
     router.push(`?${params.toString()}`, { scroll: false });
   };
 
   return (
-    <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-2">
+    <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-2 items-stretch">
       <StatCardButton
         label="Active Listings"
         value={activeCount}
@@ -50,8 +48,8 @@ export function StatFilters({
         onClick={handleFilter}
       />
 
-      {/* Revenue Card: Static display only */}
-      <div className="bg-white border border-zinc-200 p-8 shadow-sm">
+      {/* Revenue Card: Updated to match the exact padding and height of the buttons */}
+      <div className="bg-white border border-zinc-200 p-8 shadow-sm flex flex-col justify-center">
         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-1">
           Total Revenue
         </p>
