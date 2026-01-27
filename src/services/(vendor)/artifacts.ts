@@ -1,11 +1,19 @@
-import { createDirectus, rest, staticToken, readItems, deleteItems, updateItems, readMe } from "@directus/sdk";
+import {
+  createDirectus,
+  rest,
+  staticToken,
+  readItems,
+  deleteItems,
+  updateItems,
+  readMe,
+} from "@directus/sdk";
 import { Artifact } from "@/types/artifact";
 import { DirectusUser } from "@/types/dashboard";
 
 const BASE_URL = process.env.NEXT_PUBLIC_DIRECTUS_URL!;
 
 // Helper to get an authenticated client
-const getClient = (token: string) => 
+const getClient = (token: string) =>
   createDirectus(BASE_URL).with(staticToken(token)).with(rest());
 
 export const vendorArtifactService = {
@@ -17,8 +25,8 @@ export const vendorArtifactService = {
     try {
       const result = await client.request(
         readMe({
-          fields: ['first_name', 'last_name', 'id']
-        })
+          fields: ["first_name", "last_name", "id"],
+        }),
       );
       return result as DirectusUser;
     } catch (error) {
@@ -31,30 +39,52 @@ export const vendorArtifactService = {
    * Fetch only items owned by the user
    */
   async getMyItems(
-  token: string, 
-  sort?: string, 
-  search?: string, 
-  limit: number = 20, 
-  page: number = 1
-): Promise<Artifact[]> {
+    token: string,
+    sort?: string,
+    search?: string,
+    limit: number = 20,
+    availability?: string
+  ): Promise<Artifact[]> {
     const client = getClient(token);
+
+    // Define a proper type for the Directus filter object
+    // This satisfies ESLint because we are being explicit about the structure
+    interface DirectusFilter {
+      status: { _eq: string };
+      availability?: { _eq: string };
+    }
+
+    const filter: DirectusFilter = {
+      status: { _eq: "published" },
+    };
+
+    if (availability) {
+      filter.availability = { _eq: availability };
+    }
+
     try {
       const data = await client.request(
         readItems("props", {
-          fields: ["id", "name", "availability", "purchase_price", "date_created"],
-          filter: { status: { _eq: "published" } },
+          fields: [
+            "id",
+            "name",
+            "availability",
+            "purchase_price",
+            "date_created"
+          ],
+          filter: filter,
           sort: sort ? [sort] : ["-date_created"],
           search: search || undefined,
           limit: limit,
-          offset: (page - 1) * limit,
         })
       );
+
       return data as Artifact[];
     } catch (error) {
       console.error("Fetch Items Error:", error);
       return [];
     }
-},
+  },
 
   /**
    * Delete multiple items at once
@@ -73,7 +103,11 @@ export const vendorArtifactService = {
   /**
    * Bulk update status (e.g., set to 'sold' or 'available')
    */
-  async bulkUpdateStatus(token: string, ids: string[], availability: "available" | "sold") {
+  async bulkUpdateStatus(
+    token: string,
+    ids: string[],
+    availability: "available" | "sold",
+  ) {
     const client = getClient(token);
     try {
       await client.request(updateItems("props", ids, { availability }));
@@ -82,5 +116,5 @@ export const vendorArtifactService = {
       console.error("Bulk Update Error:", error);
       return { success: false };
     }
-  }
+  },
 };

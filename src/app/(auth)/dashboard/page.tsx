@@ -4,54 +4,52 @@ import Link from "next/link";
 import { ToastListener } from "@/components/dashboard/ToastListener";
 import { vendorArtifactService } from "@/services/(vendor)/artifacts";
 import { ArtifactTable } from "@/components/dashboard/ArtifactTable";
-
-function StatCard({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="bg-white border border-zinc-200 p-8 shadow-sm">
-      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-1">
-        {label}
-      </p>
-      <p className="text-3xl font-light text-zinc-900 tracking-tighter">
-        {value}
-      </p>
-    </div>
-  );
-}
+import { StatFilters } from "@/components/dashboard/StatFilters";
 
 export default async function PortalPage({
   searchParams,
 }: {
-  searchParams: Promise<{ sort?: string; search?: string; limit?: string }>;
+  searchParams: Promise<{ 
+    sort?: string; 
+    search?: string; 
+    limit?: string;
+    availability?: string;
+  }>;
 }) {
   const cookieStore = await cookies();
   const token = cookieStore.get("directus_session")?.value;
 
   // Await searchParams as required by Next.js 15
-  const { sort, search, limit } = await searchParams;
+  const { sort, search, limit, availability } = await searchParams;
 
   if (!token) return redirect("/login");
 
-  // Fetch data using the centralized service
-  // We pass the sort parameter to getMyItems so Directus handles the order
-  const [user, items] = await Promise.all([
+  // We fetch 'allItems' (no filters) for the stats cards 
+  // and 'filteredItems' for the actual table.
+  const [user, allItems, filteredItems] = await Promise.all([
     vendorArtifactService.getVendorData(token),
-    vendorArtifactService.getMyItems(token, sort, search, Number(limit || 20)),
+    vendorArtifactService.getMyItems(token, undefined, undefined, 100), // For stats
+    vendorArtifactService.getMyItems(token, sort, search, Number(limit || 20), availability),
   ]);
 
   if (!user) return redirect("/login");
 
-  const totalRevenue = items.reduce(
-    (acc, i) => acc + (Number(i.purchase_price) || 0),
-    0,
-  );
+  // Calculate stats from allItems so they stay consistent
+  const totalRevenue = allItems
+    .filter(i => i.availability === "sold")
+    .reduce((acc, i) => acc + (Number(i.purchase_price) || 0), 0);
 
   const formattedRevenue = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
   }).format(totalRevenue);
 
-  const activeCount = items.filter(
+  const activeCount = allItems.filter(
     (i) => i.availability === "available",
+  ).length;
+
+  const soldCount = allItems.filter(
+    (i) => i.availability === "sold",
   ).length;
 
   return (
@@ -66,7 +64,7 @@ export default async function PortalPage({
         </div>
         <div className="flex items-center gap-8">
           <Link
-            href="dashboard/artifact/new"
+            href="/dashboard/artifact/new"
             className="bg-zinc-900 text-white px-8 py-4 text-[11px] font-bold uppercase tracking-[0.2em] hover:bg-zinc-700 transition-all shadow-sm"
           >
             New Artifact
@@ -74,13 +72,15 @@ export default async function PortalPage({
         </div>
       </header>
 
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-2">
-        <StatCard label="Active Listings" value={activeCount} />
-        <StatCard label="Items Sold" value={items.length - activeCount} />
-        <StatCard label="Total Revenue" value={formattedRevenue} />
-      </section>
+      {/* Using the new interactive component */}
+      <StatFilters 
+        activeCount={activeCount} 
+        soldCount={soldCount} 
+        formattedRevenue={formattedRevenue} 
+      />
 
-      <ArtifactTable items={items} token={token} />
+      {/* Table shows the filtered items */}
+      <ArtifactTable items={filteredItems} token={token} />
     </div>
   );
 }
