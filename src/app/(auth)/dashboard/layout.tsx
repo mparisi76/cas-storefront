@@ -2,7 +2,6 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { isSessionValid } from "@/lib/directus-auth";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
-import { KeepAlive } from "@/components/dashboard/KeepAlive";
 import { createDirectus, rest, staticToken, readMe } from "@directus/sdk";
 
 // Define the interface to match what the Header expects
@@ -58,7 +57,6 @@ export default async function DashboardLayout({
 
   return (
     <>
-      <KeepAlive />
       <div className="min-h-screen bg-white flex flex-col">
         <DashboardHeader user={userData} />
         <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-8">

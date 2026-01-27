@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import EditArtifactForm from "./EditArtifactForm";
 import Link from "next/link";
-// import directus from "@/lib/directus";
 import {
   createDirectus,
   readItem,

@@ -30,16 +30,23 @@ export const vendorArtifactService = {
   /**
    * Fetch only items owned by the user
    */
-  async getMyItems(token: string, sort?: string): Promise<Artifact[]> {
+  async getMyItems(
+  token: string, 
+  sort?: string, 
+  search?: string, 
+  limit: number = 20, 
+  page: number = 1
+): Promise<Artifact[]> {
     const client = getClient(token);
     try {
       const data = await client.request(
         readItems("props", {
           fields: ["id", "name", "availability", "purchase_price", "date_created"],
           filter: { status: { _eq: "published" } },
-          // If 'sort' exists, we pass it as an array to Directus. 
-          // Otherwise, we default to newest first.
           sort: sort ? [sort] : ["-date_created"],
+          search: search || undefined,
+          limit: limit,
+          offset: (page - 1) * limit,
         })
       );
       return data as Artifact[];
@@ -47,7 +54,7 @@ export const vendorArtifactService = {
       console.error("Fetch Items Error:", error);
       return [];
     }
-	},
+},
 
   /**
    * Delete multiple items at once

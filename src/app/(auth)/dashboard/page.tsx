@@ -21,13 +21,13 @@ function StatCard({ label, value }: { label: string; value: string | number }) {
 export default async function PortalPage({
   searchParams,
 }: {
-  searchParams: Promise<{ sort?: string }>;
+  searchParams: Promise<{ sort?: string; search?: string; limit?: string }>;
 }) {
   const cookieStore = await cookies();
   const token = cookieStore.get("directus_session")?.value;
 
   // Await searchParams as required by Next.js 15
-  const { sort } = await searchParams;
+  const { sort, search, limit } = await searchParams;
 
   if (!token) return redirect("/login");
 
@@ -35,7 +35,7 @@ export default async function PortalPage({
   // We pass the sort parameter to getMyItems so Directus handles the order
   const [user, items] = await Promise.all([
     vendorArtifactService.getVendorData(token),
-    vendorArtifactService.getMyItems(token, sort),
+    vendorArtifactService.getMyItems(token, sort, search, Number(limit || 20)),
   ]);
 
   if (!user) return redirect("/login");
