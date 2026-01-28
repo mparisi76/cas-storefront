@@ -15,14 +15,23 @@ const buildFilters = (params: {
   category?: string;
   classification?: string;
   search?: string;
+  vendor?: string; // This will be the User ID
 }) => {
-  const { category, classification, search } = params;
+  const { category, classification, search, vendor } = params;
 
   const andFilters: DirectusFilter[] = [
     { status: { _eq: "published" } },
     { availability: { _in: ["available", "sold"] } },
   ];
 
+  // FILTER BY SYSTEM USER ID
+  if (vendor && vendor !== "all") {
+    andFilters.push({
+      user_created: { _eq: vendor }
+    });
+  }
+
+  // ... rest of your classification/category/search logic
   if (classification && classification !== "all") {
     andFilters.push({ classification: { _eq: classification } });
   }
@@ -37,11 +46,8 @@ const buildFilters = (params: {
   }
 
   if (search) {
-    const searchConditions: DirectusFilter[] = [
-      { name: { _icontains: search } },
-    ];
-    const isNumeric = !isNaN(Number(search)) && search.trim() !== "";
-    if (isNumeric) {
+    const searchConditions: DirectusFilter[] = [{ name: { _icontains: search } }];
+    if (!isNaN(Number(search)) && search.trim() !== "") {
       searchConditions.push({ id: { _eq: Number(search) } });
     }
     andFilters.push({ _or: searchConditions });
@@ -50,18 +56,20 @@ const buildFilters = (params: {
   return { _and: andFilters };
 };
 
+// ... existing buildFilters function
+
 export const getShopItems = cache(
   async (params: {
     category?: string;
     classification?: string;
     search?: string;
+    vendor?: string; // Ensure this is here
     page?: number;
     limit?: number;
   }) => {
     const { page = 1, limit = 12 } = params;
     const filter = buildFilters(params);
 
-    // 1. Fetch the items
     const data = await directus.request(
       readItems("props", {
         filter,
@@ -73,13 +81,13 @@ export const getShopItems = cache(
           "availability",
           "classification",
           { category: ["id", "slug", "name", { parent: ["id", "slug"] }] },
+          { user_created: ["id", "first_name", "last_name"] }, // Relation to system users
         ],
         limit,
         page,
       }),
     );
 
-    // 2. Fetch the count separately (This uses a different endpoint that usually bypasses the array issue)
     const countResponse = await directus.request(
       aggregate("props", {
         aggregate: { count: "*" },
@@ -96,13 +104,11 @@ export const getShopItems = cache(
   },
 );
 
-// 2. New Reactive Category Counts
-// src/services/artifacts.ts (or categories.ts)
-
 export const getCategoryCounts = cache(
   async (params: {
     classification?: string;
     search?: string;
+    vendor?: string; // FIX: Add vendor to this type definition
   }): Promise<Record<string, number>> => {
     // 1. Build the filter (ignoring category so sidebar stays full)
     const filter = buildFilters({ ...params, category: undefined });

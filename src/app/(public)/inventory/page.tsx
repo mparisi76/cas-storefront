@@ -7,6 +7,7 @@ import Pagination from "@/components/inventory/Pagination";
 import { getCategoryTree } from "@/lib/utils";
 import { getCategoryCounts, getShopItems } from "@/services/(public)/artifacts";
 import { getCategories } from "@/services/categories";
+import { getActiveVendors } from "@/services/(public)/vendors";
 
 export default async function ShopPage({
   searchParams,
@@ -16,6 +17,7 @@ export default async function ShopPage({
     classification?: string;
     search?: string;
     page?: string;
+    vendor?: string; // New param
   }>;
 }) {
   const params = await searchParams;
@@ -24,24 +26,29 @@ export default async function ShopPage({
   const activeSlug = params.category || "all";
   const activeEra = params.classification || "all";
   const activeSearch = params.search || "";
+  const activeVendor = params.vendor || "all"; // New extract
   const currentPage = Number(params.page) || 1;
   const itemsPerPage = 12;
 
-  // 2. Fetch all data in parallel
-  const [{ data: items, meta }, categories, counts] = await Promise.all([
-    getShopItems({
-      category: activeSlug,
-      classification: activeEra,
-      search: activeSearch,
-      page: currentPage,
-      limit: itemsPerPage,
-    }),
-    getCategories(),
-    getCategoryCounts({
-      search: activeSearch,
-      classification: activeEra,
-    }),
-  ]);
+  // 2. Fetch all data in parallel including Vendors
+  const [{ data: items, meta }, categories, counts, vendors] =
+    await Promise.all([
+      getShopItems({
+        category: activeSlug,
+        classification: activeEra,
+        search: activeSearch,
+        vendor: activeVendor, // Passing to artifact service
+        page: currentPage,
+        limit: itemsPerPage,
+      }),
+      getCategories(),
+      getCategoryCounts({
+        search: activeSearch,
+        classification: activeEra,
+        vendor: activeVendor, // Passing to count service so sidebar updates
+      }),
+      getActiveVendors(), // Fetching the list for the UI
+    ]);
 
   // 3. UI State & Pagination calculations
   const totalCount = meta?.filter_count || 0;
@@ -56,19 +63,22 @@ export default async function ShopPage({
   const categoryTree = getCategoryTree(categoriesWithCounts, []);
   const eraOptions = ["all", "antique", "vintage", "modern"];
   const isFiltered =
-    activeSlug !== "all" || activeEra !== "all" || activeSearch !== "";
+    activeSlug !== "all" ||
+    activeEra !== "all" ||
+    activeSearch !== "" ||
+    activeVendor !== "all";
 
   return (
-    <main className="bg-[#F9F8F6] min-h-screen pt-6 md:pt-10 px-4 md:px-10">
+    <main className="bg-[#F9F8F6] min-h-screen pt-6 md:pt-10 px-4 md:px-10 text-zinc-900">
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start">
         {/* DESKTOP SIDEBAR */}
         <div className="hidden lg:block w-64 sticky top-10 shrink-0">
-          <ShopSidebar tree={categoryTree} />
+          <ShopSidebar tree={categoryTree} vendors={vendors} />
         </div>
 
         <div
           className="flex-1 w-full animate-in-view"
-          key={`${activeSlug}-${activeEra}-${activeSearch}-${currentPage}`}
+          key={`${activeSlug}-${activeEra}-${activeSearch}-${activeVendor}-${currentPage}`}
         >
           {/* HEADER SECTION */}
           <div className="mb-8 md:mb-12 flex flex-col md:flex-row md:justify-between md:items-end gap-6 md:gap-0">
@@ -126,9 +136,6 @@ export default async function ShopPage({
           <div className="flex flex-col gap-12">
             {items.length > 0 ? (
               <>
-                {/* The grid container is transparent and has no borders.
-                  Negative margins allow the item borders to overlap perfectly.
-                */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 -ml-px -mt-px">
                   {items.map((item) => (
                     <div
@@ -140,7 +147,6 @@ export default async function ShopPage({
                   ))}
                 </div>
 
-                {/* PAGINATION WRAPPER */}
                 <div className="pb-20 lg:pb-12 pt-4">
                   <Pagination
                     currentPage={currentPage}
