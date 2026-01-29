@@ -4,71 +4,62 @@ import Link from "next/link";
 import ArtifactCard from "./ArtifactCard";
 import { Artifact } from "@/types/artifact";
 
-interface RelatedArtifactsProps {
-  categoryId: string | number;
-  categoryName: string;
-  categorySlug: string;
-  currentId: string | number;
+interface MoreFromVendorProps {
+  vendorId: string;
+  vendorName: string;
+  currentId: string;
 }
 
-export default async function RelatedArtifacts({
-  categoryId,
-  // categoryName,
-  categorySlug,
+export default async function MoreFromVendor({
+  vendorId,
+  vendorName,
   currentId,
-}: RelatedArtifactsProps) {
-  const response = await directus.request(
+}: MoreFromVendorProps) {
+  const artifacts = await directus.request(
     readItems("props", {
       filter: {
         _and: [
-          { category: { id: { _eq: categoryId } } },
+          { user_created: { _eq: vendorId } },
           { id: { _neq: currentId } },
           { status: { _eq: "published" } },
         ],
       },
       limit: 4,
       fields: [
-        "id", "name", "thumbnail", "purchase_price", "availability", "classification",
-        { category: ["id", "slug", "name"] },
+        "id", "name", "thumbnail", "purchase_price", "availability",
         { user_created: ["id", "first_name", "last_name"] },
       ],
-    })
+    }),
   );
 
-  const relatedItems = response as Artifact[];
-  if (relatedItems.length === 0) return null;
+  if (!artifacts || artifacts.length === 0) return null;
 
   return (
     <section className="border-t border-zinc-200 pt-16">
       <div className="flex justify-between items-end mb-10">
         <div>
           <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 mb-2">
-            Discovery
+            Shop Selection
           </h3>
           <h2 className="text-2xl font-bold uppercase tracking-tighter text-zinc-800 italic">
-            Related Artifacts
+            More from {vendorName}
           </h2>
         </div>
-        
         <Link
-          href={`/inventory?category=${categorySlug}`}
+          href={`/inventory?vendor=${vendorId}`}
           className="text-[10px] font-black uppercase tracking-widest text-blue-600 border-b border-blue-600 pb-1 hover:text-zinc-900 hover:border-zinc-900 transition-all"
         >
-          View all
+          View All
         </Link>
       </div>
 
-      {/* THE "INVENTORY PAGE" GRID LOGIC: 
-          -ml-px and -mt-px on both parent and child.
-          This ensures the grid stops exactly where the items stop.
-      */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 -ml-px -mt-px">
-        {relatedItems.map((related) => (
+        {(artifacts as Artifact[]).map((item) => (
           <div 
-            key={related.id} 
+            key={item.id} 
             className="border-t border-r border-b border-l border-zinc-200 bg-[#F9F8F6] -ml-px -mt-px overflow-hidden"
           >
-            <ArtifactCard item={related} />
+            <ArtifactCard item={item} hideVendor />
           </div>
         ))}
       </div>

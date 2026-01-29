@@ -55,7 +55,7 @@ export default function ShopSidebar({ tree, vendors }: ShopSidebarProps) {
         {/* VENDOR DROPDOWN SECTION */}
         <div>
           <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-zinc-600 mb-6">
-            Source
+            By Shop
           </h3>
           <VendorFilter vendors={vendors} />
         </div>
@@ -63,7 +63,7 @@ export default function ShopSidebar({ tree, vendors }: ShopSidebarProps) {
         {/* INVENTORY SECTION */}
         <div>
           <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-zinc-600 mb-10">
-            Inventory
+            By Category
           </h3>
           <nav className="space-y-1">
             <button

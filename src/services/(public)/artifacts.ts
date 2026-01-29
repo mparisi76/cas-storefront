@@ -134,3 +134,33 @@ export const getCategoryCounts = cache(
     return counts;
   },
 );
+
+export const getMoreFromVendor = cache(async (vendorId: string, currentArtifactId: string | number) => {
+  try {
+    const data = await directus.request(
+      readItems("props", {
+        filter: {
+          _and: [
+            { user_created: { _eq: vendorId } },
+            { id: { _neq: currentArtifactId } }, // Don't show the current item
+            { status: { _eq: "published" } }
+          ],
+        },
+        limit: 4,
+        fields: [
+          "id",
+          "name",
+          "thumbnail",
+          "purchase_price",
+          "availability",
+          { user_created: ["id", "first_name", "last_name"] }
+        ],
+      })
+    );
+
+    return data;
+  } catch (error) {
+    console.error("Error fetching more from vendor:", error);
+    return [];
+  }
+});

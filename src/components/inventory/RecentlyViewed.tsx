@@ -5,9 +5,11 @@ import ArtifactCard from "./ArtifactCard";
 import directus from "@/lib/directus";
 import { readItems } from "@directus/sdk";
 import { Artifact } from "@/types/artifact";
+import Link from "next/link";
 
 export default function RecentlyViewed({ currentId }: { currentId: string }) {
   const [items, setItems] = useState<Artifact[]>([]);
+  const [totalInHistory, setTotalInHistory] = useState(0);
   const [hasChecked, setHasChecked] = useState(false);
 
   useEffect(() => {
@@ -20,7 +22,10 @@ export default function RecentlyViewed({ currentId }: { currentId: string }) {
         }
 
         const storedIds = JSON.parse(history) as string[];
-        const idsToFetch = storedIds.filter((id) => String(id) !== String(currentId));
+        const filteredIds = storedIds.filter((id) => String(id) !== String(currentId));
+        
+        setTotalInHistory(filteredIds.length);
+        const idsToFetch = filteredIds.slice(0, 8);
 
         if (idsToFetch.length === 0) {
           setHasChecked(true);
@@ -33,7 +38,8 @@ export default function RecentlyViewed({ currentId }: { currentId: string }) {
             fields: [
               "id", "name", "thumbnail", "purchase_price", 
               "availability", "classification", 
-              { category: ["name", "slug"] }
+              { category: ["name", "slug"] },
+              { user_created: ["id", "first_name", "last_name"] }
             ],
           })
         );
@@ -57,21 +63,33 @@ export default function RecentlyViewed({ currentId }: { currentId: string }) {
   if (!hasChecked || items.length === 0) return null;
 
   return (
-    <section className="mt-32 pt-16 border-t border-zinc-200">
-      <div className="mb-12">
-        <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 mb-2">
-          Your History
-        </h2>
-        <h3 className="text-3xl font-bold uppercase tracking-tighter italic text-zinc-800">
-          Recently Viewed
-        </h3>
+    <section className="border-t border-zinc-200 pt-16">
+      <div className="flex justify-between items-end mb-10">
+        <div>
+          <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 mb-2">
+            Your History
+          </h3>
+          <h2 className="text-2xl font-bold uppercase tracking-tighter text-zinc-800 italic">
+            Recently Viewed
+          </h2>
+        </div>
+        
+        {totalInHistory > items.length && (
+          <Link
+            href="/inventory/history" 
+            className="text-[10px] font-black uppercase tracking-widest text-blue-600 border-b border-blue-600 pb-1 hover:text-zinc-900 hover:border-zinc-900 transition-all"
+          >
+            View All ({totalInHistory})
+          </Link>
+        )}
       </div>
 
-      {/* CLEAN GRID: No background-color hack here.
-          We use a standard gap so empty space is just the page background. */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 -ml-px -mt-px">
         {items.map((item) => (
-          <div key={item.id} className="flex">
+          <div 
+            key={item.id} 
+            className="border-t border-r border-b border-l border-zinc-200 bg-[#F9F8F6] -ml-px -mt-px overflow-hidden"
+          >
             <ArtifactCard item={item} />
           </div>
         ))}

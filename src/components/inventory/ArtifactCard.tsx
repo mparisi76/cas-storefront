@@ -4,9 +4,14 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Artifact } from "@/types/artifact";
-import { ImageIcon, AlertCircle } from "lucide-react";
+import { ImageIcon, AlertCircle, Store } from "lucide-react";
 
-export default function ArtifactCard({ item }: { item: Artifact }) {
+interface ArtifactCardProps {
+  item: Artifact;
+  hideVendor?: boolean; 
+}
+
+export default function ArtifactCard({ item, hideVendor = false }: ArtifactCardProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -22,45 +27,38 @@ export default function ArtifactCard({ item }: { item: Artifact }) {
 
   const imageUrl = `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${item.thumbnail}?width=800&height=1000&fit=inside&format=webp`;
 
+  const vendorName = item.user_created 
+    ? `${item.user_created.first_name} ${item.user_created.last_name || ""}`.trim()
+    : "Archive Main";
+
   return (
     <Link
       href={`/inventory/${item.id}`}
-      className={`group block p-6 md:p-10 transition-all duration-500 ease-out h-full ${
+      className={`group flex flex-col p-6 md:p-6 transition-all duration-500 ease-out h-full ${
         isSold 
           ? "opacity-90 cursor-default" 
           : "hover:bg-zinc-50/80"
       }`}
     >
-      <div className="aspect-4/5 bg-zinc-100 overflow-hidden mb-6 md:mb-8 relative">
-        
-        {/* Loader */}
+      {/* IMAGE CONTAINER */}
+      <div className="aspect-4/5 bg-zinc-100 overflow-hidden mb-6 md:mb-8 relative shrink-0">
         {!isLoaded && !hasError && item.thumbnail && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-50 z-20">
             <div className="animate-pulse flex flex-col items-center">
               <ImageIcon className="text-zinc-400 mb-2" size={24} strokeWidth={1} />
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
-                Retrieving
-              </span>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Retrieving</span>
             </div>
           </div>
         )}
-
-        {/* Error State */}
         {hasError && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-50 z-20">
             <AlertCircle className="text-zinc-300 mb-1" size={20} />
-            <span className="text-[8px] font-bold uppercase tracking-widest text-zinc-400">
-              Asset Missing
-            </span>
+            <span className="text-[8px] font-bold uppercase tracking-widest text-zinc-400">Asset Missing</span>
           </div>
         )}
-
-        {/* Sold Overlay */}
         {isSold && (
           <div className="absolute inset-0 z-30 flex items-center justify-center bg-[#F9F8F6]/40 backdrop-blur-[1px]">
-            <div className="border-2 border-zinc-800 px-4 py-1 text-zinc-800 font-black uppercase tracking-[0.3em] -rotate-12 text-xs shadow-sm bg-white">
-              Sold
-            </div>
+            <div className="border-2 border-zinc-800 px-4 py-1 text-zinc-800 font-black uppercase tracking-[0.3em] -rotate-12 text-xs shadow-sm bg-white">Sold</div>
           </div>
         )}
 
@@ -74,36 +72,44 @@ export default function ArtifactCard({ item }: { item: Artifact }) {
             loading="lazy"
             className={`relative z-10 object-contain w-full h-full bg-white transition-all duration-700 ease-in-out ${
               isLoaded ? "opacity-100" : "opacity-0"
-            } ${
-              isSold 
-                ? "grayscale contrast-75" 
-                : "grayscale group-hover:grayscale-0 group-hover:scale-105"
-            }`}
+            } ${isSold ? "grayscale contrast-75" : "grayscale group-hover:grayscale-0 group-hover:scale-105"}`}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-zinc-300 uppercase tracking-[0.2em] text-[11px] font-bold">
-            Image Pending
-          </div>
+          <div className="w-full h-full flex items-center justify-center text-zinc-300 uppercase tracking-[0.2em] text-[11px] font-bold">Image Pending</div>
         )}
       </div>
 
-      {/* Static Info Area */}
-      <div className="flex justify-between items-start gap-4">
-        <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 mb-1">
-            CAS—{String(item.id).padStart(4, "0")}
-          </p>
-          <h3 className={`font-bold uppercase text-base md:text-lg leading-tight transition-colors tracking-tight ${
+      {/* TEXT AREA: Pinned to the bottom of the card */}
+      <div className="flex-1 flex flex-col relative min-h-25">
+        
+        {/* VENDOR (Optional) */}
+        {!hideVendor && (
+          <div className="flex items-center gap-1.5 mb-2">
+            <Store size={10} className="text-zinc-400 shrink-0" />
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 italic truncate">
+              {vendorName}
+            </p>
+          </div>
+        )}
+
+        <div className="flex justify-between items-start gap-4">
+          <h3 className={`font-bold uppercase text-base md:text-lg leading-[1.1] transition-colors tracking-tight flex-1 ${
             isSold ? "text-zinc-500" : "text-zinc-600 group-hover:text-blue-600"
           }`}>
             {item.name}
           </h3>
+
+          <div className="text-right shrink-0">
+            <span className={`${isSold ? "text-zinc-400 font-mono text-[10px] italic" : "text-blue-600 font-medium text-sm md:text-base"}`}>
+              {isSold ? "[ SOLD ]" : item.purchase_price ? `$${Number(item.purchase_price).toLocaleString()}` : "POA"}
+            </span>
+          </div>
         </div>
-        <div className="text-right shrink-0">
-          <span className={`${isSold ? "text-zinc-400 font-mono text-[10px] italic" : "text-blue-600 font-medium text-sm md:text-base"}`}>
-            {isSold ? "[ SOLD ]" : item.purchase_price ? `$${Number(item.purchase_price).toLocaleString()}` : "POA"}
-          </span>
-        </div>
+
+        {/* ABSOLUTE PIN: This stays in the corner of the 'min-h-[100px]' box */}
+        <p className="absolute -bottom-4 -right-4 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 pointer-events-none">
+          CAS—{String(item.id).padStart(4, "0")}
+        </p>
       </div>
     </Link>
   );

@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import ShippingDrawer from "@/components/inventory/ShippingDrawer";
 import ArtifactGallery from "@/components/inventory/ArtifactGallery";
 import RelatedArtifacts from "@/components/inventory/RelatedArtifacts";
@@ -9,6 +10,8 @@ import { createCheckout } from "@/app/actions/checkout";
 import type { Metadata } from "next";
 import ViewTracker from "@/components/inventory/ViewTracker";
 import RecentlyViewed from "@/components/inventory/RecentlyViewed";
+import { Store } from "lucide-react";
+import MoreFromVendor from "@/components/inventory/MoreFromVendor";
 
 export async function generateMetadata({
   params,
@@ -55,6 +58,15 @@ export default async function ProductPage({
         "availability",
         "date_sold",
         { category: ["id", "name", "slug"] },
+        {
+          user_created: [
+            "id",
+            "first_name",
+            "last_name",
+            "description",
+            "avatar",
+          ],
+        },
       ],
     }),
   );
@@ -62,8 +74,10 @@ export default async function ProductPage({
   if (!item) notFound();
 
   const isSold = item.availability === "sold";
+  const vendorName = item.user_created
+    ? `${item.user_created.first_name} ${item.user_created.last_name || ""}`.trim()
+    : "Archive Main";
 
-  // Refined logic for shipping availability
   const hasDimensions =
     Boolean(item.weight) &&
     Boolean(item.length) &&
@@ -111,12 +125,30 @@ export default async function ProductPage({
 
           <section className="lg:col-span-5">
             <div className="mb-10">
+              <Link
+                href={`/inventory?vendor=${item.user_created?.id}`}
+                className="inline-flex items-center gap-2 mb-6 group"
+              >
+                <div className="w-6 h-6 rounded-full bg-zinc-200 flex items-center justify-center overflow-hidden border border-zinc-300">
+                  {item.user_created?.avatar ? (
+                    <img
+                      src={`${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${item.user_created.avatar}?width=40`}
+                      alt={vendorName}
+                    />
+                  ) : (
+                    <Store size={10} className="text-zinc-500" />
+                  )}
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 group-hover:text-blue-600 transition-colors">
+                  Source: {vendorName}
+                </span>
+              </Link>
+
               <div className="flex items-center gap-3 mb-4 flex-wrap">
                 <span className="text-[10px] font-mono font-bold uppercase tracking-[0.2em] bg-zinc-800 text-white px-2 py-0.5">
                   CAS—{String(item.id).padStart(4, "0")}
                 </span>
-                
-                {/* NEW: Era Classification Badge */}
+
                 {item.classification && (
                   <>
                     <span className="text-zinc-300 text-[10px]">|</span>
@@ -163,7 +195,6 @@ export default async function ProductPage({
               />
             </div>
 
-            {/* SPECIFICATIONS: Manifest Table */}
             <div className="grid grid-cols-1 border-t border-zinc-200 mb-12">
               <div className="flex justify-between py-4 border-b border-zinc-100 items-baseline">
                 <h4 className="text-[10px] uppercase font-black tracking-[0.3em] text-zinc-400">
@@ -188,7 +219,11 @@ export default async function ProductPage({
             <div className="space-y-4">
               {!isSold && item.purchase_price ? (
                 <form action={createCheckout}>
-                  <input type="hidden" name="price" value={item.purchase_price} />
+                  <input
+                    type="hidden"
+                    name="price"
+                    value={item.purchase_price}
+                  />
                   <input type="hidden" name="itemName" value={item.name} />
                   <input type="hidden" name="itemId" value={item.id} />
                   <button
@@ -233,6 +268,15 @@ export default async function ProductPage({
         </div>
 
         <div className="mt-24 space-y-24">
+          {/* VENDOR ARTIFACTS SECTION */}
+          {item.user_created?.id && (
+            <MoreFromVendor
+              vendorId={item.user_created.id}
+              vendorName={item.user_created.first_name}
+              currentId={id}
+            />
+          )}
+
           {item.category && (
             <RelatedArtifacts
               categoryId={item.category.id}

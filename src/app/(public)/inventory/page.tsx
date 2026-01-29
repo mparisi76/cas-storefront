@@ -129,7 +129,7 @@ export default async function ShopPage({
               params={params}
               eraOptions={eraOptions}
             />
-            <MobileFilters tree={categoryTree} activeSlug={activeSlug} />
+            <MobileFilters tree={categoryTree} activeSlug={activeSlug} vendors={vendors} />
           </div>
 
           {/* MAIN CONTENT AREA */}
