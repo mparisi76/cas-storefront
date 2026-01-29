@@ -167,7 +167,7 @@ export default async function ProductPage({
               </div>
 
               <h1
-                className={`text-4xl md:text-5xl font-bold uppercase tracking-tighter italic leading-[0.9] mb-6 ${isSold ? "text-zinc-400" : "text-zinc-800"}`}
+                className={`text-4xl md:text-2xl font-bold uppercase tracking-tighter italic leading-[0.9] mb-6 ${isSold ? "text-zinc-400" : "text-zinc-800"}`}
               >
                 {item.name}
               </h1>
