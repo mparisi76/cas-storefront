@@ -27,7 +27,7 @@ export default async function MoreFromVendor({
       limit: 4,
       fields: [
         "id", "name", "thumbnail", "purchase_price", "availability",
-        { user_created: ["id", "first_name", "last_name"] },
+        { user_created: ["id", "shop_name"] },
       ],
     }),
   );

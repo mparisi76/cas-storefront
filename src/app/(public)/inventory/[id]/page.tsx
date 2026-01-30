@@ -61,10 +61,9 @@ export default async function ProductPage({
         {
           user_created: [
             "id",
-            "first_name",
-            "last_name",
             "description",
             "avatar",
+            "shop_name",
           ],
         },
       ],
@@ -75,7 +74,7 @@ export default async function ProductPage({
 
   const isSold = item.availability === "sold";
   const vendorName = item.user_created
-    ? `${item.user_created.first_name} ${item.user_created.last_name || ""}`.trim()
+    ? `${item.user_created.shop_name || ""}`.trim()
     : "Archive Main";
 
   const hasDimensions =
@@ -140,7 +139,7 @@ export default async function ProductPage({
                   )}
                 </div>
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 group-hover:text-blue-600 transition-colors">
-                  Source: {vendorName}
+                  Sold by: {vendorName}
                 </span>
               </Link>
 
@@ -272,7 +271,7 @@ export default async function ProductPage({
           {item.user_created?.id && (
             <MoreFromVendor
               vendorId={item.user_created.id}
-              vendorName={item.user_created.first_name}
+              vendorName={item.user_created.shop_name}
               currentId={id}
             />
           )}

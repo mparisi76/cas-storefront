@@ -10,12 +10,21 @@ interface CategoryCountResult {
 
 type DirectusFilter = Record<string, unknown>;
 
+/**
+ * Validates UUID format (8-4-4-4-12 hex characters)
+ * This prevents the app from crashing when malformed vendor IDs are passed in the URL.
+ */
+const isValidUUID = (uuid: string) => {
+  const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return regex.test(uuid);
+};
+
 // 1. Helper to share filter logic between items and counts
 const buildFilters = (params: {
   category?: string;
   classification?: string;
   search?: string;
-  vendor?: string; // This will be the User ID
+  vendor?: string;
 }) => {
   const { category, classification, search, vendor } = params;
 
@@ -24,14 +33,19 @@ const buildFilters = (params: {
     { availability: { _in: ["available", "sold"] } },
   ];
 
-  // FILTER BY SYSTEM USER ID
+  // VALIDATED VENDOR FILTER
   if (vendor && vendor !== "all") {
-    andFilters.push({
-      user_created: { _eq: vendor }
-    });
+    if (isValidUUID(vendor)) {
+      andFilters.push({
+        user_created: { _eq: vendor }
+      });
+    } else {
+      // If the vendor ID is malformed, we inject a filter that is guaranteed 
+      // to return nothing (searching for a non-existent ID) to fail safely.
+      andFilters.push({ id: { _eq: -1 } });
+    }
   }
 
-  // ... rest of your classification/category/search logic
   if (classification && classification !== "all") {
     andFilters.push({ classification: { _eq: classification } });
   }
@@ -56,14 +70,12 @@ const buildFilters = (params: {
   return { _and: andFilters };
 };
 
-// ... existing buildFilters function
-
 export const getShopItems = cache(
   async (params: {
     category?: string;
     classification?: string;
     search?: string;
-    vendor?: string; // Ensure this is here
+    vendor?: string;
     page?: number;
     limit?: number;
   }) => {
@@ -81,7 +93,7 @@ export const getShopItems = cache(
           "availability",
           "classification",
           { category: ["id", "slug", "name", { parent: ["id", "slug"] }] },
-          { user_created: ["id", "first_name", "last_name"] }, // Relation to system users
+          { user_created: ["id", "first_name", "last_name", "shop_name"] },
         ],
         limit,
         page,
@@ -108,9 +120,8 @@ export const getCategoryCounts = cache(
   async (params: {
     classification?: string;
     search?: string;
-    vendor?: string; // FIX: Add vendor to this type definition
+    vendor?: string;
   }): Promise<Record<string, number>> => {
-    // 1. Build the filter (ignoring category so sidebar stays full)
     const filter = buildFilters({ ...params, category: undefined });
 
     const response = await directus.request(
@@ -136,13 +147,16 @@ export const getCategoryCounts = cache(
 );
 
 export const getMoreFromVendor = cache(async (vendorId: string, currentArtifactId: string | number) => {
+  // Even internal IDs should be validated if they come from the URL/client
+  if (!isValidUUID(vendorId)) return [];
+
   try {
     const data = await directus.request(
       readItems("props", {
         filter: {
           _and: [
             { user_created: { _eq: vendorId } },
-            { id: { _neq: currentArtifactId } }, // Don't show the current item
+            { id: { _neq: currentArtifactId } },
             { status: { _eq: "published" } }
           ],
         },
@@ -153,7 +167,7 @@ export const getMoreFromVendor = cache(async (vendorId: string, currentArtifactI
           "thumbnail",
           "purchase_price",
           "availability",
-          { user_created: ["id", "first_name", "last_name"] }
+          { user_created: ["id", "first_name", "last_name", "shop_name"] }
         ],
       })
     );

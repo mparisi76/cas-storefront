@@ -28,7 +28,7 @@ export default function ArtifactCard({ item, hideVendor = false }: ArtifactCardP
   const imageUrl = `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${item.thumbnail}?width=800&height=1000&fit=inside&format=webp`;
 
   const vendorName = item.user_created 
-    ? `${item.user_created.first_name} ${item.user_created.last_name || ""}`.trim()
+    ? `${item.user_created.shop_name || ""}`.trim()
     : "Archive Main";
 
   return (

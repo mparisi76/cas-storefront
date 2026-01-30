@@ -39,7 +39,7 @@ export default function RecentlyViewed({ currentId }: { currentId: string }) {
               "id", "name", "thumbnail", "purchase_price", 
               "availability", "classification", 
               { category: ["name", "slug"] },
-              { user_created: ["id", "first_name", "last_name"] }
+              { user_created: ["id", "shop_name"] }
             ],
           })
         );
