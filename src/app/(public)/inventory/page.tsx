@@ -5,6 +5,7 @@ import EraSelector from "@/components/inventory/EraSelector";
 import ArtifactCard from "@/components/inventory/ArtifactCard";
 import ArtifactListItem from "@/components/inventory/ArtifactListItem";
 import Pagination from "@/components/inventory/Pagination";
+import EmptyState from "@/components/inventory/EmptyState";
 import { getCategoryTree } from "@/lib/utils";
 import { getCategoryCounts, getShopItems } from "@/services/(public)/artifacts";
 import { getCategories } from "@/services/categories";
@@ -107,20 +108,20 @@ export default async function ShopPage({
               <div className="relative z-10 max-w-2xl">
                 <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-600 mb-4 flex items-center gap-2">
                   <span className="w-8 h-px bg-blue-600"></span>
-                  Verified Vendor Partner
+                  Verified Source
                 </h3>
                 <h1 className="text-4xl md:text-5xl font-bold uppercase tracking-tighter text-zinc-800 italic mb-4">
                   {currentVendorDetails.shop_name}
                 </h1>
                 <p className="text-sm text-zinc-500 leading-relaxed uppercase tracking-tight">
-                  Curated objects and rare selections from{" "}
+                  Curated objects and primary stock selections from{" "}
                   {currentVendorDetails.shop_name}.
                 </p>
               </div>
             </div>
           )}
 
-          {/* STANDARD HEADER SECTION (Only shows if no vendor is selected, or keeps it compact) */}
+          {/* STANDARD HEADER SECTION */}
           <div className="mb-8 md:mb-12 flex flex-col md:flex-row md:justify-between md:items-end gap-6 md:gap-0">
             <div className="flex flex-col justify-end">
               <div className="flex items-center gap-3 h-6 mb-2">
@@ -128,10 +129,10 @@ export default async function ShopPage({
                   {activeSearch
                     ? `Results for "${activeSearch}"`
                     : activeVendor !== "all"
-                      ? "Vendor Collection"
+                      ? "Source Inventory"
                       : activeSlug !== "all"
                         ? "Category"
-                        : "Complete Inventory"}
+                        : "Complete Stock"}
                   <span className="ml-2 text-zinc-500">({totalCount})</span>
                 </h2>
                 {isFiltered && (
@@ -144,14 +145,13 @@ export default async function ShopPage({
                 )}
               </div>
 
-              {/* Only show the big title if the Vendor Spotlight isn't already showing it */}
               {!currentVendorDetails && (
                 <h1 className="text-3xl md:text-4xl font-bold uppercase tracking-tighter text-zinc-800 italic leading-none">
                   {activeSearch
                     ? "Filtered Search"
                     : activeSlug !== "all"
                       ? activeSlug.replace(/-/g, " ")
-                      : "Selected Objects"}
+                      : "Selected Stock"}
                 </h1>
               )}
             </div>
@@ -228,20 +228,7 @@ export default async function ShopPage({
                 </div>
               </>
             ) : (
-              <div className="py-20 md:py-32 text-center border border-dashed border-zinc-200 bg-white/50 animate-in fade-in zoom-in-95 duration-500">
-                <div className="max-w-xs mx-auto space-y-6 px-6">
-                  <p className="text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-zinc-400 font-bold">
-                    No items match your current selection
-                  </p>
-                  <div className="h-px w-8 bg-zinc-200 mx-auto" />
-                  <Link
-                    href="/inventory"
-                    className="inline-block text-[10px] font-black uppercase tracking-[0.2em] text-blue-600 border border-blue-200 px-6 py-3 hover:bg-blue-600 hover:text-white transition-all active:scale-95"
-                  >
-                    Clear All Filters
-                  </Link>
-                </div>
-              </div>
+              <EmptyState />
             )}
           </div>
         </div>

@@ -159,7 +159,7 @@ export function ArtifactTable({ items, token }: ArtifactTableProps) {
                 <input type="checkbox" className="accent-zinc-900 cursor-pointer" onChange={toggleSelectAll} checked={selectedIds.length === items.length && items.length > 0} />
               </th>
               <th onClick={() => handleSort('name')} className="sticky top-0 z-40 bg-zinc-50 px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500 border-b border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors">
-                Artifact Description {getSortIcon('name')}
+                Description {getSortIcon('name')}
               </th>
               <th onClick={() => handleSort('availability')} className="sticky top-0 z-40 bg-zinc-50 px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500 border-b border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors">
                 Status {getSortIcon('availability')}
