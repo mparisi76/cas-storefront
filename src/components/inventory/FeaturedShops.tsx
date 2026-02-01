@@ -21,7 +21,7 @@ export default function FeaturedShops({
               Verified Sources
             </h2>
             <h3 className="text-4xl md:text-5xl font-bold uppercase tracking-tighter italic text-zinc-800">
-              The Valley&apos;s <br /> Essential Stockists
+              Featured Vendors
             </h3>
           </div>
           <Link

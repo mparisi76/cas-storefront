@@ -44,7 +44,7 @@ export default async function DashboardLayout({
     };
 
     userData = {
-      name: `${user.first_name || ""} ${user.last_name || ""}`.trim() || "Archivist",
+      name: `${user.first_name || ""} ${user.last_name || ""}`.trim() || "N/A",
       email: user.email,
       role: user.role?.name || "Vendor"
     };

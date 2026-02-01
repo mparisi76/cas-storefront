@@ -103,7 +103,7 @@ export function DashboardHeader({ user }: { user?: UserProps }) {
             >
               <div className="hidden lg:flex flex-col items-end text-right">
                 <span className="text-[10px] font-black uppercase tracking-widest text-zinc-900 leading-none">
-                  {user?.name || "Anonymous Archivist"}
+                  {user?.name || "Anonymous"}
                 </span>
                 <span className="text-[8px] uppercase tracking-widest text-zinc-400 mt-1 font-bold">
                   {user?.role || "Owner"}
