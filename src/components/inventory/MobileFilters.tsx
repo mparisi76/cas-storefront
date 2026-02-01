@@ -4,8 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { CategoryTree } from '@/types/category';
-import { PublicVendor } from "@/services/(public)/vendors";
 import { useSearchParams } from 'next/navigation';
+import { PublicVendor } from '@/types/vendor';
 
 export default function MobileFilters({ 
   tree, 

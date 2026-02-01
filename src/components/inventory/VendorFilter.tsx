@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronDown, Store } from "lucide-react";
-import { PublicVendor } from "@/services/(public)/vendors";
+import { PublicVendor } from "@/types/vendor";
 
 interface VendorFilterProps {
   vendors: PublicVendor[];

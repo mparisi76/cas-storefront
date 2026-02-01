@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import { TreeChild, TreeParent } from "@/types/category";
 import { VendorFilter } from "./VendorFilter";
-import { PublicVendor } from "@/services/(public)/vendors";
+import { PublicVendor } from "@/types/vendor";
 
 type CategoryTree = Record<string, TreeParent>;
 
