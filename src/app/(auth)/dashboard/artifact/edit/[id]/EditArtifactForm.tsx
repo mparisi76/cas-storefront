@@ -298,7 +298,7 @@ export default function EditArtifactForm({
             type="submit"
             className="w-full bg-zinc-900 text-white py-8 text-[15px] font-black uppercase tracking-[0.4em] hover:bg-zinc-800 transition-all shadow-xl disabled:opacity-20"
           >
-            {isPending ? "Updating Archive..." : "Save Changes"}
+            {isPending ? "Updating..." : "Save Changes"}
           </button>
         </div>
       </form>

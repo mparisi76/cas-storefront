@@ -105,7 +105,7 @@ export default function Header() {
           <input
             ref={inputRef}
             type="text"
-            placeholder="SEARCH ARTIFACTS..."
+            placeholder="SEARCH COLLECTIONS"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-transparent border-none outline-none text-[11px] md:text-[12px] font-bold uppercase tracking-[0.2em] text-zinc-800 placeholder:text-zinc-300"

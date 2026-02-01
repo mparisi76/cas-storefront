@@ -117,7 +117,7 @@ export default function ShippingDrawer({
           <div className="flex justify-between items-center mb-12">
             <div>
               <h2 className="text-2xl font-bold uppercase tracking-tighter text-zinc-800 italic leading-none">Logistics</h2>
-              <p className="text-[10px] uppercase tracking-widest text-zinc-400 font-bold mt-1">Registry Estimate</p>
+              <p className="text-[10px] uppercase tracking-widest text-zinc-400 font-bold mt-1">Estimate</p>
             </div>
             <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-zinc-200 rounded-full transition-colors cursor-pointer">
               <X size={24} className="text-zinc-400" />

@@ -3,12 +3,14 @@ import ShopSidebar from "@/components/inventory/ShopSidebar";
 import MobileFilters from "@/components/inventory/MobileFilters";
 import EraSelector from "@/components/inventory/EraSelector";
 import ArtifactCard from "@/components/inventory/ArtifactCard";
-import ArtifactListItem from "@/components/inventory/ArtifactListItem"; // New Import
+import ArtifactListItem from "@/components/inventory/ArtifactListItem";
 import Pagination from "@/components/inventory/Pagination";
 import { getCategoryTree } from "@/lib/utils";
 import { getCategoryCounts, getShopItems } from "@/services/(public)/artifacts";
 import { getCategories } from "@/services/categories";
 import { getActiveVendors } from "@/services/(public)/vendors";
+import GridIcon from "@/components/ui/icons/GridIcon";
+import ListIcon from "@/components/ui/icons/ListIcon";
 
 export default async function ShopPage({
   searchParams,
@@ -19,7 +21,7 @@ export default async function ShopPage({
     search?: string;
     page?: string;
     vendor?: string;
-    view?: "grid" | "list"; // New param
+    view?: "grid" | "list";
   }>;
 }) {
   const params = await searchParams;
@@ -28,7 +30,7 @@ export default async function ShopPage({
   const activeEra = params.classification || "all";
   const activeSearch = params.search || "";
   const activeVendor = params.vendor || "all";
-  const activeView = params.view || "grid"; // Default to grid
+  const activeView = params.view || "grid";
   const currentPage = Number(params.page) || 1;
   const itemsPerPage = 12;
 
@@ -51,6 +53,9 @@ export default async function ShopPage({
       getActiveVendors(),
     ]);
 
+  // Find current vendor details for the header
+  const currentVendorDetails = vendors.find((v) => v.id === activeVendor);
+
   const totalCount = meta?.filter_count || 0;
   const totalPages = Math.ceil(totalCount / itemsPerPage);
 
@@ -61,9 +66,12 @@ export default async function ShopPage({
 
   const categoryTree = getCategoryTree(categoriesWithCounts, []);
   const eraOptions = ["all", "antique", "vintage", "modern"];
-  const isFiltered = activeSlug !== "all" || activeEra !== "all" || activeSearch !== "" || activeVendor !== "all";
+  const isFiltered =
+    activeSlug !== "all" ||
+    activeEra !== "all" ||
+    activeSearch !== "" ||
+    activeVendor !== "all";
 
-  // Helper to maintain current params when toggling view
   const getViewLink = (viewType: string) => {
     const p = new URLSearchParams({
       ...(params.category && { category: params.category }),
@@ -83,68 +91,127 @@ export default async function ShopPage({
           <ShopSidebar tree={categoryTree} vendors={vendors} />
         </div>
 
-        <div className="flex-1 w-full animate-in-view" key={`${activeSlug}-${activeEra}-${activeSearch}-${activeVendor}-${currentPage}-${activeView}`}>
-          
+        <div
+          className="flex-1 w-full animate-in-view"
+          key={`${activeSlug}-${activeEra}-${activeSearch}-${activeVendor}-${currentPage}-${activeView}`}
+        >
+          {/* VENDOR SPOTLIGHT HEADER */}
+          {currentVendorDetails && (
+            <div className="mb-10 p-6 md:p-10 bg-white border border-zinc-200 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-5 select-none">
+                <span className="text-8xl font-black italic uppercase tracking-tighter">
+                  Verified
+                </span>
+              </div>
+
+              <div className="relative z-10 max-w-2xl">
+                <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-600 mb-4 flex items-center gap-2">
+                  <span className="w-8 h-px bg-blue-600"></span>
+                  Verified Vendor Partner
+                </h3>
+                <h1 className="text-4xl md:text-5xl font-bold uppercase tracking-tighter text-zinc-800 italic mb-4">
+                  {currentVendorDetails.shop_name}
+                </h1>
+                <p className="text-sm text-zinc-500 leading-relaxed uppercase tracking-tight">
+                  Curated objects and rare selections from{" "}
+                  {currentVendorDetails.shop_name}.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* STANDARD HEADER SECTION (Only shows if no vendor is selected, or keeps it compact) */}
           <div className="mb-8 md:mb-12 flex flex-col md:flex-row md:justify-between md:items-end gap-6 md:gap-0">
             <div className="flex flex-col justify-end">
               <div className="flex items-center gap-3 h-6 mb-2">
                 <h2 className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.4em] text-zinc-500 leading-none">
-                  {activeSearch ? `Results for "${activeSearch}"` : activeSlug !== "all" ? "Category" : "Complete Inventory"}
+                  {activeSearch
+                    ? `Results for "${activeSearch}"`
+                    : activeVendor !== "all"
+                      ? "Vendor Collection"
+                      : activeSlug !== "all"
+                        ? "Category"
+                        : "Complete Inventory"}
                   <span className="ml-2 text-zinc-500">({totalCount})</span>
                 </h2>
                 {isFiltered && (
-                  <Link href="/inventory" className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-blue-600 hover:text-zinc-900 flex items-center gap-1 border border-blue-100 px-2 py-1 bg-blue-50/40 transition-colors">
+                  <Link
+                    href="/inventory"
+                    className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-blue-600 hover:text-zinc-900 flex items-center gap-1 border border-blue-100 px-2 py-1 bg-blue-50/40 transition-colors"
+                  >
                     <span>✕ Clear</span>
                   </Link>
                 )}
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold uppercase tracking-tighter text-zinc-800 italic leading-none">
-                {activeSearch ? "Filtered Search" : activeSlug !== "all" ? activeSlug.replace(/-/g, " ") : "Selected Artifacts"}
-              </h1>
+
+              {/* Only show the big title if the Vendor Spotlight isn't already showing it */}
+              {!currentVendorDetails && (
+                <h1 className="text-3xl md:text-4xl font-bold uppercase tracking-tighter text-zinc-800 italic leading-none">
+                  {activeSearch
+                    ? "Filtered Search"
+                    : activeSlug !== "all"
+                      ? activeSlug.replace(/-/g, " ")
+                      : "Selected Objects"}
+                </h1>
+              )}
             </div>
 
             <div className="flex items-center gap-4">
-              {/* VIEW TOGGLE */}
               <div className="flex border border-zinc-200 bg-white overflow-hidden">
-                <Link 
-                  href={getViewLink('grid')}
-                  className={`p-2 transition-colors ${activeView === 'grid' ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:bg-zinc-50'}`}
+                <Link
+                  href={getViewLink("grid")}
+                  className={`p-2 transition-colors ${activeView === "grid" ? "bg-zinc-800 text-white" : "text-zinc-400 hover:bg-zinc-50"}`}
                 >
                   <GridIcon />
                 </Link>
-                <Link 
-                  href={getViewLink('list')}
-                  className={`p-2 transition-colors border-l border-zinc-200 ${activeView === 'list' ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:bg-zinc-50'}`}
+                <Link
+                  href={getViewLink("list")}
+                  className={`p-2 transition-colors border-l border-zinc-200 ${activeView === "list" ? "bg-zinc-800 text-white" : "text-zinc-400 hover:bg-zinc-50"}`}
                 >
                   <ListIcon />
                 </Link>
               </div>
-
               <div className="hidden lg:block">
-                <EraSelector activeEra={activeEra} params={params} eraOptions={eraOptions} />
+                <EraSelector
+                  activeEra={activeEra}
+                  params={params}
+                  eraOptions={eraOptions}
+                />
               </div>
             </div>
           </div>
 
+          {/* MOBILE FILTERS */}
           <div className="lg:hidden flex flex-col gap-4 mb-8">
-            <EraSelector activeEra={activeEra} params={params} eraOptions={eraOptions} />
-            <MobileFilters tree={categoryTree} activeSlug={activeSlug} vendors={vendors} />
+            <EraSelector
+              activeEra={activeEra}
+              params={params}
+              eraOptions={eraOptions}
+            />
+            <MobileFilters
+              tree={categoryTree}
+              activeSlug={activeSlug}
+              vendors={vendors}
+            />
           </div>
 
+          {/* MAIN CONTENT AREA */}
           <div className="flex flex-col gap-12">
             {items.length > 0 ? (
               <>
-                {/* DYNAMIC LAYOUT BASED ON VIEW */}
-                <div className={activeView === 'grid' 
-                  ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 -ml-px -mt-px" 
-                  : "flex flex-col -mt-px"
-                }>
+                <div
+                  className={
+                    activeView === "grid"
+                      ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 -ml-px -mt-px"
+                      : "flex flex-col -mt-px"
+                  }
+                >
                   {items.map((item) => (
                     <div
                       key={item.id}
                       className="border-t border-r border-b border-l border-zinc-200 bg-white -ml-px -mt-px overflow-hidden"
                     >
-                      {activeView === 'grid' ? (
+                      {activeView === "grid" ? (
                         <ArtifactCard item={item} />
                       ) : (
                         <ArtifactListItem item={item} />
@@ -154,13 +221,26 @@ export default async function ShopPage({
                 </div>
 
                 <div className="pb-20 lg:pb-12 pt-4">
-                  <Pagination currentPage={currentPage} totalPages={totalPages} />
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                  />
                 </div>
               </>
             ) : (
-              <div className="py-20 md:py-32 text-center border border-dashed border-zinc-200 bg-white/50">
-                <p className="text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-zinc-400 font-bold">No artifacts match your selection</p>
-                <Link href="/inventory" className="mt-6 inline-block text-[10px] font-black uppercase tracking-[0.2em] text-blue-600 border border-blue-200 px-6 py-3 hover:bg-blue-600 hover:text-white transition-all">Clear All Filters</Link>
+              <div className="py-20 md:py-32 text-center border border-dashed border-zinc-200 bg-white/50 animate-in fade-in zoom-in-95 duration-500">
+                <div className="max-w-xs mx-auto space-y-6 px-6">
+                  <p className="text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-zinc-400 font-bold">
+                    No items match your current selection
+                  </p>
+                  <div className="h-px w-8 bg-zinc-200 mx-auto" />
+                  <Link
+                    href="/inventory"
+                    className="inline-block text-[10px] font-black uppercase tracking-[0.2em] text-blue-600 border border-blue-200 px-6 py-3 hover:bg-blue-600 hover:text-white transition-all active:scale-95"
+                  >
+                    Clear All Filters
+                  </Link>
+                </div>
               </div>
             )}
           </div>
@@ -168,12 +248,4 @@ export default async function ShopPage({
       </div>
     </main>
   );
-}
-
-// Simple Icon Components
-function GridIcon() {
-  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>;
-}
-function ListIcon() {
-  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>;
 }

@@ -121,7 +121,7 @@ export function ArtifactTable({ items, token }: ArtifactTableProps) {
           </svg>
           <input 
             type="text"
-            placeholder="Filter archive..."
+            placeholder="Filter collection..."
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             className="flex-1 bg-transparent border-none outline-none text-[12px] font-medium text-zinc-800 placeholder:text-zinc-300 placeholder:uppercase placeholder:tracking-widest placeholder:text-[9px] placeholder:font-black"
@@ -192,7 +192,7 @@ export function ArtifactTable({ items, token }: ArtifactTableProps) {
             ) : (
               <tr>
                 <td colSpan={5} className="px-6 py-20 text-center">
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-300">No artifacts found</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-300">No items found</p>
                 </td>
               </tr>
             )}
@@ -205,7 +205,7 @@ export function ArtifactTable({ items, token }: ArtifactTableProps) {
               onClick={handleLoadMore}
               className="px-10 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 hover:text-zinc-900 hover:bg-white border border-transparent hover:border-zinc-200 transition-all"
             >
-              Load More Artifacts
+              Load More
             </button>
           </div>
         )}

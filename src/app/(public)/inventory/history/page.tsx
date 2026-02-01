@@ -112,7 +112,7 @@ export default function HistoryPage() {
       ) : (
         <div className="py-32 text-center border border-dashed border-zinc-200 bg-white/50">
           <p className="text-[11px] uppercase tracking-[0.3em] text-zinc-400 font-bold mb-6">
-            You haven&apos;t viewed any artifacts yet.
+            You haven&apos;t viewed any items yet.
           </p>
           <Link
             href="/inventory"

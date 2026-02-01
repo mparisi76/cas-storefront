@@ -30,7 +30,7 @@ export function ConfirmDeleteModal({
         </div>
         
         <p className="text-[15px] text-zinc-500 leading-relaxed">
-          Are you sure you want to remove this selection from the archive? This action is permanent and cannot be undone.
+          Are you sure you want to remove this selection from your collection? This action is permanent and cannot be undone.
         </p>
 
         <div className="flex flex-col gap-3 pt-2">

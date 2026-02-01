@@ -11,7 +11,7 @@ export default function Footer() {
             Catskill Architectural Salvage
           </h3>
           <p className="text-[11px] text-zinc-600 uppercase tracking-widest leading-relaxed max-w-xs">
-            Purveyors of historical artifacts and industrial remnants. <br />
+            Curators of antique, vintage, and industrial remnants. <br />
             Based in the Hudson Valley, NY.
           </p>
         </div>

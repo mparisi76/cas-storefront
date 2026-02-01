@@ -92,9 +92,12 @@ export const getShopItems = cache(
           "purchase_price",
           "availability",
           "classification",
+          "featured", // Added to fields
           { category: ["id", "slug", "name", { parent: ["id", "slug"] }] },
           { user_created: ["id", "first_name", "last_name", "shop_name"] },
         ],
+        // Multi-level sort: Featured items first, then newest first
+        sort: ["-featured", "-date_created", "-id"],
         limit,
         page,
       }),
@@ -167,8 +170,10 @@ export const getMoreFromVendor = cache(async (vendorId: string, currentArtifactI
           "thumbnail",
           "purchase_price",
           "availability",
+          "featured",
           { user_created: ["id", "first_name", "last_name", "shop_name"] }
         ],
+        sort: ["-featured", "-date_created"],
       })
     );
 

@@ -31,7 +31,7 @@ export async function generateMetadata({
     title: item.name,
     description:
       item.description?.replace(/<[^>]*>/g, "").substring(0, 160) ||
-      "Historical artifact from Catskill Architectural Salvage.",
+      "Curated Collections from Catskill Architectural Salvage.",
     openGraph: {
       title: `${item.name} | Catskill Architectural Salvage`,
       images: [
@@ -75,7 +75,7 @@ export default async function ProductPage({
   const isSold = item.availability === "sold";
   const vendorName = item.user_created
     ? `${item.user_created.shop_name || ""}`.trim()
-    : "Archive Main";
+    : "Unnamed Shop";
 
   const hasDimensions =
     Boolean(item.weight) &&
@@ -93,7 +93,7 @@ export default async function ProductPage({
             href="/inventory"
             className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.3em] text-zinc-400 hover:text-blue-600 transition-colors"
           >
-            Registry
+            Home
           </Link>
           <span className="text-zinc-300 text-[10px]">—</span>
           {item.category ? (
@@ -161,7 +161,7 @@ export default async function ProductPage({
                 <span
                   className={`text-[10px] font-black uppercase tracking-[0.2em] ${isSold ? "text-zinc-400" : "text-blue-600"}`}
                 >
-                  {isSold ? "Archived" : "Available"}
+                  {isSold ? "Sold" : "Available"}
                 </span>
               </div>
 

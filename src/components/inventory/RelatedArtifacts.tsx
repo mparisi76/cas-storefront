@@ -46,7 +46,7 @@ export default async function RelatedArtifacts({
             Discovery
           </h3>
           <h2 className="text-2xl font-bold uppercase tracking-tighter text-zinc-800 italic">
-            Related Artifacts
+            Related Items
           </h2>
         </div>
         

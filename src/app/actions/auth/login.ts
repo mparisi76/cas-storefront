@@ -43,7 +43,7 @@ export async function loginAction(
     });
 
   } catch {
-    return { error: "Connection to Archival Server failed" };
+    return { error: "Connection to Server failed" };
   }
 
   redirect("/dashboard");
