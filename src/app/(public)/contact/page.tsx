@@ -2,8 +2,9 @@
 
 import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Send, CheckCircle2, ArrowLeft, Clock } from "lucide-react";
+import { Send, ArrowLeft, Clock } from "lucide-react";
 import Link from "next/link";
+import { SubmissionSuccess } from "@/components/inventory/SubmissionSuccess";
 
 function ContactForm() {
   const searchParams = useSearchParams();
@@ -13,16 +14,15 @@ function ContactForm() {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
 
-    // Extract data from form
-    const formData = new FormData(e.currentTarget as HTMLFormElement);
+    const formData = new FormData(e.currentTarget);
     const data = {
       name: formData.get("name"),
       email: formData.get("email"),
-      type: formData.get("type") || initialType,
+      type: formData.get("type"),
       message: formData.get("message"),
     };
 
@@ -36,10 +36,11 @@ function ContactForm() {
       if (response.ok) {
         setSubmitted(true);
       } else {
-        alert("Transmission failed. Please try direct email.");
+        const errorData = await response.json();
+        alert(errorData.error || "Transmission failed.");
       }
     } catch (error) {
-      console.error(error);
+      console.error("Submission error:", error);
       alert("Connectivity error.");
     } finally {
       setLoading(false);
@@ -47,26 +48,7 @@ function ContactForm() {
   };
 
   if (submitted) {
-    return (
-      <div className="max-w-xl mx-auto py-20 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-8">
-          <CheckCircle2 size={40} strokeWidth={1.5} />
-        </div>
-        <h1 className="text-4xl font-bold uppercase tracking-tighter italic text-zinc-800 mb-4">
-          Transmission Received
-        </h1>
-        <p className="text-zinc-500 uppercase tracking-tight text-sm mb-12 leading-relaxed">
-          Your request has been logged into our source network. <br />A
-          representative will contact you regarding your acquisition.
-        </p>
-        <Link
-          href="/inventory"
-          className="inline-block border border-zinc-200 px-10 py-4 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 hover:text-zinc-900 hover:border-zinc-900 transition-all"
-        >
-          Return to Stock
-        </Link>
-      </div>
-    );
+    return <SubmissionSuccess />;
   }
 
   return (
@@ -106,8 +88,8 @@ function ContactForm() {
                 </h4>
                 <p className="text-[11px] text-zinc-500 uppercase tracking-tight leading-relaxed">
                   Studio Visits by Appointment Only
-                  <br />
-                  Digital Inquiries: Mon—Fri, 9am—5pm
+                  {/* <br /> */}
+                  {/* Digital Inquiries: Mon—Fri, 9am—5pm */}
                 </p>
               </div>
 
@@ -115,9 +97,9 @@ function ContactForm() {
                 <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-900 mb-3 flex items-center gap-2">
                   <Instagram size={12} /> Field Log
                 </h4>
-                <a 
-                  href="https://instagram.com/catskillarchitecturalsalvage" 
-                  target="_blank" 
+                <a
+                  href="https://instagram.com/catskillarchitecturalsalvage"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm text-zinc-500 italic uppercase hover:text-blue-600 transition-colors"
                 >
@@ -144,9 +126,9 @@ function ContactForm() {
                 Name
               </label>
               <input
+                name="name"
                 required
                 type="text"
-                name="name"
                 className="w-full bg-transparent border-b border-zinc-200 py-3 font-medium text-zinc-800 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-400"
                 placeholder="Full Name"
               />
@@ -156,9 +138,9 @@ function ContactForm() {
                 Email
               </label>
               <input
+                name="email"
                 required
                 type="email"
-                name="email"
                 className="w-full bg-transparent border-b border-zinc-200 py-3 font-medium text-zinc-800 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-400"
                 placeholder="email@firm.com"
               />
@@ -197,7 +179,7 @@ function ContactForm() {
               rows={5}
               defaultValue={initialItem ? `Requesting: ${initialItem}` : ""}
               required
-              placeholder="Please provide dimensions, era, or specific material requirements..."
+              placeholder="The more details you can provide, the more likely we can help you"
               className="w-full bg-transparent border-b border-zinc-200 py-3 font-medium text-zinc-800 focus:border-zinc-900 outline-none transition-colors resize-none placeholder:text-zinc-400"
             />
           </div>
