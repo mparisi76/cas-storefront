@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChevronRight, X } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { TreeChild, TreeParent } from "@/types/category";
 import { VendorFilter } from "./VendorFilter";
 import { PublicVendor } from "@/types/vendor";
+import { ActiveFilters } from "./ActiveChips";
 
 type CategoryTree = Record<string, TreeParent>;
 
@@ -18,10 +19,6 @@ export default function ShopSidebar({ tree, vendors }: ShopSidebarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeSlug = searchParams.get("category") || "all";
-  const activeVendorId = searchParams.get("vendor");
-
-  // Find the active vendor name for the UI chip
-  const activeVendor = vendors.find(v => v.id === activeVendorId);
 
   const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>(
     () => {
@@ -53,43 +50,10 @@ export default function ShopSidebar({ tree, vendors }: ShopSidebarProps) {
     router.push(`/inventory?${params.toString()}`, { scroll: false });
   };
 
-  const clearFilter = (key: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete(key);
-    params.set("page", "1");
-    router.push(`/inventory?${params.toString()}`, { scroll: false });
-  };
-
   return (
     <aside className="w-64 shrink-0 hidden lg:block">
       <div className="sticky top-32 pr-8 self-start space-y-12">
-        
-        {/* ACTIVE FILTERS (Chips) */}
-        {(activeVendorId || activeSlug !== "all") && (
-          <div className="pb-4 border-b border-zinc-100">
-            <h3 className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-400 mb-4">
-              Active Filters
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {activeVendor && (
-                <button 
-                  onClick={() => clearFilter("vendor")}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900 text-white text-[9px] font-bold uppercase tracking-widest hover:bg-blue-600 transition-colors cursor-pointer"
-                >
-                  {activeVendor.shop_name} <X size={10} />
-                </button>
-              )}
-              {activeSlug !== "all" && (
-                <button 
-                  onClick={() => setCategory("all")}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-zinc-100 text-zinc-900 text-[9px] font-bold uppercase tracking-widest hover:bg-zinc-200 transition-colors cursor-pointer"
-                >
-                  {activeSlug.replace("-", " ")} <X size={10} />
-                </button>
-              )}
-            </div>
-          </div>
-        )}
+        <ActiveFilters vendors={vendors} />
 
         {/* VENDOR DROPDOWN SECTION */}
         <div>

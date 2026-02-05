@@ -7,14 +7,15 @@ interface EraSelectorProps {
   activeEra: string;
   params: { [key: string]: string | string[] | undefined };
   eraOptions: string[];
+  className?: string; // Added to accept the h-10 from parent
 }
 
 export default function EraSelector({
   activeEra,
   params,
   eraOptions,
+  className = "",
 }: EraSelectorProps) {
-  // Calculate dynamic dates once per render
   const eraData = useMemo(() => {
     const currentYear = new Date().getFullYear();
     const antiqueYear = currentYear - 100;
@@ -27,21 +28,23 @@ export default function EraSelector({
   }, []);
 
   return (
-    <div className="sticky top-20 lg:static z-40 -mx-4 md:-mx-10 lg:mx-0 w-[calc(100%+2rem)] md:w-[calc(100%+5rem)] lg:w-auto bg-[#F9F8F6] lg:bg-transparent border-b border-zinc-200 lg:border-none">
-      <div className="flex items-center gap-4 md:gap-8 px-8 lg:px-0 py-4 lg:py-0 overflow-visible whitespace-nowrap">
-        <span className="text-[11px] md:text-[12px] font-black uppercase tracking-[0.2em] text-zinc-800 leading-none shrink-0">
+    <div className={`w-full bg-transparent ${className}`}>
+      <div className="flex items-center gap-6 overflow-x-auto no-scrollbar whitespace-nowrap h-full">
+        {/* Removed the "Era:" span for mobile/slim view to save vertical and horizontal space */}
+        <span className="hidden lg:block text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400 shrink-0">
           Era:
         </span>
 
-        <div className="flex items-center gap-4 md:gap-6 h-12">
+        <div className="flex items-center gap-5 h-full">
           {eraOptions.map((era) => {
             const eraKey = era.toLowerCase() as keyof typeof eraData;
             const years = eraData[eraKey];
+            const isActive = activeEra === era || (!activeEra && era === "all");
 
             return (
               <div
                 key={era}
-                className="relative group flex flex-col items-center"
+                className="relative group flex items-center h-full"
               >
                 <Link
                   href={{
@@ -52,19 +55,19 @@ export default function EraSelector({
                       page: 1,
                     },
                   }}
-                  className={`text-[10px] md:text-[11px] font-bold uppercase tracking-[0.2em] transition-all relative pb-1 leading-none shrink-0 ${
-                    activeEra === era || (!activeEra && era === "all")
-                      ? "text-blue-600 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-blue-600"
-                      : "text-zinc-400 hover:text-zinc-800"
+                  className={`text-[10px] font-black uppercase tracking-[0.15em] transition-all relative h-full flex items-center border-b-2 ${
+                    isActive
+                      ? "text-blue-600 border-blue-600"
+                      : "text-zinc-400 border-transparent hover:text-zinc-800"
                   }`}
                 >
                   {era}
                 </Link>
 
-                {/* TOOLTIP: Now using z-50 and positioning that avoids clipping */}
+                {/* Years Tooltip - Hidden on mobile to prevent clipping/height issues */}
                 {years && (
-                  <div className="absolute top-full mt-1 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none translate-y-1 group-hover:translate-y-0 z-50">
-                    <div className="bg-zinc-800 text-white text-[8px] font-mono tracking-[0.2em] px-2 py-1 shadow-md whitespace-nowrap uppercase">
+                  <div className="hidden lg:block absolute top-full left-1/2 -translate-x-1/2 mt-1 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-50">
+                    <div className="bg-zinc-800 text-white text-[8px] font-mono px-2 py-1 shadow-md uppercase">
                       {years}
                     </div>
                   </div>
