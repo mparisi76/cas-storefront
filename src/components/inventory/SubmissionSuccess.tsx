@@ -15,19 +15,20 @@ export function SubmissionSuccess() {
   useEffect(() => {
     async function fetchRecentArrivals() {
       try {
-        // Matched exactly to the fields in your RelatedArtifacts example
+        // limit=4 to match the RelatedArtifacts grid
         const fields = "id,name,thumbnail,featured,purchase_price,availability,classification,category.id,category.slug,category.name,user_created.id,user_created.shop_name";
         
         const response = await fetch(
-          `${DIRECTUS_URL}/items/props?limit=3&sort=-date_created&filter[status][_eq]=published&filter[featured][_eq]=1&fields=${fields}`,
+          `${DIRECTUS_URL}/items/props?limit=4&sort=-date_created&filter[status][_eq]=published&filter[featured][_eq]=1&fields=${fields}`,
         );
         const result = await response.json();
 
         if (result.data && result.data.length > 0) {
           setRecentItems(result.data);
         } else {
+          // Fallback to limit 4 as well
           const fallbackResponse = await fetch(
-            `${DIRECTUS_URL}/items/props?limit=3&sort=-date_created&filter[status][_eq]=published&fields=${fields}`,
+            `${DIRECTUS_URL}/items/props?limit=4&sort=-date_created&filter[status][_eq]=published&fields=${fields}`,
           );
           const fallbackResult = await fallbackResponse.json();
           setRecentItems(fallbackResult.data);
@@ -43,7 +44,7 @@ export function SubmissionSuccess() {
   }, []);
 
   return (
-    <div className="max-w-6xl mx-auto py-10 md:py-20 animate-in fade-in slide-in-from-bottom-4 duration-700 px-4">
+    <div className="max-w-7xl mx-auto py-10 md:py-20 animate-in fade-in slide-in-from-bottom-4 duration-700 px-4">
       <div className="text-center mb-16">
         <div className="w-16 h-16 bg-zinc-900 text-white rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl">
           <CheckCircle2 size={32} strokeWidth={1.5} />
@@ -61,10 +62,10 @@ export function SubmissionSuccess() {
         <div className="flex justify-between items-end mb-10">
           <div>
             <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 mb-2">
-              Direct from the Field
+              Discovery
             </h3>
             <h2 className="text-2xl font-bold uppercase tracking-tighter text-zinc-800 italic">
-              Recent Arrivals
+              Recent Yard Arrivals
             </h2>
           </div>
           
@@ -81,12 +82,12 @@ export function SubmissionSuccess() {
             <Loader2 className="animate-spin text-zinc-200" size={32} />
           </div>
         ) : (
-          /* THE COLLAPSED BORDER GRID */
-          <div className="grid grid-cols-1 md:grid-cols-3 -ml-px -mt-px">
+          /* THE "INVENTORY PAGE" GRID LOGIC */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 -ml-px -mt-px">
             {recentItems.map((item) => (
               <div 
                 key={item.id} 
-                className="border-t border-r border-b border-l border-zinc-200 bg-[#F9F8F6] -ml-px -mt-px overflow-hidden"
+                className="border border-zinc-200 bg-[#F9F8F6] -ml-px -mt-px overflow-hidden"
               >
                 <ArtifactCard item={item} />
               </div>

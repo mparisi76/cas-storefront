@@ -32,9 +32,13 @@ function LoginForm() {
 
       {/* Success Message after Registration */}
       {isRegistered && (
-        <div className="bg-green-50 border border-green-100 p-3 text-center mb-6">
-          <p className="text-[9px] font-bold uppercase tracking-widest text-green-700">
-            Registration successful. Please login.
+        <div className="bg-zinc-900 border border-zinc-800 p-4 text-center mb-8 animate-in fade-in slide-in-from-top-2">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white mb-1">
+            Application Received
+          </p>
+          <p className="text-[9px] text-zinc-400 uppercase tracking-widest leading-relaxed">
+            We are reviewing your shop details.<br/>
+            You will receive an email once approved.
           </p>
         </div>
       )}
