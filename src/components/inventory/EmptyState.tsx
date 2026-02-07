@@ -22,15 +22,12 @@ export default function EmptyState({ activeSearch }: EmptyStateProps) {
         </div>
 
         <div className="space-y-2">
-          <p className="text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-zinc-400 font-black">
-            Inventory Exhausted
-          </p>
           <h3 className="text-xl font-bold uppercase tracking-tighter text-zinc-800 italic">
-            No matching stock found
+            No matching items found
           </h3>
           <p className="text-[11px] text-zinc-500 leading-relaxed uppercase tracking-tight">
-            Our sources haven&apos;t listed this specific item yet. Refine your 
-            parameters or request a specific acquisition.
+            Our sources haven&apos;t listed this specific item yet. Please refine your 
+            parameters.
           </p>
         </div>
 

@@ -13,7 +13,6 @@ import { getCategories } from "@/services/categories";
 import { getActiveVendors } from "@/services/(public)/vendors";
 import GridIcon from "@/components/ui/icons/GridIcon";
 import ListIcon from "@/components/ui/icons/ListIcon";
-import { PublicVendor } from "@/types/vendor";
 
 export default async function ShopPage({
   searchParams,
@@ -104,7 +103,7 @@ export default async function ShopPage({
           )}
 
           {/* STICKY MOBILE HEADER: FIXED HEIGHT & LOGIC */}
-          <div className="lg:hidden sticky top-0 z-[70] -mx-4 px-4 bg-[#F9F8F6]/95 backdrop-blur-md border-b border-zinc-200">
+          <div className="lg:hidden sticky top-0 z-70 -mx-4 px-4 bg-[#F9F8F6]/95 backdrop-blur-md border-b border-zinc-200">
             {/* ERA SECTION: Restricted to 40px height */}
             <div className="border-b border-zinc-200/50">
               <EraSelector 
@@ -127,10 +126,10 @@ export default async function ShopPage({
             <ActiveFilters vendors={vendors} className="pb-3" />
           </div>
 
-          <header className="hidden lg:flex flex-col gap-4 mb-8">
+          <header className="hidden lg:flex flex-col gap-4">
             <div className="flex items-baseline justify-between border-b border-zinc-200 pb-5">
-              <h1 className="text-5xl font-bold uppercase tracking-tighter text-zinc-800 italic leading-none">
-                {activeSearch ? `Results for "${activeSearch}"` : "The Yard Inventory"}
+              <h1 className="text-3xl font-bold uppercase tracking-tighter text-zinc-800 italic leading-none">
+                {activeSearch ? `Results for "${activeSearch}"` : "All Inventory"}
               </h1>
               <div className="flex items-center gap-4">
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">{totalCount} Objects</span>
@@ -141,7 +140,7 @@ export default async function ShopPage({
             </div>
           </header>
 
-          <div className="hidden lg:flex items-center justify-between mb-8 py-2 border-b border-zinc-100">
+          <div className="hidden lg:flex items-center justify-between py-2 border-b border-zinc-100">
             <EraSelector activeEra={activeEra} params={params} eraOptions={eraOptions} />
             <div className="flex bg-white border border-zinc-200 rounded-sm p-0.5">
               <Link href={getViewLink("grid")} className={`p-1.5 ${activeView === "grid" ? "bg-zinc-900 text-white" : "text-zinc-400"}`}><GridIcon /></Link>
