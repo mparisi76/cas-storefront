@@ -30,9 +30,12 @@ export default function FontSizeControls() {
           <Minus size={14} className="text-zinc-600" />
         </button>
         
-        <div className="flex items-center gap-1.5 px-1 border-x border-zinc-100 min-w-11.25 justify-center">
+        <div className="flex items-center gap-1.5 px-1 border-x border-zinc-100 min-w-11.25 justify-center overflow-hidden">
           <Type size={12} className="text-zinc-400" />
-          <span className="text-detail font-black font-mono text-zinc-800">
+          <span 
+            key={fontSize}
+            className="text-detail font-black font-mono text-zinc-800 animate-in slide-in-from-bottom-1 duration-200"
+          >
             {fontSize >= 0 ? `+${fontSize}` : fontSize}
           </span>
         </div>
@@ -47,9 +50,9 @@ export default function FontSizeControls() {
         </button>
       </div>
 
-      {/* SUBTLE GHOST TOOLTIP */}
-      <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-zinc-50 border border-zinc-200 text-zinc-400 text-detail font-black uppercase tracking-[0.2em] whitespace-nowrap rounded opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none z-50 shadow-sm">
-        Interface Text Scale
+      {/* SUBTLE GHOST TOOLTIP WITH DELAY */}
+      <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-zinc-50 border border-zinc-200 text-zinc-400 text-detail font-black uppercase tracking-[0.2em] whitespace-nowrap rounded opacity-0 group-hover:opacity-100 transition-all duration-300 delay-500 pointer-events-none z-50 shadow-sm translate-y-1 group-hover:translate-y-0">
+        Interface Scale
       </div>
     </div>
   );
