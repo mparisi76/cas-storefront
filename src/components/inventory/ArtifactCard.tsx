@@ -60,7 +60,7 @@ export default function ArtifactCard({
                 size={24}
                 strokeWidth={1}
               />
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
+              <span className="text-detail font-black uppercase tracking-[0.2em] text-zinc-500">
                 Retrieving
               </span>
             </div>
@@ -71,7 +71,7 @@ export default function ArtifactCard({
         {hasError && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-50 z-20">
             <AlertCircle className="text-zinc-300 mb-1" size={20} />
-            <span className="text-[8px] font-bold uppercase tracking-widest text-zinc-400">
+            <span className="text-tiny font-bold uppercase tracking-widest text-zinc-400">
               Asset Missing
             </span>
           </div>
@@ -102,7 +102,7 @@ export default function ArtifactCard({
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-50 text-zinc-300">
             <ImageIcon size={32} strokeWidth={0.5} className="mb-2" />
-            <span className="uppercase tracking-[0.2em] text-[9px] font-bold">
+            <span className="uppercase tracking-[0.2em] text-detail font-bold">
               No Image Available
             </span>
           </div>
@@ -114,7 +114,7 @@ export default function ArtifactCard({
         {!hideVendor && (
           <div className="flex items-center gap-1.5 mb-2">
             <Store size={10} className="text-zinc-400 shrink-0" />
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 italic truncate">
+            <p className="text-detail font-black uppercase tracking-[0.2em] text-zinc-400 italic truncate">
               {vendorName}
             </p>
           </div>
@@ -125,7 +125,7 @@ export default function ArtifactCard({
             className={`font-bold uppercase text-base md:text-lg leading-[1.1] transition-colors tracking-tight flex-1 ${
               isSold
                 ? "text-zinc-500"
-                : "text-zinc-600 group-hover:text-blue-600"
+                : "text-zinc-800 group-hover:text-blue-600"
             }`}
           >
             {item.name}
@@ -133,7 +133,7 @@ export default function ArtifactCard({
 
           <div className="text-right shrink-0">
             <span
-              className={`${isSold ? "text-zinc-400 font-mono text-[10px] italic" : "text-blue-600 font-medium text-sm md:text-base"}`}
+              className={`${isSold ? "text-zinc-400 font-mono text-detail italic" : "text-blue-600 font-medium text-sm md:text-base"}`}
             >
               {isSold
                 ? "[ SOLD ]"
@@ -144,7 +144,7 @@ export default function ArtifactCard({
           </div>
         </div>
 
-        <p className="absolute -bottom-4 -right-4 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 pointer-events-none">
+        <p className="absolute -bottom-4 -right-4 text-detail font-black uppercase tracking-[0.3em] text-zinc-400 pointer-events-none">
           CAS—{String(item.id).padStart(4, "0")}
         </p>
       </div>

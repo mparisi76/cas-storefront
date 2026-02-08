@@ -58,7 +58,7 @@ export default function MobileFilters({
             setIsVendorOpen(!isVendorOpen);
             setIsCategoryOpen(false);
           }}
-          className="w-full flex justify-between items-center px-4 py-3 text-[10px] font-black uppercase tracking-widest text-zinc-800"
+          className="w-full flex justify-between items-center px-4 py-3 text-detail font-black uppercase tracking-widest text-zinc-800"
         >
           <span className="truncate">{getActiveVendorLabel()}</span>
           {isVendorOpen ? (
@@ -73,7 +73,7 @@ export default function MobileFilters({
             <Link
               href={`/inventory?${createQueryString("vendor", "all")}`}
               onClick={() => setIsVendorOpen(false)}
-              className={`block px-5 py-4 text-[10px] font-bold uppercase tracking-widest border-b border-zinc-100 ${activeVendorId === "all" ? "text-blue-600 bg-blue-50/30" : "text-zinc-500"}`}
+              className={`block px-5 py-4 text-detail font-bold uppercase tracking-widest border-b border-zinc-100 ${activeVendorId === "all" ? "text-blue-600 bg-blue-50/30" : "text-zinc-500"}`}
             >
               All Shops
             </Link>
@@ -82,7 +82,7 @@ export default function MobileFilters({
                 key={vendor.id}
                 href={`/inventory?${createQueryString("vendor", vendor.id)}`}
                 onClick={() => setIsVendorOpen(false)}
-                className={`block px-5 py-4 text-[10px] font-bold uppercase tracking-widest border-b border-zinc-100 ${activeVendorId === vendor.id ? "text-blue-600 bg-blue-50/30" : "text-zinc-500"}`}
+                className={`block px-5 py-4 text-detail font-bold uppercase tracking-widest border-b border-zinc-100 ${activeVendorId === vendor.id ? "text-blue-600 bg-blue-50/30" : "text-zinc-500"}`}
               >
                 {vendor.shop_name}
               </Link>
@@ -98,7 +98,7 @@ export default function MobileFilters({
             setIsCategoryOpen(!isCategoryOpen);
             setIsVendorOpen(false);
           }}
-          className="w-full flex justify-between items-center px-4 py-3 text-[10px] font-black uppercase tracking-widest text-zinc-800"
+          className="w-full flex justify-between items-center px-4 py-3 text-detail font-black uppercase tracking-widest text-zinc-800"
         >
           <span className="truncate">{getActiveCategoryLabel()}</span>
           {isCategoryOpen ? (
@@ -113,7 +113,7 @@ export default function MobileFilters({
             <Link
               href={`/inventory?${createQueryString("category", "all")}`}
               onClick={() => setIsCategoryOpen(false)}
-              className={`block px-5 py-4 text-[10px] font-bold uppercase tracking-widest border-b border-zinc-100 ${activeSlug === "all" ? "text-blue-600 bg-blue-50/30" : "text-zinc-500"}`}
+              className={`block px-5 py-4 text-detail font-bold uppercase tracking-widest border-b border-zinc-100 ${activeSlug === "all" ? "text-blue-600 bg-blue-50/30" : "text-zinc-500"}`}
             >
               All Categories
             </Link>
@@ -122,7 +122,7 @@ export default function MobileFilters({
                 <Link
                   href={`/inventory?${createQueryString("category", parent.slug)}`}
                   onClick={() => setIsCategoryOpen(false)}
-                  className={`block px-5 py-4 text-[10px] font-black uppercase tracking-widest ${activeSlug === parent.slug ? "text-blue-600" : "text-zinc-800"}`}
+                  className={`block px-5 py-4 text-detail font-black uppercase tracking-widest ${activeSlug === parent.slug ? "text-blue-600" : "text-zinc-800"}`}
                 >
                   {parent.name}
                 </Link>
@@ -131,7 +131,7 @@ export default function MobileFilters({
                     key={childId}
                     href={`/inventory?${createQueryString("category", child.slug)}`}
                     onClick={() => setIsCategoryOpen(false)}
-                    className={`block px-8 py-3 text-[10px] font-bold uppercase tracking-widest bg-zinc-50/50 ${activeSlug === child.slug ? "text-blue-600" : "text-zinc-500"}`}
+                    className={`block px-8 py-3 text-detail font-bold uppercase tracking-widest bg-zinc-50/50 ${activeSlug === child.slug ? "text-blue-600" : "text-zinc-500"}`}
                   >
                     {child.name}
                   </Link>

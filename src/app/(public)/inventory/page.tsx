@@ -112,14 +112,14 @@ export default async function ShopPage({
               <div className="flex flex-col">
                 <div className="flex items-center gap-3 mb-1">
                   {currentVendor && (
-                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-600">
+                    <span className="text-label font-black uppercase tracking-[0.4em] text-blue-600">
                       Verified Source
                     </span>
                   )}
                   {isFiltered && (
                     <Link 
                       href="/inventory" 
-                      className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 hover:text-blue-600 transition-colors"
+                      className="text-label font-black uppercase tracking-[0.4em] text-zinc-400 hover:text-blue-600 transition-colors"
                     >
                       [ Clear All ]
                     </Link>
@@ -131,7 +131,7 @@ export default async function ShopPage({
               </div>
               
               <div className="flex items-center gap-6 pb-1">
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">
+                <span className="text-label font-black uppercase tracking-[0.3em] text-zinc-500">
                   {totalCount} Objects
                 </span>
 

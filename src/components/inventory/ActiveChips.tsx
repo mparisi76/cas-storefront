@@ -54,7 +54,7 @@ export function ActiveFilters({ vendors, className = "" }: ActiveFiltersProps) {
       {activeVendor && (
         <button
           onClick={() => clearFilter("vendor")}
-          className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900 text-white text-[9px] font-black uppercase tracking-widest hover:bg-zinc-800 transition-colors"
+          className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900 text-white text-tiny font-black uppercase tracking-widest hover:bg-zinc-800 transition-colors"
         >
           {activeVendor.shop_name || activeVendor.first_name} <X size={10} />
         </button>
@@ -64,7 +64,7 @@ export function ActiveFilters({ vendors, className = "" }: ActiveFiltersProps) {
       {activeSlug && activeSlug !== "all" && (
         <button
           onClick={() => clearFilter("category")}
-          className="flex items-center gap-2 px-3 py-1.5 bg-white border border-zinc-200 text-zinc-900 text-[9px] font-black uppercase tracking-widest hover:bg-zinc-50 transition-colors"
+          className="flex items-center gap-2 px-3 py-1.5 bg-white border border-zinc-200 text-zinc-900 text-tiny font-black uppercase tracking-widest hover:bg-zinc-50 transition-colors"
         >
           {activeSlug.replace(/-/g, " ")} <X size={10} />
         </button>
@@ -74,7 +74,7 @@ export function ActiveFilters({ vendors, className = "" }: ActiveFiltersProps) {
       {activeEra && activeEra !== "all" && (
         <button
           onClick={() => clearFilter("classification")}
-          className="flex items-center gap-2 px-3 py-1.5 bg-white border border-zinc-200 text-zinc-900 text-[9px] font-black uppercase tracking-widest hover:bg-zinc-50 transition-colors"
+          className="flex items-center gap-2 px-3 py-1.5 bg-white border border-zinc-200 text-zinc-900 text-tiny font-black uppercase tracking-widest hover:bg-zinc-50 transition-colors"
         >
           {activeEra.replace(/-/g, " ")} <X size={10} />
         </button>
@@ -84,7 +84,7 @@ export function ActiveFilters({ vendors, className = "" }: ActiveFiltersProps) {
       {activeSearch && (
         <button
           onClick={() => clearFilter("search")}
-          className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-100 text-blue-700 text-[9px] font-black uppercase tracking-widest hover:bg-blue-100 transition-colors"
+          className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-100 text-blue-700 text-tiny font-black uppercase tracking-widest hover:bg-blue-100 transition-colors"
         >
           &ldquo;{activeSearch}&rdquo; <X size={10} />
         </button>

@@ -22,10 +22,11 @@ export default function EmptyState({ activeSearch }: EmptyStateProps) {
         </div>
 
         <div className="space-y-2">
+          {/* text-xl is now reactive via your tailwind.config.ts */}
           <h3 className="text-xl font-bold uppercase tracking-tighter text-zinc-800 italic">
             No matching items found
           </h3>
-          <p className="text-[11px] text-zinc-500 leading-relaxed uppercase tracking-tight">
+          <p className="text-label text-zinc-500 leading-relaxed uppercase tracking-tight">
             Our sources haven&apos;t listed this specific item yet. Please refine your 
             parameters.
           </p>
@@ -34,14 +35,14 @@ export default function EmptyState({ activeSearch }: EmptyStateProps) {
         <div className="flex flex-col gap-3">
           <Link
             href="/inventory"
-            className="inline-block text-[10px] font-black uppercase tracking-[0.2em] text-white bg-zinc-900 px-6 py-4 hover:bg-blue-600 transition-all active:scale-95 text-center"
+            className="inline-block text-detail font-black uppercase tracking-[0.2em] text-white bg-zinc-900 px-6 py-4 hover:bg-blue-600 transition-all active:scale-95 text-center"
           >
             Clear All Filters
           </Link>
           
           <Link
             href={requestUrl}
-            className="group inline-flex items-center justify-center gap-2 text-[9px] font-bold uppercase tracking-[0.2em] text-zinc-400 hover:text-zinc-900 transition-colors py-2"
+            className="group inline-flex items-center justify-center gap-2 text-tiny font-bold uppercase tracking-[0.2em] text-zinc-400 hover:text-zinc-900 transition-colors py-2"
           >
             Place a Stock Request 
             <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />

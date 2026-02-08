@@ -1,93 +1,92 @@
 /* eslint-disable @next/next/no-img-element */
+"use client";
+
 import Link from "next/link";
 import { Artifact } from "@/types/artifact";
-import StarIcon from "@/components/ui/icons/StarIcon";
-import { ImageIcon } from "lucide-react";
+import { Store } from "lucide-react";
 
-export default function ArtifactListItem({ item }: { item: Artifact }) {
-  const vendorDisplay = item.user_created?.shop_name || "Independent Vendor";
+interface ArtifactListItemProps {
+  item: Artifact;
+}
+
+export default function ArtifactListItem({ item }: ArtifactListItemProps) {
   const isSold = item.availability === "sold";
   const hasPrice = item.purchase_price && Number(item.purchase_price) > 0;
+
+  const vendorName = item.user_created
+    ? `${item.user_created.shop_name || ""}`.trim()
+    : "Unnamed Shop";
+
+  const imageUrl = item.thumbnail
+    ? `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${item.thumbnail}?width=400&height=400&fit=cover&format=webp`
+    : null;
 
   return (
     <Link
       href={`/inventory/${item.id}`}
-      className={`flex items-center gap-4 p-3 md:p-4 transition-colors group relative ${
+      className={`group flex items-center gap-6 p-4 md:p-6 transition-all duration-300 ${
         isSold ? "opacity-70" : "hover:bg-zinc-50"
       }`}
     >
-      {/* THUMBNAIL / PLACEHOLDER */}
-      <div className="w-12 h-12 bg-zinc-100 shrink-0 overflow-hidden border border-zinc-200 relative flex items-center justify-center">
-        {item.thumbnail ? (
+      {/* THUMBNAIL */}
+      <div className="w-16 h-16 md:w-24 md:h-24 bg-zinc-100 shrink-0 overflow-hidden relative">
+        {imageUrl ? (
           <img
-            src={`${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${item.thumbnail}?width=100&height=100&fit=cover`}
+            src={imageUrl}
             alt={item.name}
-            className={`w-full h-full object-cover transition-all ${
-              isSold ? "grayscale" : "grayscale group-hover:grayscale-0"
+            className={`object-cover w-full h-full transition-transform duration-500 ${
+              isSold ? "grayscale" : "group-hover:scale-110"
             }`}
           />
         ) : (
-          <ImageIcon className="text-zinc-300" size={16} strokeWidth={1.5} />
+          <div className="w-full h-full flex items-center justify-center text-zinc-300">
+            <Store size={20} strokeWidth={1} />
+          </div>
         )}
-        
         {isSold && (
-          <div className="absolute inset-0 bg-white/20 flex items-center justify-center z-10">
-            <div className="bg-zinc-900 text-white text-[6px] font-black uppercase px-1 py-0.5 -rotate-12">Sold</div>
+          <div className="absolute inset-0 bg-white/20 flex items-center justify-center">
+            <span className="text-[8px] font-black uppercase tracking-tighter bg-zinc-900 text-white px-1">
+              Sold
+            </span>
           </div>
         )}
       </div>
 
-      <div className="flex-1 flex items-center justify-between min-w-0 gap-8">
-        {/* PRIMARY INFO & FEATURED TAG */}
-        <div className="flex flex-col min-w-0 grow-2">
-          <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-[8px] font-mono text-zinc-400 uppercase tracking-widest">
-              REF_{String(item.id).slice(0, 8)}
-            </span>
-            
-            {item.featured && !isSold && (
-              <span className="flex items-center gap-1 text-[7px] font-black text-blue-600 uppercase tracking-[0.15em] bg-blue-50 px-1.5 py-0.5 border border-blue-100">
-                <StarIcon className="w-2 h-2" /> Featured
+      {/* CONTENT */}
+      <div className="flex-1 min-w-0">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-ui-detail font-black uppercase tracking-widest text-zinc-400 italic">
+                {vendorName}
               </span>
-            )}
+              <span className="text-zinc-200 text-ui-micro">•</span>
+              <span className="text-ui-micro font-mono text-zinc-400">
+                CAS—{String(item.id).padStart(4, "0")}
+              </span>
+            </div>
+            <h3
+              className={`font-bold uppercase text-sm md:text-lg leading-tight truncate ${
+                isSold
+                  ? "text-zinc-500"
+                  : "text-zinc-800 group-hover:text-blue-600"
+              }`}
+            >
+              {item.name}
+            </h3>
           </div>
-          <h3 className={`font-bold text-sm uppercase tracking-tight truncate ${isSold ? "text-zinc-400" : "text-zinc-900"}`}>
-            {item.name}
-          </h3>
-        </div>
 
-        {/* CLASSIFICATION */}
-        <div className="hidden lg:flex flex-col w-24 shrink-0">
-          <span className="text-[8px] font-mono text-zinc-400 uppercase">
-            Class.
-          </span>
-          <span className={`text-[10px] uppercase italic truncate ${isSold ? "text-zinc-400" : "text-zinc-600"}`}>
-            {item.classification || "—"}
-          </span>
-        </div>
-
-        {/* VENDOR */}
-        <div className="hidden md:flex flex-col w-40 shrink-0">
-          <span className="text-[8px] font-mono text-zinc-400 uppercase">
-            Sold By
-          </span>
-          <span className={`text-[10px] font-bold uppercase truncate tracking-tight ${isSold ? "text-zinc-400" : "text-zinc-800"}`}>
-            {vendorDisplay}
-          </span>
-        </div>
-
-        {/* PRICE */}
-        <div className="flex flex-col items-end w-24 shrink-0">
-          <span className="text-[8px] font-mono text-zinc-400 uppercase">
-            Price
-          </span>
-          <span className={`font-black text-sm whitespace-nowrap ${isSold ? "text-zinc-400 line-through decoration-1" : "text-zinc-900"}`}>
-            {isSold 
-              ? `[ SOLD ]` 
-              : hasPrice 
-                ? `$${Number(item.purchase_price).toLocaleString()}` 
-                : "Call"}
-          </span>
+          <div className="flex items-center gap-4">
+            <span
+              className={`${isSold ? "text-zinc-400 font-mono text-ui-detail italic" : "text-blue-600 font-bold text-base"}`}
+            >
+              {isSold
+                ? "[ SOLD ]"
+                : hasPrice
+                  ? `$${Number(item.purchase_price).toLocaleString()}`
+                  : "Price on Request"}
+            </span>
+          </div>
         </div>
       </div>
     </Link>

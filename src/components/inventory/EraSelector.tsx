@@ -31,7 +31,7 @@ export default function EraSelector({
   return (
     <div className={`w-full bg-transparent ${className}`}>
       <div className="flex items-center gap-6 overflow-x-auto no-scrollbar whitespace-nowrap h-full">
-        <span className="hidden lg:block text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400 shrink-0">
+        <span className="hidden lg:block text-label font-black uppercase tracking-[0.2em] text-zinc-400 shrink-0">
           Era:
         </span>
 
@@ -55,7 +55,7 @@ export default function EraSelector({
                       page: 1,
                     },
                   }}
-                  className={`text-[10px] font-black uppercase tracking-[0.15em] transition-all relative h-full flex items-center border-b-2 ${
+                  className={`text-detail font-black uppercase tracking-[0.15em] transition-all relative h-full flex items-center border-b-2 ${
                     isActive
                       ? "text-blue-600 border-blue-600"
                       : "text-zinc-900 border-transparent hover:text-zinc-800"
@@ -66,7 +66,7 @@ export default function EraSelector({
 
                 {years && (
                   <div className="hidden lg:block absolute top-full left-1/2 -translate-x-1/2 mt-1 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-50">
-                    <div className="bg-zinc-800 text-white text-[8px] font-mono px-2 py-1 shadow-md uppercase">
+                    <div className="bg-zinc-800 text-white text-tiny font-mono px-2 py-1 shadow-md uppercase">
                       {years}
                     </div>
                   </div>

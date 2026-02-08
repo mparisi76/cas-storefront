@@ -47,7 +47,7 @@ export default function ArtifactGallery({
                 size={32}
                 strokeWidth={1}
               />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600">
+              <span className="text-detail font-black uppercase tracking-[0.3em] text-zinc-600">
                 Retrieving Artifact
               </span>
             </div>
@@ -84,7 +84,7 @@ export default function ArtifactGallery({
         {isError && (
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-100 p-8 text-center">
             <AlertCircle className="text-zinc-400 mb-3" size={24} />
-            <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+            <p className="text-detail font-bold uppercase tracking-widest text-zinc-500">
               Image Unreachable
             </p>
           </div>

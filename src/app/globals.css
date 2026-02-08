@@ -3,6 +3,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --font-step: 0;
 }
 
 @theme inline {
@@ -11,13 +12,6 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
-
-/* @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #cdcdcd;
-  }
-} */
 
 body {
   background: var(--background);
@@ -107,4 +101,44 @@ body {
 
 .animate-loading-shimmer {
   animation: loading-shimmer 1.5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+/* Map the data attribute */
+html[data-font-size="-1"] { --font-step: -1; }
+html[data-font-size="0"]  { --font-step: 0; }
+html[data-font-size="1"]  { --font-step: 1; }
+html[data-font-size="2"]  { --font-step: 2; }
+html[data-font-size="3"]  { --font-step: 3; }
+
+/* Expanded ladder: Added 3xl through 6xl */
+:root {
+  --size-tiny:   calc(8px + (var(--font-step) * 1px));
+  --size-detail: calc(11px + (var(--font-step) * 1px));
+  --size-label:  calc(11px + (var(--font-step) * 1px));
+  --size-xs:     calc(12px + (var(--font-step) * 1px));
+  --size-sm:     calc(14px + (var(--font-step) * 1px));
+  --size-base:   calc(16px + (var(--font-step) * 1px));
+  --size-lg:     calc(18px + (var(--font-step) * 1px));
+  --size-xl:     calc(20px + (var(--font-step) * 1px));
+  --size-2xl:    calc(24px + (var(--font-step) * 1px));
+  --size-3xl:    calc(30px + (var(--font-step) * 1px));
+  --size-4xl:    calc(36px + (var(--font-step) * 1px));
+  --size-5xl:    calc(48px + (var(--font-step) * 1px));
+  --size-6xl:    calc(60px + (var(--font-step) * 1px));
+}
+
+@layer utilities {
+  .text-tiny   { font-size: var(--size-tiny) !important; }
+  .text-detail { font-size: var(--size-detail) !important; }
+  .text-label  { font-size: var(--size-label) !important; }
+  .text-xs     { font-size: var(--size-xs) !important; }
+  .text-sm     { font-size: var(--size-sm) !important; }
+  .text-base   { font-size: var(--size-base) !important; }
+  .text-lg     { font-size: var(--size-lg) !important; }
+  .text-xl     { font-size: var(--size-xl) !important; }
+  .text-2xl    { font-size: var(--size-2xl) !important; }
+  .text-3xl    { font-size: var(--size-3xl) !important; }
+  .text-4xl    { font-size: var(--size-4xl) !important; }
+  .text-5xl    { font-size: var(--size-5xl) !important; }
+  .text-6xl    { font-size: var(--size-6xl) !important; }
 }

@@ -66,7 +66,7 @@ export default function RecentlyViewed({ currentId }: { currentId: string }) {
     <section className="border-t border-zinc-200 pt-16">
       <div className="flex justify-between items-end mb-10">
         <div>
-          <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 mb-2">
+          <h3 className="text-detail font-black uppercase tracking-[0.4em] text-zinc-400 mb-2">
             Your History
           </h3>
           <h2 className="text-2xl font-bold uppercase tracking-tighter text-zinc-800 italic">
@@ -77,7 +77,7 @@ export default function RecentlyViewed({ currentId }: { currentId: string }) {
         {totalInHistory > items.length && (
           <Link
             href="/inventory/history" 
-            className="text-[10px] font-black uppercase tracking-widest text-blue-600 border-b border-blue-600 pb-1 hover:text-zinc-900 hover:border-zinc-900 transition-all"
+            className="text-detail font-black uppercase tracking-widest text-blue-600 border-b border-blue-600 pb-1 hover:text-zinc-900 hover:border-zinc-900 transition-all"
           >
             View All ({totalInHistory})
           </Link>

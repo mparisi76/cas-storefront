@@ -96,7 +96,7 @@ export default function ShippingDrawer({
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className={`w-full border py-4 text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 ${
+        className={`w-full border py-4 text-label font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 ${
           disabled 
             ? "border-zinc-200 text-zinc-400 bg-zinc-50 hover:bg-zinc-100" 
             : "border-zinc-300 text-zinc-500 hover:bg-zinc-800 hover:text-white hover:border-zinc-800"
@@ -117,7 +117,7 @@ export default function ShippingDrawer({
           <div className="flex justify-between items-center mb-12">
             <div>
               <h2 className="text-2xl font-bold uppercase tracking-tighter text-zinc-800 italic leading-none">Logistics</h2>
-              <p className="text-[10px] uppercase tracking-widest text-zinc-400 font-bold mt-1">Estimate</p>
+              <p className="text-detail uppercase tracking-widest text-zinc-400 font-bold mt-1">Estimate</p>
             </div>
             <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-zinc-200 rounded-full transition-colors cursor-pointer">
               <X size={24} className="text-zinc-400" />
@@ -127,12 +127,12 @@ export default function ShippingDrawer({
           <div className="space-y-10">
             {/* Item Summary Card */}
             <div className="bg-white border border-zinc-200 p-6">
-              <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-4 border-b border-zinc-50 pb-2">Artifact Manifest</p>
+              <p className="text-detail font-black uppercase tracking-widest text-zinc-400 mb-4 border-b border-zinc-50 pb-2">Artifact Manifest</p>
               <div className="space-y-1">
                 <p className="text-sm font-bold text-zinc-800">{itemName}</p>
                 <div className="flex justify-between items-center pt-2">
-                  <span className="text-[11px] font-mono text-zinc-500 uppercase">{weight || "—"} LBS</span>
-                  <span className="text-[11px] font-mono text-zinc-500 uppercase">Size: {length || "0"}&rdquo;×{width || "0"}&rdquo;×{height || "0"}&rdquo;</span>
+                  <span className="text-label font-mono text-zinc-500 uppercase">{weight || "—"} LBS</span>
+                  <span className="text-label font-mono text-zinc-500 uppercase">Size: {length || "0"}&rdquo;×{width || "0"}&rdquo;×{height || "0"}&rdquo;</span>
                 </div>
               </div>
             </div>
@@ -140,7 +140,7 @@ export default function ShippingDrawer({
             {/* Input Section */}
             {!disabled && (
               <div className="space-y-4">
-                <label className="block text-[11px] font-black uppercase tracking-widest text-zinc-800">Destination Zip Code</label>
+                <label className="block text-label font-black uppercase tracking-widest text-zinc-800">Destination Zip Code</label>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -153,12 +153,12 @@ export default function ShippingDrawer({
                   <button
                     onClick={calculateShipping}
                     disabled={loading}
-                    className="bg-zinc-900 text-white px-8 font-bold uppercase tracking-widest hover:bg-blue-600 transition-colors text-[11px] disabled:bg-zinc-200"
+                    className="bg-zinc-900 text-white px-8 font-bold uppercase tracking-widest hover:bg-blue-600 transition-colors text-label disabled:bg-zinc-200"
                   >
                     {loading ? "..." : "Get Rates"}
                   </button>
                 </div>
-                {error && <p className="text-[10px] font-bold text-red-600 uppercase italic flex items-center gap-2"><AlertCircle size={12}/> {error}</p>}
+                {error && <p className="text-detail font-bold text-red-600 uppercase italic flex items-center gap-2"><AlertCircle size={12}/> {error}</p>}
               </div>
             )}
 
@@ -168,14 +168,14 @@ export default function ShippingDrawer({
                 <div className="bg-white border border-zinc-200 p-8 text-center space-y-6">
                   <Truck size={32} className="mx-auto text-zinc-800" strokeWidth={1} />
                   <div>
-                    <p className="text-[11px] font-black uppercase tracking-widest text-zinc-800">Specialized Handling Required</p>
-                    <p className="text-[12px] text-zinc-500 mt-3 leading-relaxed italic">
+                    <p className="text-label font-black uppercase tracking-widest text-zinc-800">Specialized Handling Required</p>
+                    <p className="text-base text-zinc-500 mt-3 leading-relaxed italic">
                       Due to the architectural scale or weight of this piece, standard parcel service is unavailable. We utilize specialized crate-and-freight carriers.
                     </p>
                   </div>
                   <button
                     onClick={handleFreightInquiry}
-                    className="w-full bg-zinc-900 text-white py-4 text-[11px] font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-blue-600 transition-all"
+                    className="w-full bg-zinc-900 text-white py-4 text-label font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-blue-600 transition-all"
                   >
                     <Mail size={14} /> Request Manual Quote
                   </button>
@@ -184,7 +184,7 @@ export default function ShippingDrawer({
                 rates.map((rate, i) => (
                   <div key={i} className="flex justify-between items-center bg-white border border-zinc-200 p-5 hover:border-zinc-900 transition-colors">
                     <div>
-                      <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">{rate.provider} • {rate.service}</p>
+                      <p className="text-detail font-black text-zinc-400 uppercase tracking-widest mb-1">{rate.provider} • {rate.service}</p>
                       <p className="text-sm font-bold text-zinc-800 italic">Est. {rate.estimated_days} Day Delivery</p>
                     </div>
                     <p className="text-xl font-light text-zinc-900">${parseFloat(rate.price).toFixed(2)}</p>
@@ -195,14 +195,14 @@ export default function ShippingDrawer({
               {!loading && rates.length === 0 && !error && !isFreight && !disabled && (
                 <div className="py-16 text-center border border-dashed border-zinc-200 opacity-50">
                   <Truck size={24} className="mx-auto text-zinc-400 mb-3" />
-                  <p className="text-[10px] uppercase font-black text-zinc-400 tracking-widest">Awaiting Destination</p>
+                  <p className="text-detail uppercase font-black text-zinc-400 tracking-widest">Awaiting Destination</p>
                 </div>
               )}
             </div>
           </div>
 
           <div className="mt-auto border-t border-zinc-200 pt-8">
-            <p className="text-[10px] text-zinc-400 uppercase tracking-tight leading-relaxed italic">
+            <p className="text-detail text-zinc-400 uppercase tracking-tight leading-relaxed italic">
               * rates include white-glove packaging. definitive transit costs finalized upon invoice.
             </p>
           </div>

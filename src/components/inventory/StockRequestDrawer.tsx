@@ -66,7 +66,7 @@ export default function StockRequestDrawer({
             <h2 className="text-3xl font-bold uppercase tracking-tighter text-zinc-900 italic leading-none">
               Inquiry
             </h2>
-            <p className="text-[10px] uppercase tracking-[0.3em] text-blue-600 font-black">
+            <p className="text-detail uppercase tracking-[0.3em] text-blue-600 font-black">
               Stock Request Portal
             </p>
           </div>
@@ -90,7 +90,7 @@ export default function StockRequestDrawer({
             >
               <div className="space-y-8">
                 <div className="border-l-2 border-zinc-100 pl-6 space-y-2">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+                  <p className="text-detail font-bold uppercase tracking-widest text-zinc-400">
                     The Mission
                   </p>
                   <p className="text-sm text-zinc-600 leading-relaxed italic">
@@ -102,7 +102,7 @@ export default function StockRequestDrawer({
 
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-900">
+                    <label className="text-detail font-black uppercase tracking-[0.2em] text-zinc-900">
                       Request Item
                     </label>
                     <input
@@ -115,7 +115,7 @@ export default function StockRequestDrawer({
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-900">
+                    <label className="text-detail font-black uppercase tracking-[0.2em] text-zinc-900">
                       Contact Email
                     </label>
                     <input
@@ -127,7 +127,7 @@ export default function StockRequestDrawer({
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-900">
+                    <label className="text-detail font-black uppercase tracking-[0.2em] text-zinc-900">
                       Project Details
                     </label>
                     <textarea
@@ -143,7 +143,7 @@ export default function StockRequestDrawer({
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-zinc-900 text-white py-5 text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-blue-600 transition-all disabled:bg-zinc-200 cursor-pointer"
+                  className="w-full bg-zinc-900 text-white py-5 text-detail font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-blue-600 transition-all disabled:bg-zinc-200 cursor-pointer"
                 >
                   {loading ? (
                     "TRANSMITTING..."
@@ -171,7 +171,7 @@ export default function StockRequestDrawer({
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-900 transition-colors pt-4 cursor-pointer"
+                className="text-detail font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-900 transition-colors pt-4 cursor-pointer"
               >
                 Return to Inventory
               </button>
@@ -181,7 +181,7 @@ export default function StockRequestDrawer({
 
         {/* Footer - Fixed Height */}
         <div className="p-8 md:p-12 pt-0 border-t border-zinc-50 mt-auto">
-          <p className="text-[9px] text-zinc-400 uppercase tracking-tight leading-relaxed font-medium">
+          <p className="text-tiny text-zinc-400 uppercase tracking-tight leading-relaxed font-medium">
             * Source requests are prioritized for trade professionals and
             verified acquisition partners.
           </p>

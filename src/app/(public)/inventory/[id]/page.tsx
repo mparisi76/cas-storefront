@@ -95,25 +95,25 @@ export default async function ProductPage({
         <nav className="mb-10 border-b border-zinc-200 pb-4 flex items-center gap-3">
           <Link
             href="/inventory"
-            className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.3em] text-zinc-400 hover:text-blue-600 transition-colors"
+            className="text-detail font-black uppercase tracking-[0.3em] text-zinc-400 hover:text-blue-600 transition-colors"
           >
             Home
           </Link>
-          <span className="text-zinc-300 text-[10px]">—</span>
+          <span className="text-zinc-300 text-detail">—</span>
           {item.category ? (
             <Link
               href={`/inventory?category=${item.category.slug}`}
-              className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.3em] text-blue-600 transition-colors"
+              className="text-detail font-black uppercase tracking-[0.3em] text-blue-600 transition-colors"
             >
               {item.category.name}
             </Link>
           ) : (
-            <span className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.3em] text-zinc-300">
+            <span className="text-detail font-black uppercase tracking-[0.3em] text-zinc-300">
               General Salvage
             </span>
           )}
-          <span className="text-zinc-300 text-[10px]">—</span>
-          <span className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.3em] text-zinc-800 truncate max-w-50 md:max-w-none">
+          <span className="text-zinc-300 text-detail">—</span>
+          <span className="text-detail font-black uppercase tracking-[0.3em] text-zinc-800 truncate max-w-50 md:max-w-none">
             {item.name}
           </span>
         </nav>
@@ -142,56 +142,57 @@ export default async function ProductPage({
                     <Store size={10} className="text-zinc-500" />
                   )}
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 group-hover:text-blue-600 transition-colors">
+                <span className="text-detail font-black uppercase tracking-[0.2em] text-zinc-500 group-hover:text-blue-600 transition-colors">
                   Sold by: {vendorName}
                 </span>
               </Link>
 
               <div className="flex items-center gap-3 mb-4 flex-wrap">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-[0.2em] bg-zinc-800 text-white px-2 py-0.5">
+                <span className="text-detail font-mono font-bold uppercase tracking-[0.2em] bg-zinc-800 text-white px-2 py-0.5">
                   CAS—{String(item.id).padStart(4, "0")}
                 </span>
 
                 {item.classification && (
                   <>
-                    <span className="text-zinc-300 text-[10px]">|</span>
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 italic">
+                    <span className="text-zinc-300 text-detail">|</span>
+                    <span className="text-detail font-black uppercase tracking-[0.2em] text-zinc-500 italic">
                       {item.classification.replace(/-/g, " ")}
                     </span>
                   </>
                 )}
 
-                <span className="text-zinc-300 text-[10px]">|</span>
+                <span className="text-zinc-300 text-detail">|</span>
                 <span
-                  className={`text-[10px] font-black uppercase tracking-[0.2em] ${isSold ? "text-zinc-400" : "text-blue-600"}`}
+                  className={`text-detail font-black uppercase tracking-[0.2em] ${isSold ? "text-zinc-400" : "text-blue-600"}`}
                 >
                   {isSold ? "Sold" : "Available"}
                 </span>
               </div>
 
+              {/* Title now using text-2xl which is your top-tier scaling utility */}
               <h1
-                className={`text-4xl md:text-2xl font-bold uppercase tracking-tighter italic leading-[0.9] mb-6 ${isSold ? "text-zinc-400" : "text-zinc-800"}`}
+                className={`text-2xl font-bold uppercase tracking-tighter italic leading-[0.9] mb-6 ${isSold ? "text-zinc-400" : "text-zinc-800"}`}
               >
                 {item.name}
               </h1>
 
               <div className="flex items-baseline gap-4">
                 <span
-                  className={`text-4xl font-light tracking-tighter ${isSold ? "text-zinc-300 line-through" : "text-zinc-800"}`}
+                  className={`text-2xl font-light tracking-tighter ${isSold ? "text-zinc-300 line-through" : "text-zinc-900"}`}
                 >
                   {hasPrice
                     ? `$${Number(item.purchase_price).toLocaleString()}`
                     : "POA"}
                 </span>
                 {!isSold && hasPrice && (
-                  <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                  <span className="text-detail font-black uppercase tracking-widest text-zinc-400">
                     USD + Shipping
                   </span>
                 )}
               </div>
             </div>
 
-            <div className="mb-12 text-zinc-500 leading-relaxed border-l border-zinc-200 pl-8 text-base font-medium max-w-prose">
+            <div className="mb-12 text-zinc-500 leading-relaxed border-l border-zinc-200 pl-8 text-base font-medium max-prose">
               <div
                 className="prose prose-zinc prose-sm italic"
                 dangerouslySetInnerHTML={{ __html: item.description || "" }}
@@ -200,18 +201,18 @@ export default async function ProductPage({
 
             <div className="grid grid-cols-1 border-t border-zinc-200 mb-12">
               <div className="flex justify-between py-4 border-b border-zinc-100 items-baseline">
-                <h4 className="text-[10px] uppercase font-black tracking-[0.3em] text-zinc-400">
+                <h4 className="text-detail uppercase font-black tracking-[0.3em] text-zinc-400">
                   Object Weight
                 </h4>
-                <p className="text-sm font-bold text-zinc-600 font-mono">
+                <p className="text-label font-bold text-zinc-600 font-mono">
                   {item.weight ? `${item.weight} LBS` : "—"}
                 </p>
               </div>
               <div className="flex justify-between py-4 border-b border-zinc-100 items-baseline">
-                <h4 className="text-[10px] uppercase font-black tracking-[0.3em] text-zinc-400">
+                <h4 className="text-detail uppercase font-black tracking-[0.3em] text-zinc-400">
                   Dimensions (L×W×H)
                 </h4>
-                <p className="text-sm font-bold text-zinc-600 font-mono">
+                <p className="text-label font-bold text-zinc-600 font-mono">
                   {item.length && item.width && item.height
                     ? `${item.length}" × ${item.width}" × ${item.height}"`
                     : "—"}
@@ -231,7 +232,7 @@ export default async function ProductPage({
                   <input type="hidden" name="itemId" value={item.id} />
                   <button
                     type="submit"
-                    className="w-full bg-zinc-800 text-white py-5 text-[12px] font-black uppercase tracking-[0.4em] hover:bg-blue-600 transition-all shadow-xl active:scale-[0.98]"
+                    className="w-full bg-zinc-800 text-white py-5 text-label font-black uppercase tracking-[0.4em] hover:bg-blue-600 transition-all shadow-xl active:scale-[0.98]"
                   >
                     Purchase
                   </button>
@@ -240,7 +241,7 @@ export default async function ProductPage({
                 !isSold && (
                   <a
                     href={`mailto:info@catskillas.com?subject=Inquiry: ${item.name} (Ref: CAS-${item.id})`}
-                    className="w-full bg-zinc-800 text-white py-5 text-[12px] font-black uppercase tracking-[0.4em] hover:bg-blue-600 transition-all text-center block"
+                    className="w-full bg-zinc-800 text-white py-5 text-label font-black uppercase tracking-[0.4em] hover:bg-blue-600 transition-all text-center block"
                   >
                     Request Pricing
                   </a>
@@ -248,7 +249,7 @@ export default async function ProductPage({
               )}
 
               {isSold && (
-                <div className="w-full bg-zinc-100 text-zinc-400 py-5 text-[12px] font-black uppercase tracking-[0.4em] border border-zinc-200 text-center cursor-not-allowed">
+                <div className="w-full bg-zinc-100 text-zinc-400 py-5 text-label font-black uppercase tracking-[0.4em] border border-zinc-200 text-center cursor-not-allowed">
                   Item Out of Circulation
                 </div>
               )}

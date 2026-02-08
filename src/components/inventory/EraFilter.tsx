@@ -59,7 +59,7 @@ export function EraFilter({ activeEra, options }: EraFilterProps) {
               activeEra !== "all" ? "text-blue-600" : "text-zinc-400"
             }
           />
-          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-800 truncate">
+          <span className="text-detail font-bold uppercase tracking-widest text-zinc-800 truncate">
             {activeLabel}
           </span>
         </div>
@@ -75,7 +75,7 @@ export function EraFilter({ activeEra, options }: EraFilterProps) {
             <button
               key={era}
               onClick={() => handleEraSelect(era)}
-              className={`w-full text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-zinc-50 transition-colors border-b last:border-b-0 border-zinc-50 ${
+              className={`w-full text-left px-4 py-3 text-detail font-bold uppercase tracking-widest hover:bg-zinc-50 transition-colors border-b last:border-b-0 border-zinc-50 ${
                 activeEra === era
                   ? "bg-zinc-50 text-blue-600"
                   : "text-zinc-500"

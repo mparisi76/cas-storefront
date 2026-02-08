@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import "./globals.css";
 import { ToastProvider } from "@/context/ToastContext";
+import { FontSizeProvider } from "@/app/providers/FontSizeProvider";
 
 export default function RootLayout({
   children,
@@ -21,9 +22,11 @@ export default function RootLayout({
     <html lang="en">
       <body className="flex flex-col min-h-screen bg-[#F9F8F6] text-zinc-700 antialiased">
         <main className="flex-1">
-          <ToastProvider>
-            {children}
-          </ToastProvider>
+          <FontSizeProvider>
+            <ToastProvider>
+              {children}
+            </ToastProvider>
+          </FontSizeProvider>
         </main>
       </body>
     </html>

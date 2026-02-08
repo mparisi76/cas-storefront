@@ -1,4 +1,3 @@
-// components/ui/Modal.tsx
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
@@ -60,12 +59,18 @@ export function Modal({
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-900 transition-colors"
+                className="absolute top-6 right-6 text-zinc-400 hover:text-zinc-900 transition-colors z-10"
               >
                 <X className="w-5 h-5" />
               </button>
             )}
-            {children}
+            
+            {/* Note: Usually, specific text inside 'children' should use 
+              text-detail, text-label, or text-tiny to respect your scaling.
+            */}
+            <div className="relative">
+              {children}
+            </div>
           </motion.div>
         </div>
       )}

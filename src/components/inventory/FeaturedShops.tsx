@@ -16,7 +16,7 @@ export default function FeaturedShops({
       <div className="px-4 md:px-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
           <div className="max-w-xl">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-600 mb-4 flex items-center gap-3">
+            <h2 className="text-detail font-black uppercase tracking-[0.4em] text-blue-600 mb-4 flex items-center gap-3">
               <span className="w-8 h-px bg-blue-600"></span>
               Verified Sources
             </h2>
@@ -26,7 +26,7 @@ export default function FeaturedShops({
           </div>
           <Link
             href="/inventory"
-            className="group text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-zinc-900 transition-colors flex items-center gap-2"
+            className="group text-detail font-bold uppercase tracking-widest text-zinc-400 hover:text-zinc-900 transition-colors flex items-center gap-2"
           >
             View All Sources
             <span className="group-hover:translate-x-1 transition-transform">
@@ -74,7 +74,7 @@ export default function FeaturedShops({
                 )}
               </div>
 
-              <p className="text-[10px] font-mono text-zinc-400 uppercase tracking-[0.2em] italic">
+              <p className="text-detail font-mono text-zinc-400 uppercase tracking-[0.2em] italic">
                 Direct Source — Hudson Valley, NY
               </p>
             </Link>

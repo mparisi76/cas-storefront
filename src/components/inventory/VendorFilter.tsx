@@ -61,7 +61,7 @@ export function VendorFilter({ vendors }: VendorFilterProps) {
               activeVendorSlug !== "all" ? "text-blue-600" : "text-zinc-400"
             }
           />
-          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-800 truncate">
+          <span className="text-detail font-bold uppercase tracking-widest text-zinc-800 truncate">
             {activeVendorName}
           </span>
         </div>
@@ -75,7 +75,7 @@ export function VendorFilter({ vendors }: VendorFilterProps) {
         <div className="absolute top-full left-0 w-full z-50 mt-1 bg-white border border-zinc-900 shadow-xl max-h-60 overflow-y-auto">
           <button
             onClick={() => handleVendorSelect(null)}
-            className={`w-full text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-zinc-50 transition-colors ${
+            className={`w-full text-left px-4 py-3 text-detail font-bold uppercase tracking-widest hover:bg-zinc-50 transition-colors ${
               activeVendorSlug === "all"
                 ? "bg-zinc-50 text-blue-600"
                 : "text-zinc-500"
@@ -87,13 +87,12 @@ export function VendorFilter({ vendors }: VendorFilterProps) {
             <button
               key={vendor.slug}
               onClick={() => handleVendorSelect(vendor.slug)}
-              className={`w-full text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-zinc-50 border-t border-zinc-50 transition-colors ${
+              className={`w-full text-left px-4 py-3 text-detail font-bold uppercase tracking-widest hover:bg-zinc-50 border-t border-zinc-50 transition-colors ${
                 activeVendorSlug === vendor.slug
                   ? "bg-zinc-50 text-blue-600"
                   : "text-zinc-500"
               }`}
             >
-              {/* Update: Show shop_name instead of vendor name */}
               {vendor.shop_name}
             </button>
           ))}

@@ -38,7 +38,7 @@ export default function Pagination({
         <button
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="px-3 md:px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 disabled:opacity-0 hover:text-blue-600 transition-colors shrink-0"
+          className="px-3 md:px-4 py-2 text-detail font-black uppercase tracking-[0.2em] text-zinc-400 disabled:opacity-0 hover:text-blue-600 transition-colors shrink-0"
         >
           Prev
         </button>
@@ -49,7 +49,7 @@ export default function Pagination({
             <button
               key={page}
               onClick={() => handlePageChange(page)}
-              className={`w-9 h-9 md:w-10 md:h-10 flex items-center justify-center text-[11px] font-bold transition-all shrink-0
+              className={`w-9 h-9 md:w-10 md:h-10 flex items-center justify-center text-label font-bold transition-all shrink-0
                 ${
                   currentPage === page
                     ? "bg-zinc-800 text-white"
@@ -65,7 +65,7 @@ export default function Pagination({
         <button
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="px-3 md:px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 disabled:opacity-0 hover:text-blue-600 transition-colors shrink-0"
+          className="px-3 md:px-4 py-2 text-detail font-black uppercase tracking-[0.2em] text-zinc-400 disabled:opacity-0 hover:text-blue-600 transition-colors shrink-0"
         >
           Next
         </button>
