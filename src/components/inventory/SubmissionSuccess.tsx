@@ -3,12 +3,16 @@
 import { useState, useEffect } from "react";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Artifact } from "@/types/artifact";
 import ArtifactCard from "@/components/inventory/ArtifactCard";
 
 const DIRECTUS_URL = process.env.NEXT_PUBLIC_DIRECTUS_URL;
 
 export function SubmissionSuccess() {
+  const searchParams = useSearchParams();
+  const itemName = searchParams.get("item");
+
   const [recentItems, setRecentItems] = useState<Artifact[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -53,7 +57,7 @@ export function SubmissionSuccess() {
           We&apos;re on it.
         </h1>
         <p className="text-zinc-500 text-base leading-relaxed max-w-md mx-auto italic">
-          Thanks for reaching out. We&apos;ve got your details and we&apos;ll be
+          Thanks for reaching out{itemName ? ` regarding ${itemName}` : ""}. We&apos;ve got your details and we&apos;ll be
           in touch shortly. In the meantime, feel free to keep scouting.
         </p>
       </div>

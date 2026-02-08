@@ -38,6 +38,7 @@ export interface Artifact {
   date_created: Date;
   date_updated: Date;
   featured: boolean;
+  source_url?: string;
 }
 
 export interface GalleryItem {

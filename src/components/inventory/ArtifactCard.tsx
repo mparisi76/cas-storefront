@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Artifact } from "@/types/artifact";
-import { ImageIcon, AlertCircle, Store } from "lucide-react";
+import { ImageIcon, AlertCircle, Store, Info } from "lucide-react";
 import FeaturedBadge from "@/components/inventory/FeaturedBadge";
 
 interface ArtifactCardProps {
@@ -20,6 +20,9 @@ export default function ArtifactCard({
   const [hasError, setHasError] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
   const isSold = item.availability === "sold";
+  const isExternal = Boolean(item.source_url);
+
+  console.log(item.source_url);
 
   // Check if price exists and is greater than 0
   const hasPrice = item.purchase_price && Number(item.purchase_price) > 0;
@@ -32,7 +35,7 @@ export default function ArtifactCard({
     }
   }, [item.thumbnail]);
 
-  const imageUrl = item.thumbnail 
+  const imageUrl = item.thumbnail
     ? `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${item.thumbnail}?width=800&height=1000&fit=inside&format=webp`
     : null;
 
@@ -71,7 +74,7 @@ export default function ArtifactCard({
         {hasError && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-50 z-20">
             <AlertCircle className="text-zinc-300 mb-1" size={20} />
-            <span className="text-tiny font-bold uppercase tracking-widest text-zinc-400">
+            <span className="text-detail font-bold uppercase tracking-widest text-zinc-400">
               Asset Missing
             </span>
           </div>
@@ -111,14 +114,26 @@ export default function ArtifactCard({
 
       {/* TEXT AREA */}
       <div className="flex-1 flex flex-col relative min-h-25">
-        {!hideVendor && (
-          <div className="flex items-center gap-1.5 mb-2">
-            <Store size={10} className="text-zinc-400 shrink-0" />
-            <p className="text-detail font-black uppercase tracking-[0.2em] text-zinc-400 italic truncate">
-              {vendorName}
-            </p>
-          </div>
-        )}
+        <div className="flex flex-col gap-1 mb-2">
+          {!hideVendor && (
+            <div className="flex items-center gap-1.5">
+              <Store size={10} className="text-zinc-400 shrink-0" />
+              <p className="text-detail font-black uppercase tracking-[0.2em] text-zinc-400 italic truncate">
+                {vendorName}
+              </p>
+            </div>
+          )}
+
+          {/* AGGREGATE LISTING TAG */}
+          {isExternal && (
+            <div className="flex items-center gap-1.5">
+              <Info size={10} className="text-blue-500 shrink-0" />
+              <p className="text-detail font-black uppercase tracking-[0.2em] text-blue-500 italic">
+                Third-Party Listing
+              </p>
+            </div>
+          )}
+        </div>
 
         <div className="flex justify-between items-start gap-4">
           <h3

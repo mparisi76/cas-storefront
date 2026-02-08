@@ -93,6 +93,7 @@ export const getShopItems = cache(
           "availability",
           "classification",
           "featured",
+          "source_url",
           { category: ["id", "slug", "name", { parent: ["id", "slug"] }] },
           { user_created: ["id", "first_name", "last_name", "shop_name"] },
         ],

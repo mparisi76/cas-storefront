@@ -64,34 +64,34 @@ function ContactForm() {
           <div className="space-y-12 border-l-2 border-zinc-100 pl-8">
             <div className="space-y-8">
               <div>
-                <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-900 mb-2">
+                <h4 className="text-detail font-black uppercase tracking-widest text-zinc-900 mb-2">
                   Location
                 </h4>
-                <p className="text-sm text-zinc-500 italic uppercase">
+                <p className="text-base text-zinc-500 italic uppercase">
                   Hudson Valley, New York
                 </p>
               </div>
 
               <div>
-                <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-900 mb-2">
+                <h4 className="text-detail font-black uppercase tracking-widest text-zinc-900 mb-2">
                   Direct Outreach
                 </h4>
-                <p className="text-sm text-zinc-500 italic uppercase underline decoration-zinc-200 underline-offset-4 break-all">
+                <p className="text-base text-zinc-500 italic uppercase underline decoration-zinc-200 underline-offset-4 break-all">
                   catskillarchitecturalsalvage@gmail.com
                 </p>
               </div>
 
               <div>
-                <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-900 mb-3 flex items-center gap-2">
+                <h4 className="text-detail font-black uppercase tracking-widest text-zinc-900 mb-3 flex items-center gap-2">
                   <Clock size={12} /> Hours
                 </h4>
-                <p className="text-[11px] text-zinc-500 uppercase tracking-tight leading-relaxed">
+                <p className="text-label text-zinc-500 uppercase tracking-tight leading-relaxed">
                   Studio Visits by Appointment Only
                 </p>
               </div>
             </div>
 
-            <p className="text-[11px] text-zinc-400 leading-relaxed uppercase tracking-tight max-w-xs pt-4">
+            <p className="text-label text-zinc-400 leading-relaxed uppercase tracking-tight max-w-xs pt-4">
               Specialized search services are prioritized for trade
               professionals, architects, and verified acquisition partners.
             </p>
@@ -104,40 +104,40 @@ function ContactForm() {
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-900">
+              <label className="text-detail font-black uppercase tracking-[0.2em] text-zinc-900">
                 Name
               </label>
               <input
                 name="name"
                 required
                 type="text"
-                className="w-full bg-transparent border-b border-zinc-200 py-3 font-medium text-zinc-800 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-400"
+                className="w-full bg-transparent border-b border-zinc-200 py-3 text-base font-medium text-zinc-800 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-400"
                 placeholder="Full Name"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-900">
+              <label className="text-detail font-black uppercase tracking-[0.2em] text-zinc-900">
                 Email
               </label>
               <input
                 name="email"
                 required
                 type="email"
-                className="w-full bg-transparent border-b border-zinc-200 py-3 font-medium text-zinc-800 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-400"
+                className="w-full bg-transparent border-b border-zinc-200 py-3 text-base font-medium text-zinc-800 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-400"
                 placeholder="email@firm.com"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-900">
+            <label className="text-detail font-black uppercase tracking-[0.2em] text-zinc-900">
               Inquiry Type
             </label>
             <div className="relative">
               <select
                 name="type"
                 defaultValue={initialType}
-                className="w-full bg-transparent border-b border-zinc-200 py-3 font-medium text-zinc-800 focus:border-zinc-900 outline-none transition-colors appearance-none cursor-pointer"
+                className="w-full bg-transparent border-b border-zinc-200 py-3 text-base font-medium text-zinc-800 focus:border-zinc-900 outline-none transition-colors appearance-none cursor-pointer"
               >
                 <option value="general">General Inquiry</option>
                 <option value="request">Stock Request (Search)</option>
@@ -153,7 +153,7 @@ function ContactForm() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-900">
+            <label className="text-detail font-black uppercase tracking-[0.2em] text-zinc-900">
               Message / Item Details
             </label>
             <textarea
@@ -162,14 +162,14 @@ function ContactForm() {
               defaultValue={initialItem ? `Requesting: ${initialItem}` : ""}
               required
               placeholder="The more details you can provide, the more likely we can help you"
-              className="w-full bg-transparent border-b border-zinc-200 py-3 font-medium text-zinc-800 focus:border-zinc-900 outline-none transition-colors resize-none placeholder:text-zinc-400"
+              className="w-full bg-transparent border-b border-zinc-200 py-3 text-base font-medium text-zinc-800 focus:border-zinc-900 outline-none transition-colors resize-none placeholder:text-zinc-400"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-zinc-900 text-white py-5 text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-blue-600 transition-all disabled:bg-zinc-200 cursor-pointer"
+            className="w-full bg-zinc-900 text-white py-5 text-label font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-blue-600 transition-all disabled:bg-zinc-200 cursor-pointer"
           >
             {loading ? (
               "TRANSMITTING..."
@@ -191,14 +191,14 @@ export default function ContactClient() {
       <div className="mb-12">
         <Link
           href="/inventory"
-          className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-zinc-900 transition-colors"
+          className="inline-flex items-center gap-2 text-label font-bold uppercase tracking-widest text-zinc-400 hover:text-zinc-900 transition-colors"
         >
           <ArrowLeft size={14} /> Back to Inventory
         </Link>
       </div>
       <Suspense
         fallback={
-          <div className="text-center py-20 uppercase font-mono text-[10px] tracking-widest">
+          <div className="text-center py-20 uppercase font-mono text-label tracking-widest">
             Loading Form...
           </div>
         }

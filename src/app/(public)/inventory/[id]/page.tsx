@@ -10,7 +10,7 @@ import { createCheckout } from "@/app/actions/checkout";
 import type { Metadata } from "next";
 import ViewTracker from "@/components/inventory/ViewTracker";
 import RecentlyViewed from "@/components/inventory/RecentlyViewed";
-import { Store, ExternalLink, Info } from "lucide-react";
+import { Store, ExternalLink, Info, MessageSquare } from "lucide-react";
 import MoreFromVendor from "@/components/inventory/MoreFromVendor";
 
 export async function generateMetadata({
@@ -25,7 +25,7 @@ export async function generateMetadata({
     }),
   );
 
-  if (!item) return { title: "Artifact Not Found" };
+  if (!item) return { title: "Item Not Found" };
 
   const eraTag = item.classification ? ` | ${item.classification.toUpperCase()}` : "";
 
@@ -77,22 +77,7 @@ export default async function ProductPage({
 
   const isSold = item.availability === "sold";
   const hasPrice = item.purchase_price && Number(item.purchase_price) > 0;
-  
-  // Extract Source Name for better UX
-  const getSourceDisplayName = (url: string | null) => {
-    if (!url) return "Source Archive";
-    try {
-      const domain = new URL(url).hostname.replace('www.', '');
-      const parts = domain.split('.');
-      const name = parts.length > 2 ? parts[parts.length - 2] : parts[0];
-      return name.charAt(0).toUpperCase() + name.slice(1);
-    } catch {
-      return "Source Archive";
-    }
-  };
-
   const isExternal = Boolean(item.source_url);
-  const sourceName = getSourceDisplayName(item.source_url);
   
   const vendorName = item.user_created
     ? `${item.user_created.shop_name || ""}`.trim()
@@ -103,6 +88,9 @@ export default async function ProductPage({
     Boolean(item.length) &&
     Boolean(item.width) &&
     Boolean(item.height);
+
+  // Prepare contact link with pre-filled parameters
+  const contactLink = `/contact?type=${isExternal ? "general" : "request"}&item=${encodeURIComponent(`${item.name} (CAS-${String(id).padStart(4, "0")})`)}`;
 
   return (
     <main className="min-h-full w-full bg-[#F9F8F6] text-zinc-700 selection:bg-blue-100 pb-24">
@@ -150,7 +138,7 @@ export default async function ProductPage({
                 <div className="mb-6 flex items-center gap-2 bg-blue-50 border border-blue-100 px-3 py-2">
                   <Info size={14} className="text-blue-600" />
                   <span className="text-detail font-bold uppercase tracking-widest text-blue-700">
-                    Aggregated Listing Via {sourceName}
+                    Third-Party Listed
                   </span>
                 </div>
               )}
@@ -258,7 +246,7 @@ export default async function ProductPage({
                         rel="noopener noreferrer"
                         className="w-full bg-blue-600 text-white py-5 text-label font-black uppercase tracking-[0.4em] hover:bg-zinc-800 transition-all shadow-xl flex items-center justify-center gap-3"
                       >
-                        View on {sourceName} <ExternalLink size={16} />
+                        View Original Listing <ExternalLink size={16} />
                       </a>
                       <div className="mt-4 p-4 border border-blue-100 bg-blue-50/50">
                         <p className="text-detail font-bold uppercase tracking-widest text-blue-700 mb-1">
@@ -266,7 +254,8 @@ export default async function ProductPage({
                         </p>
                         <p className="text-detail text-blue-600/80 leading-relaxed">
                           This item is part of our aggregated digital collection. 
-                          Final transaction and logistics are managed directly by {sourceName}.
+                          Final transaction and logistics are managed directly by the 
+                          originating archive.
                         </p>
                       </div>
                     </div>
@@ -290,6 +279,14 @@ export default async function ProductPage({
                       Request Pricing
                     </a>
                   )}
+                  
+                  {/* DYNAMIC CONTACT VENDOR BUTTON */}
+                  <Link
+                    href={contactLink}
+                    className="w-full border border-zinc-300 text-zinc-500 py-4 text-label font-black uppercase tracking-[0.2em] hover:bg-zinc-800 hover:text-white hover:border-zinc-800 transition-all flex items-center justify-center gap-3"
+                  >
+                    <MessageSquare size={14} /> Contact Vendor
+                  </Link>
                 </div>
               )}
 
@@ -300,7 +297,7 @@ export default async function ProductPage({
               )}
 
               {!isSold && (
-                <div className="pt-2">
+                <div className="pt-2 group/shipping relative">
                   <ShippingDrawer
                     weight={Number(item.weight) || 0}
                     length={Number(item.length) || 0}
@@ -310,6 +307,16 @@ export default async function ProductPage({
                     id={item.id}
                     disabled={!hasDimensions || isExternal}
                   />
+                  
+                  {/* TOOLTIP WITH 11PX TEXT */}
+                  {(!hasDimensions || isExternal) && (
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-zinc-800 text-white text-[11px] font-bold uppercase tracking-widest opacity-0 group-hover/shipping:opacity-100 transition-opacity pointer-events-none z-10 text-center shadow-xl">
+                      {isExternal 
+                        ? "Logistics for external items are handled by the original seller." 
+                        : "Dimensional data required for automated shipping quotes."}
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-zinc-800" />
+                    </div>
+                  )}
                 </div>
               )}
             </div>
