@@ -22,8 +22,6 @@ export default function ArtifactCard({
   const isSold = item.availability === "sold";
   const isExternal = Boolean(item.source_url);
 
-  console.log(item.source_url);
-
   // Check if price exists and is greater than 0
   const hasPrice = item.purchase_price && Number(item.purchase_price) > 0;
 
