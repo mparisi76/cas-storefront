@@ -10,7 +10,7 @@ import { createCheckout } from "@/app/actions/checkout";
 import type { Metadata } from "next";
 import ViewTracker from "@/components/inventory/ViewTracker";
 import RecentlyViewed from "@/components/inventory/RecentlyViewed";
-import { Store } from "lucide-react";
+import { Store, ExternalLink, Info } from "lucide-react";
 import MoreFromVendor from "@/components/inventory/MoreFromVendor";
 
 export async function generateMetadata({
@@ -59,6 +59,7 @@ export default async function ProductPage({
         "photo_gallery.*",
         "availability",
         "date_sold",
+        "source_url",
         { category: ["id", "name", "slug"] },
         {
           user_created: [
@@ -76,6 +77,22 @@ export default async function ProductPage({
 
   const isSold = item.availability === "sold";
   const hasPrice = item.purchase_price && Number(item.purchase_price) > 0;
+  
+  // Extract Source Name for better UX
+  const getSourceDisplayName = (url: string | null) => {
+    if (!url) return "Source Archive";
+    try {
+      const domain = new URL(url).hostname.replace('www.', '');
+      const parts = domain.split('.');
+      const name = parts.length > 2 ? parts[parts.length - 2] : parts[0];
+      return name.charAt(0).toUpperCase() + name.slice(1);
+    } catch {
+      return "Source Archive";
+    }
+  };
+
+  const isExternal = Boolean(item.source_url);
+  const sourceName = getSourceDisplayName(item.source_url);
   
   const vendorName = item.user_created
     ? `${item.user_created.shop_name || ""}`.trim()
@@ -128,6 +145,16 @@ export default async function ProductPage({
 
           <section className="lg:col-span-5">
             <div className="mb-10">
+              {/* EXTERNAL SOURCE NOTICE */}
+              {isExternal && (
+                <div className="mb-6 flex items-center gap-2 bg-blue-50 border border-blue-100 px-3 py-2">
+                  <Info size={14} className="text-blue-600" />
+                  <span className="text-detail font-bold uppercase tracking-widest text-blue-700">
+                    Aggregated Listing Via {sourceName}
+                  </span>
+                </div>
+              )}
+
               <Link
                 href={`/inventory?vendor=${item.user_created?.id}`}
                 className="inline-flex items-center gap-2 mb-6 group"
@@ -143,7 +170,7 @@ export default async function ProductPage({
                   )}
                 </div>
                 <span className="text-detail font-black uppercase tracking-[0.2em] text-zinc-500 group-hover:text-blue-600 transition-colors">
-                  Sold by: {vendorName}
+                  Listed by: {vendorName}
                 </span>
               </Link>
 
@@ -169,20 +196,19 @@ export default async function ProductPage({
                 </span>
               </div>
 
-              {/* Title now using text-2xl which is your top-tier scaling utility */}
               <h1
-                className={`text-2xl font-bold uppercase tracking-tighter italic leading-[0.9] mb-6 ${isSold ? "text-zinc-400" : "text-zinc-800"}`}
+                className={`text-4xl font-bold uppercase tracking-tighter italic leading-[0.9] mb-6 ${isSold ? "text-zinc-400" : "text-zinc-800"}`}
               >
                 {item.name}
               </h1>
 
               <div className="flex items-baseline gap-4">
                 <span
-                  className={`text-2xl font-light tracking-tighter ${isSold ? "text-zinc-300 line-through" : "text-zinc-900"}`}
+                  className={`text-4xl font-light tracking-tighter ${isSold ? "text-zinc-300 line-through" : "text-zinc-900"}`}
                 >
                   {hasPrice
                     ? `$${Number(item.purchase_price).toLocaleString()}`
-                    : "POA"}
+                    : "Call for Price"}
                 </span>
                 {!isSold && hasPrice && (
                   <span className="text-detail font-black uppercase tracking-widest text-zinc-400">
@@ -192,7 +218,7 @@ export default async function ProductPage({
               </div>
             </div>
 
-            <div className="mb-12 text-zinc-500 leading-relaxed border-l border-zinc-200 pl-8 text-base font-medium max-prose">
+            <div className="mb-12 text-zinc-500 leading-relaxed border-l border-zinc-200 pl-8 text-base font-medium max-w-prose">
               <div
                 className="prose prose-zinc prose-sm italic"
                 dangerouslySetInnerHTML={{ __html: item.description || "" }}
@@ -221,31 +247,50 @@ export default async function ProductPage({
             </div>
 
             <div className="space-y-4">
-              {!isSold && hasPrice ? (
-                <form action={createCheckout}>
-                  <input
-                    type="hidden"
-                    name="price"
-                    value={item.purchase_price}
-                  />
-                  <input type="hidden" name="itemName" value={item.name} />
-                  <input type="hidden" name="itemId" value={item.id} />
-                  <button
-                    type="submit"
-                    className="w-full bg-zinc-800 text-white py-5 text-label font-black uppercase tracking-[0.4em] hover:bg-blue-600 transition-all shadow-xl active:scale-[0.98]"
-                  >
-                    Purchase
-                  </button>
-                </form>
-              ) : (
-                !isSold && (
-                  <a
-                    href={`mailto:info@catskillas.com?subject=Inquiry: ${item.name} (Ref: CAS-${item.id})`}
-                    className="w-full bg-zinc-800 text-white py-5 text-label font-black uppercase tracking-[0.4em] hover:bg-blue-600 transition-all text-center block"
-                  >
-                    Request Pricing
-                  </a>
-                )
+              {/* PRIMARY ACTION BUTTONS */}
+              {!isSold && (
+                <div className="flex flex-col gap-4">
+                  {isExternal ? (
+                    <div className="group relative">
+                      <a
+                        href={item.source_url!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full bg-blue-600 text-white py-5 text-label font-black uppercase tracking-[0.4em] hover:bg-zinc-800 transition-all shadow-xl flex items-center justify-center gap-3"
+                      >
+                        View on {sourceName} <ExternalLink size={16} />
+                      </a>
+                      <div className="mt-4 p-4 border border-blue-100 bg-blue-50/50">
+                        <p className="text-detail font-bold uppercase tracking-widest text-blue-700 mb-1">
+                          Note
+                        </p>
+                        <p className="text-detail text-blue-600/80 leading-relaxed">
+                          This item is part of our aggregated digital collection. 
+                          Final transaction and logistics are managed directly by {sourceName}.
+                        </p>
+                      </div>
+                    </div>
+                  ) : hasPrice ? (
+                    <form action={createCheckout}>
+                      <input type="hidden" name="price" value={item.purchase_price} />
+                      <input type="hidden" name="itemName" value={item.name} />
+                      <input type="hidden" name="itemId" value={item.id} />
+                      <button
+                        type="submit"
+                        className="w-full bg-zinc-800 text-white py-5 text-label font-black uppercase tracking-[0.4em] hover:bg-blue-600 transition-all shadow-xl active:scale-[0.98]"
+                      >
+                        Purchase
+                      </button>
+                    </form>
+                  ) : (
+                    <a
+                      href={`mailto:info@catskillas.com?subject=Inquiry: ${item.name} (Ref: CAS-${item.id})`}
+                      className="w-full bg-zinc-800 text-white py-5 text-label font-black uppercase tracking-[0.4em] hover:bg-blue-600 transition-all text-center block"
+                    >
+                      Request Pricing
+                    </a>
+                  )}
+                </div>
               )}
 
               {isSold && (
@@ -263,7 +308,7 @@ export default async function ProductPage({
                     height={Number(item.height) || 0}
                     itemName={item.name}
                     id={item.id}
-                    disabled={!hasDimensions}
+                    disabled={!hasDimensions || isExternal}
                   />
                 </div>
               )}

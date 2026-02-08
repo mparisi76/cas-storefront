@@ -95,6 +95,7 @@ export default function ShippingDrawer({
   return (
     <>
       <button
+        disabled={disabled}
         onClick={() => setIsOpen(true)}
         className={`w-full border py-4 text-label font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 ${
           disabled 
