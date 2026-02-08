@@ -1,17 +1,40 @@
 import directus from "@/lib/directus";
 import { PublicVendor } from "@/types/vendor";
-import { readItems, readUsers } from "@directus/sdk";
+import { readUsers } from "@directus/sdk";
 import { cache } from "react";
 
-interface DirectusVendorCollectionRaw {
+/**
+ * Internal interface to represent the raw Directus user response
+ * before it is mapped to our PublicVendor type.
+ */
+interface DirectusUserRaw {
   id: string;
-  name: string;
+  email?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
   shop_name?: string | null;
-  slug: string;
-  logo?: string | null;
-  description?: string | null;
+  avatar?: string | null;
   featured_vendor?: boolean | null;
 }
+
+/**
+ * Normalizes user data into the PublicVendor format.
+ * Maps Directus system user fields to your specific PublicVendor interface.
+ */
+const mapUserToVendor = (user: DirectusUserRaw): PublicVendor => {
+  return {
+    id: user.id,
+    email: user.email || "",
+    first_name: user.first_name || "Independent",
+    last_name: user.last_name || "Vendor",
+    shop_name: user.shop_name || `${user.first_name || "Independent"} ${user.last_name || "Vendor"}`.trim(),
+    slug: user.id, // Using ID as slug for system users
+    logo: user.avatar
+      ? `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${user.avatar}`
+      : null,
+    featured_vendor: !!user.featured_vendor,
+  };
+};
 
 export const getActiveVendors = cache(async (): Promise<PublicVendor[]> => {
   try {
@@ -19,6 +42,7 @@ export const getActiveVendors = cache(async (): Promise<PublicVendor[]> => {
       readUsers({
         fields: [
           "id",
+          "email",
           "first_name",
           "last_name",
           "shop_name",
@@ -28,47 +52,32 @@ export const getActiveVendors = cache(async (): Promise<PublicVendor[]> => {
         filter: {
           role: { name: { _eq: "Vendor" } },
         },
-        // Note: Removed sort from here as SDK types for readUsers often omit it
       }),
     );
 
-    const mappedVendors = response.map((user) => {
-      const displayName =
-        user.shop_name ||
-        `${user.first_name || "Independent"} ${user.last_name || "Vendor"}`.trim();
+    // Casting the response to our internal raw type to satisfy the mapper
+    const mappedVendors = (response as DirectusUserRaw[]).map(mapUserToVendor);
 
-      return {
-        id: user.id,
-        shop_name: displayName,
-        name: displayName,
-        slug: user.id,
-        logo: user.avatar
-          ? `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${user.avatar}`
-          : null,
-        featured_vendor: !!user.featured_vendor,
-      };
-    });
-
-    // Manually sort by shop_name to avoid SDK type errors
-    return mappedVendors.sort((a, b) => a.shop_name.localeCompare(b.shop_name));
+    // Sort by shop_name as the primary display field
+    return mappedVendors.sort((a, b) => 
+      (a.shop_name || "").localeCompare(b.shop_name || "")
+    );
   } catch (error) {
     console.error("Error fetching users as vendors:", error);
     return [];
   }
 });
 
-/**
- * Fetches only vendors marked as 'featured_vendor'
- */
 export const getFeaturedVendors = cache(async (): Promise<PublicVendor[]> => {
   try {
     const response = await directus.request(
       readUsers({
         fields: [
           "id",
-          "shop_name",
+          "email",
           "first_name",
           "last_name",
+          "shop_name",
           "avatar",
           "featured_vendor",
         ],
@@ -82,20 +91,7 @@ export const getFeaturedVendors = cache(async (): Promise<PublicVendor[]> => {
       }),
     );
 
-    return response.map((user) => ({
-      id: user.id,
-      shop_name:
-        user.shop_name ||
-        `${user.first_name || "Independent"} ${user.last_name || ""}`.trim(),
-      name:
-        user.shop_name ||
-        `${user.first_name || "Independent"} ${user.last_name || ""}`.trim(),
-      slug: user.id,
-      logo: user.avatar
-        ? `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${user.avatar}`
-        : null,
-      featured_vendor: true,
-    }));
+    return (response as DirectusUserRaw[]).map(mapUserToVendor);
   } catch (error) {
     console.error("Error fetching featured vendors:", error);
     return [];
@@ -105,31 +101,27 @@ export const getFeaturedVendors = cache(async (): Promise<PublicVendor[]> => {
 export const getVendorBySlug = cache(
   async (slug: string): Promise<PublicVendor | null> => {
     try {
-      // If you are using a custom 'vendors' collection for profiles:
       const response = await directus.request(
-        readItems("vendors", {
-          fields: ["id", "name", "shop_name", "slug", "logo", "description"],
+        readUsers({
+          fields: [
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "shop_name",
+            "avatar",
+            "featured_vendor",
+          ],
           filter: {
-            slug: { _eq: slug },
-            status: { _eq: "active" },
+            id: { _eq: slug },
           },
-          limit: 1,
-        }),
+        })
       );
 
-      const vendor = response[0] as DirectusVendorCollectionRaw;
-      if (!vendor) return null;
+      const user = response[0] as DirectusUserRaw | undefined;
+      if (!user) return null;
 
-      return {
-        id: vendor.id,
-        name: vendor.name,
-        shop_name: vendor.shop_name || vendor.name,
-        slug: vendor.slug,
-        logo: vendor.logo
-          ? `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${vendor.logo}`
-          : null,
-        featured_vendor: !!vendor.featured_vendor,
-      } as PublicVendor;
+      return mapUserToVendor(user);
     } catch (error) {
       console.error(`Error fetching vendor with slug ${slug}:`, error);
       return null;
