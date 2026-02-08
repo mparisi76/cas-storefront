@@ -24,15 +24,22 @@ export default async function MoreFromVendor({
           { status: { _eq: "published" } },
         ],
       },
+      sort: ["-date_created"], // Business Logic: Show their newest stock first
       limit: 4,
       fields: [
-        "id", "name", "thumbnail", "purchase_price", "availability",
+        "id",
+        "name",
+        "thumbnail",
+        "purchase_price",
+        "availability",
+        "classification",
         { user_created: ["id", "shop_name"] },
+        { category: ["id", "slug", "name"] },
       ],
     }),
   );
 
-  if (!artifacts || artifacts.length === 0) return null;
+  if (!artifacts || (artifacts as Artifact[]).length === 0) return null;
 
   return (
     <section className="border-t border-zinc-200 pt-16">
@@ -57,7 +64,7 @@ export default async function MoreFromVendor({
         {(artifacts as Artifact[]).map((item) => (
           <div 
             key={item.id} 
-            className="border-t border-r border-b border-l border-zinc-200 bg-[#F9F8F6] -ml-px -mt-px overflow-hidden"
+            className="border border-zinc-200 bg-[#F9F8F6] -ml-px -mt-px overflow-hidden"
           >
             <ArtifactCard item={item} hideVendor />
           </div>

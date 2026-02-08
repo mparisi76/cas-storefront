@@ -21,24 +21,26 @@ export async function generateMetadata({
   const { id } = await params;
   const item = await directus.request(
     readItem("props", id, {
-      fields: ["name", "description", "thumbnail"],
+      fields: ["name", "description", "thumbnail", "classification"],
     }),
   );
 
   if (!item) return { title: "Artifact Not Found" };
 
+  const eraTag = item.classification ? ` | ${item.classification.toUpperCase()}` : "";
+
   return {
-    title: item.name,
+    title: `${item.name}${eraTag}`,
     description:
       item.description?.replace(/<[^>]*>/g, "").substring(0, 160) ||
       "Curated Collections from Catskill Architectural Salvage.",
     openGraph: {
-      title: `${item.name} | Catskill Architectural Salvage`,
-      images: [
+      title: `${item.name}${eraTag} | Catskill Architectural Salvage`,
+      images: item.thumbnail ? [
         {
           url: `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${item.thumbnail}`,
         },
-      ],
+      ] : [],
     },
   };
 }
@@ -73,6 +75,8 @@ export default async function ProductPage({
   if (!item) notFound();
 
   const isSold = item.availability === "sold";
+  const hasPrice = item.purchase_price && Number(item.purchase_price) > 0;
+  
   const vendorName = item.user_created
     ? `${item.user_created.shop_name || ""}`.trim()
     : "Unnamed Shop";
@@ -152,7 +156,7 @@ export default async function ProductPage({
                   <>
                     <span className="text-zinc-300 text-[10px]">|</span>
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 italic">
-                      {item.classification}
+                      {item.classification.replace(/-/g, " ")}
                     </span>
                   </>
                 )}
@@ -175,11 +179,11 @@ export default async function ProductPage({
                 <span
                   className={`text-4xl font-light tracking-tighter ${isSold ? "text-zinc-300 line-through" : "text-zinc-800"}`}
                 >
-                  {item.purchase_price
+                  {hasPrice
                     ? `$${Number(item.purchase_price).toLocaleString()}`
                     : "POA"}
                 </span>
-                {!isSold && item.purchase_price && (
+                {!isSold && hasPrice && (
                   <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
                     USD + Shipping
                   </span>
@@ -216,7 +220,7 @@ export default async function ProductPage({
             </div>
 
             <div className="space-y-4">
-              {!isSold && item.purchase_price ? (
+              {!isSold && hasPrice ? (
                 <form action={createCheckout}>
                   <input
                     type="hidden"
@@ -267,7 +271,6 @@ export default async function ProductPage({
         </div>
 
         <div className="mt-24 space-y-24">
-          {/* VENDOR ARTIFACTS SECTION */}
           {item.user_created?.id && (
             <MoreFromVendor
               vendorId={item.user_created.id}
@@ -282,6 +285,7 @@ export default async function ProductPage({
               categoryName={item.category.name}
               categorySlug={item.category.slug}
               currentId={id}
+              classification={item.classification}
             />
           )}
           <RecentlyViewed currentId={id} />

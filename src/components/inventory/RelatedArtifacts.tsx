@@ -9,26 +9,44 @@ interface RelatedArtifactsProps {
   categoryName: string;
   categorySlug: string;
   currentId: string | number;
+  classification?: string; // Pass the era from the parent page
 }
 
 export default async function RelatedArtifacts({
   categoryId,
-  // categoryName,
   categorySlug,
   currentId,
+  classification,
 }: RelatedArtifactsProps) {
+  // Logic: Prioritize items in the same Category AND same Era
   const response = await directus.request(
     readItems("props", {
       filter: {
         _and: [
-          { category: { id: { _eq: categoryId } } },
-          { id: { _neq: currentId } },
           { status: { _eq: "published" } },
+          { id: { _neq: currentId } },
+          {
+            _or: [
+              {
+                _and: [
+                  { category: { id: { _eq: categoryId } } },
+                  { classification: { _eq: classification } },
+                ],
+              },
+              { category: { id: { _eq: categoryId } } },
+            ],
+          },
         ],
       },
+      sort: ["-date_created"], // Show newest first
       limit: 4,
       fields: [
-        "id", "name", "thumbnail", "purchase_price", "availability", "classification",
+        "id",
+        "name",
+        "thumbnail",
+        "purchase_price",
+        "availability",
+        "classification",
         { category: ["id", "slug", "name"] },
         { user_created: ["id", "shop_name"] },
       ],
@@ -46,27 +64,23 @@ export default async function RelatedArtifacts({
             Discovery
           </h3>
           <h2 className="text-2xl font-bold uppercase tracking-tighter text-zinc-800 italic">
-            Related Items
+            Related {classification ? classification.replace(/-/g, " ") : "Items"}
           </h2>
         </div>
-        
+
         <Link
-          href={`/inventory?category=${categorySlug}`}
+          href={`/inventory?category=${categorySlug}${classification ? `&classification=${classification}` : ""}`}
           className="text-[10px] font-black uppercase tracking-widest text-blue-600 border-b border-blue-600 pb-1 hover:text-zinc-900 hover:border-zinc-900 transition-all"
         >
           View all
         </Link>
       </div>
 
-      {/* THE "INVENTORY PAGE" GRID LOGIC: 
-          -ml-px and -mt-px on both parent and child.
-          This ensures the grid stops exactly where the items stop.
-      */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 -ml-px -mt-px">
         {relatedItems.map((related) => (
-          <div 
-            key={related.id} 
-            className="border-t border-r border-b border-l border-zinc-200 bg-[#F9F8F6] -ml-px -mt-px overflow-hidden"
+          <div
+            key={related.id}
+            className="border border-zinc-200 bg-[#F9F8F6] -ml-px -mt-px overflow-hidden"
           >
             <ArtifactCard item={related} />
           </div>

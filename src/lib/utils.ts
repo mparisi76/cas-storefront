@@ -1,9 +1,10 @@
 import { Category, CategoryTree } from "@/types/category";
-import { Artifact } from "@/types/artifact";
+// import { Artifact } from "@/types/artifact";
+import { TreeParent, TreeChild } from "@/types/category";
 
 export function getCategoryTree(
   categories: Category[],
-  _items: Artifact[],
+  // _items: Artifact[],
 ): CategoryTree {
   const tree: CategoryTree = {};
 
@@ -37,4 +38,17 @@ export function getCategoryTree(
   });
 
   return tree;
+}
+
+/**
+ * Flattens a category tree into a single array of categories and children.
+ */
+export function flattenTree(nodes: TreeParent[]): (TreeParent | TreeChild)[] {
+  return nodes.reduce((acc: (TreeParent | TreeChild)[], node) => {
+    acc.push(node);
+    if (node.children) {
+      acc.push(...Object.values(node.children));
+    }
+    return acc;
+  }, []);
 }

@@ -5,7 +5,7 @@ import { X, Trash2 } from "lucide-react";
 import { PublicVendor } from "@/types/vendor";
 
 interface ActiveFiltersProps {
-  vendors: PublicVendor[]; // Using any[] here as it's a shared component, logic handles the find
+  vendors: PublicVendor[];
   className?: string;
 }
 
@@ -41,7 +41,7 @@ export function ActiveFilters({ vendors, className = "" }: ActiveFiltersProps) {
 
   return (
     <div className={`flex flex-wrap items-center gap-2 ${className}`}>
-      {/* Reset Icon Button */}
+      {/* Clear All Button */}
       <button
         onClick={resetAll}
         className="flex items-center justify-center w-7 h-7 bg-white border border-zinc-200 text-zinc-400 hover:text-red-600 transition-colors"
@@ -56,7 +56,7 @@ export function ActiveFilters({ vendors, className = "" }: ActiveFiltersProps) {
           onClick={() => clearFilter("vendor")}
           className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900 text-white text-[9px] font-black uppercase tracking-widest hover:bg-zinc-800 transition-colors"
         >
-          {activeVendor.shop_name || activeVendor.name} <X size={10} />
+          {activeVendor.shop_name || activeVendor.first_name} <X size={10} />
         </button>
       )}
 
@@ -76,7 +76,7 @@ export function ActiveFilters({ vendors, className = "" }: ActiveFiltersProps) {
           onClick={() => clearFilter("classification")}
           className="flex items-center gap-2 px-3 py-1.5 bg-white border border-zinc-200 text-zinc-900 text-[9px] font-black uppercase tracking-widest hover:bg-zinc-50 transition-colors"
         >
-          {activeEra} <X size={10} />
+          {activeEra.replace(/-/g, " ")} <X size={10} />
         </button>
       )}
 

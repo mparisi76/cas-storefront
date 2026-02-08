@@ -92,7 +92,7 @@ export const getShopItems = cache(
           "purchase_price",
           "availability",
           "classification",
-          "featured", // Added to fields
+          "featured",
           { category: ["id", "slug", "name", { parent: ["id", "slug"] }] },
           { user_created: ["id", "first_name", "last_name", "shop_name"] },
         ],

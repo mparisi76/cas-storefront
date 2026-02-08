@@ -21,6 +21,9 @@ export default function ArtifactCard({
   const imgRef = useRef<HTMLImageElement>(null);
   const isSold = item.availability === "sold";
 
+  // Check if price exists and is greater than 0
+  const hasPrice = item.purchase_price && Number(item.purchase_price) > 0;
+
   useEffect(() => {
     if (imgRef.current?.complete) {
       requestAnimationFrame(() => {
@@ -29,7 +32,9 @@ export default function ArtifactCard({
     }
   }, [item.thumbnail]);
 
-  const imageUrl = `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${item.thumbnail}?width=800&height=1000&fit=inside&format=webp`;
+  const imageUrl = item.thumbnail 
+    ? `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${item.thumbnail}?width=800&height=1000&fit=inside&format=webp`
+    : null;
 
   const vendorName = item.user_created
     ? `${item.user_created.shop_name || ""}`.trim()
@@ -44,9 +49,9 @@ export default function ArtifactCard({
     >
       {/* IMAGE CONTAINER */}
       <div className="aspect-4/5 bg-zinc-100 overflow-hidden mb-6 md:mb-8 relative shrink-0">
-        {/* FEATURED BADGE: Only show if featured and NOT sold */}
         {item.featured && !isSold && <FeaturedBadge />}
 
+        {/* LOADING STATE */}
         {!isLoaded && !hasError && item.thumbnail && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-50 z-20">
             <div className="animate-pulse flex flex-col items-center">
@@ -61,6 +66,8 @@ export default function ArtifactCard({
             </div>
           </div>
         )}
+
+        {/* ERROR STATE */}
         {hasError && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-50 z-20">
             <AlertCircle className="text-zinc-300 mb-1" size={20} />
@@ -69,6 +76,8 @@ export default function ArtifactCard({
             </span>
           </div>
         )}
+
+        {/* SOLD OVERLAY */}
         {isSold && (
           <div className="absolute inset-0 z-30 flex items-center justify-center bg-[#F9F8F6]/40 backdrop-blur-[1px]">
             <div className="border-2 border-zinc-800 px-4 py-1 text-zinc-800 font-black uppercase tracking-[0.3em] -rotate-12 text-xs shadow-sm bg-white">
@@ -77,7 +86,8 @@ export default function ArtifactCard({
           </div>
         )}
 
-        {item.thumbnail ? (
+        {/* IMAGE RENDER OR NO-IMAGE FALLBACK */}
+        {imageUrl ? (
           <img
             ref={imgRef}
             src={imageUrl}
@@ -90,8 +100,11 @@ export default function ArtifactCard({
             } ${isSold ? "grayscale contrast-75" : "grayscale group-hover:grayscale-0 group-hover:scale-105"}`}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-zinc-300 uppercase tracking-[0.2em] text-[11px] font-bold">
-            Image Pending
+          <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-50 text-zinc-300">
+            <ImageIcon size={32} strokeWidth={0.5} className="mb-2" />
+            <span className="uppercase tracking-[0.2em] text-[9px] font-bold">
+              No Image Available
+            </span>
           </div>
         )}
       </div>
@@ -124,9 +137,9 @@ export default function ArtifactCard({
             >
               {isSold
                 ? "[ SOLD ]"
-                : item.purchase_price
+                : hasPrice
                   ? `$${Number(item.purchase_price).toLocaleString()}`
-                  : "POA"}
+                  : "Call"}
             </span>
           </div>
         </div>

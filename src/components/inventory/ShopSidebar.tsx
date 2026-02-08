@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import { TreeChild, TreeParent } from "@/types/category";
 import { VendorFilter } from "./VendorFilter";
+import { EraFilter } from "./EraFilter";
 import { PublicVendor } from "@/types/vendor";
 import { ActiveFilters } from "./ActiveChips";
 
@@ -19,6 +20,9 @@ export default function ShopSidebar({ tree, vendors }: ShopSidebarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeSlug = searchParams.get("category") || "all";
+  const activeEra = searchParams.get("classification") || "all";
+
+  const eraOptions = ["all", "antique", "mid-century", "vintage", "modern"];
 
   const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>(
     () => {
@@ -50,28 +54,47 @@ export default function ShopSidebar({ tree, vendors }: ShopSidebarProps) {
     router.push(`/inventory?${params.toString()}`, { scroll: false });
   };
 
+  // const setEra = (era: string) => {
+  //   const params = new URLSearchParams(searchParams.toString());
+  //   if (era === "all") params.delete("classification");
+  //   else params.set("classification", era);
+  //   params.set("page", "1");
+  //   router.push(`/inventory?${params.toString()}`, { scroll: false });
+  // };
+
   return (
-    <aside className="w-64 shrink-0 hidden lg:block">
-      <div className="sticky top-32 pr-8 self-start space-y-12">
+    <aside className="w-64 shrink-0 hidden lg:block overflow-visible">
+      <div className="sticky top-10 pr-8 space-y-10">
         <ActiveFilters vendors={vendors} />
 
-        {/* VENDOR DROPDOWN SECTION */}
-        <div>
-          <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-zinc-600 mb-6">
+        {/* ERA SELECTION */}
+        <section>
+          <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 mb-4">
+            By Era
+          </h3>
+          <EraFilter
+            activeEra={activeEra}
+            options={eraOptions}
+          />
+        </section>
+
+        {/* VENDOR SELECTION */}
+        <section>
+          <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 mb-4">
             By Shop
           </h3>
           <VendorFilter vendors={vendors} />
-        </div>
+        </section>
 
-        {/* INVENTORY SECTION */}
-        <div>
-          <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-zinc-600 mb-10">
+        {/* CATEGORY NAV */}
+        <section>
+          <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 mb-6">
             By Category
           </h3>
-          <nav className="space-y-1">
+          <nav className="space-y-0.5">
             <button
               onClick={() => setCategory("all")}
-              className={`flex justify-between w-full mb-6 text-[11px] uppercase tracking-widest cursor-pointer transition-colors ${
+              className={`flex justify-between w-full mb-4 text-[10px] uppercase tracking-widest cursor-pointer transition-colors ${
                 activeSlug === "all"
                   ? "text-blue-600 font-black"
                   : "text-zinc-500 hover:text-zinc-900"
@@ -90,18 +113,18 @@ export default function ShopSidebar({ tree, vendors }: ShopSidebarProps) {
               const hasChildren = visibleChildren.length > 0;
 
               return (
-                <div key={id} className="space-y-2">
+                <div key={id} className="mb-2">
                   <div className="flex items-center justify-between group">
                     <button
                       onClick={() => setCategory(parent.slug, id)}
-                      className={`text-[11px] uppercase tracking-widest font-black cursor-pointer text-left transition-colors ${
+                      className={`text-[10px] uppercase tracking-widest font-black cursor-pointer text-left transition-colors ${
                         activeSlug === parent.slug
                           ? "text-blue-600"
                           : "text-zinc-800 hover:text-blue-600"
                       }`}
                     >
                       {parent.name}
-                      <span className="ml-2 text-[10px] font-medium text-zinc-400 group-hover:text-blue-400 transition-colors">
+                      <span className="ml-1 text-[9px] font-medium text-zinc-400">
                         ({parent.totalCount})
                       </span>
                     </button>
@@ -109,34 +132,34 @@ export default function ShopSidebar({ tree, vendors }: ShopSidebarProps) {
                     {hasChildren && (
                       <button
                         onClick={(e) => toggleExpand(id, e)}
-                        className="p-1 hover:bg-zinc-200 rounded transition-colors text-zinc-600 cursor-pointer"
+                        className="p-1 hover:bg-zinc-100 rounded transition-colors text-zinc-400"
                       >
                         <ChevronRight
-                          size={14}
-                          className={`transition-transform duration-300 ${isExpanded ? "rotate-90" : ""}`}
+                          size={12}
+                          className={`transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`}
                         />
                       </button>
                     )}
                   </div>
 
                   <div
-                    className={`grid transition-all duration-500 ease-in-out ${isExpanded ? "grid-rows-[1fr] opacity-100 mt-4 mb-4" : "grid-rows-[0fr] opacity-0 mt-0"}`}
+                    className={`grid transition-all duration-300 ease-in-out ${isExpanded ? "grid-rows-[1fr] opacity-100 mt-3 mb-2" : "grid-rows-[0fr] opacity-0"}`}
                   >
                     <div className="overflow-hidden">
-                      <div className="flex flex-col gap-3 pl-4 border-l border-zinc-200">
+                      <div className="flex flex-col gap-2 pl-3 border-l border-zinc-200">
                         {visibleChildren.map(
                           ([childId, child]: [string, TreeChild]) => (
                             <button
                               key={childId}
                               onClick={() => setCategory(child.slug)}
-                              className={`flex justify-between items-center w-full text-left text-[11px] uppercase tracking-wider cursor-pointer transition-colors ${
+                              className={`flex justify-between items-center w-full text-left text-[10px] uppercase tracking-wider cursor-pointer transition-colors ${
                                 activeSlug === child.slug
                                   ? "text-blue-600 font-black"
-                                  : "text-zinc-500 hover:text-zinc-600"
+                                  : "text-zinc-500 hover:text-zinc-900"
                               }`}
                             >
                               <span>{child.name}</span>
-                              <span className="opacity-80 font-mono text-[10px]">
+                              <span className="opacity-60 font-mono text-[9px]">
                                 [{child.count}]
                               </span>
                             </button>
@@ -149,7 +172,7 @@ export default function ShopSidebar({ tree, vendors }: ShopSidebarProps) {
               );
             })}
           </nav>
-        </div>
+        </section>
       </div>
     </aside>
   );
