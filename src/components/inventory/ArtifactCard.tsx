@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Artifact } from "@/types/artifact";
-import { ImageIcon, AlertCircle, Store, Info } from "lucide-react";
+import { ImageIcon, AlertCircle, Store, Globe } from "lucide-react";
 import FeaturedBadge from "@/components/inventory/FeaturedBadge";
 
 interface ArtifactCardProps {
@@ -51,6 +51,16 @@ export default function ArtifactCard({
       {/* IMAGE CONTAINER */}
       <div className="aspect-4/5 bg-zinc-100 overflow-hidden mb-6 md:mb-8 relative shrink-0">
         {item.featured && !isSold && <FeaturedBadge />}
+
+        {/* EXTERNAL INDICATOR - Matched to Detail Page Notice Style */}
+        {isExternal && !isSold && (
+          <div className="absolute top-0 right-0 z-20 bg-blue-50 border-b border-l border-blue-100 px-3 py-1.5 flex items-center gap-2">
+            <Globe size={12} className="text-blue-600" />
+            <span className="text-detail font-bold uppercase tracking-widest text-blue-700">
+              External
+            </span>
+          </div>
+        )}
 
         {/* LOADING STATE */}
         {!isLoaded && !hasError && item.thumbnail && (
@@ -118,16 +128,6 @@ export default function ArtifactCard({
               <Store size={10} className="text-zinc-400 shrink-0" />
               <p className="text-detail font-black uppercase tracking-[0.2em] text-zinc-400 italic truncate">
                 {vendorName}
-              </p>
-            </div>
-          )}
-
-          {/* AGGREGATE LISTING TAG */}
-          {isExternal && (
-            <div className="flex items-center gap-1.5">
-              <Info size={10} className="text-blue-500 shrink-0" />
-              <p className="text-detail font-black uppercase tracking-[0.2em] text-blue-500 italic">
-                Third-Party Listing
               </p>
             </div>
           )}
