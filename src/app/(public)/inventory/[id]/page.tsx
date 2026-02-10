@@ -96,29 +96,29 @@ export default async function ProductPage({
     <main className="min-h-full w-full bg-[#F9F8F6] text-zinc-700 selection:bg-blue-100 pb-24">
       <ViewTracker id={id} />
       <div className="max-w-6xl mx-auto px-8 py-12 lg:py-8">
-        {/* BREADCRUMBS */}
-        <nav className="mb-10 border-b border-zinc-200 pb-4 flex items-center gap-3">
+        {/* BREADCRUMBS - Updated with flex-nowrap and overflow control */}
+        <nav className="mb-10 border-b border-zinc-200 pb-4 flex items-center gap-3 w-full overflow-hidden whitespace-nowrap">
           <Link
             href="/inventory"
-            className="text-detail font-black uppercase tracking-[0.3em] text-zinc-400 hover:text-blue-600 transition-colors"
+            className="text-detail font-black uppercase tracking-[0.3em] text-zinc-400 hover:text-blue-600 transition-colors shrink-0"
           >
             Home
           </Link>
-          <span className="text-zinc-300 text-detail">—</span>
+          <span className="text-zinc-300 text-detail shrink-0">—</span>
           {item.category ? (
             <Link
               href={`/inventory?category=${item.category.slug}`}
-              className="text-detail font-black uppercase tracking-[0.3em] text-blue-600 transition-colors"
+              className="text-detail font-black uppercase tracking-[0.3em] text-blue-600 transition-colors shrink-0"
             >
               {item.category.name}
             </Link>
           ) : (
-            <span className="text-detail font-black uppercase tracking-[0.3em] text-zinc-300">
+            <span className="text-detail font-black uppercase tracking-[0.3em] text-zinc-300 shrink-0">
               General Salvage
             </span>
           )}
-          <span className="text-zinc-300 text-detail">—</span>
-          <span className="text-detail font-black uppercase tracking-[0.3em] text-zinc-800 truncate max-w-50 md:max-w-none">
+          <span className="text-zinc-300 text-detail shrink-0">—</span>
+          <span className="text-detail font-black uppercase tracking-[0.3em] text-zinc-800 truncate min-w-0">
             {item.name}
           </span>
         </nav>
@@ -138,7 +138,7 @@ export default async function ProductPage({
                 <div className="mb-6 flex items-center gap-2 bg-blue-50 border border-blue-100 px-3 py-2">
                   <Info size={14} className="text-blue-600" />
                   <span className="text-detail font-bold uppercase tracking-widest text-blue-700">
-                    Third-Party Listed
+                    External
                   </span>
                 </div>
               )}
@@ -158,7 +158,7 @@ export default async function ProductPage({
                   )}
                 </div>
                 <span className="text-detail font-black uppercase tracking-[0.2em] text-zinc-500 group-hover:text-blue-600 transition-colors">
-                  Listed by: {vendorName}
+                  {vendorName}
                 </span>
               </Link>
 

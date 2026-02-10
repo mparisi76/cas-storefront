@@ -47,9 +47,8 @@ export default async function HomePage() {
       : null;
 
     return (
-      // Changed from 'fixed' to 'relative' and removed overflow-hidden to allow scrolling
       <main className="relative w-full min-h-screen bg-zinc-950 text-zinc-900">
-        {/* HERO SECTION - Height set to screen height */}
+        {/* HERO SECTION */}
         <section className="relative h-screen w-full flex flex-col items-center justify-center overflow-hidden">
           <div className="absolute inset-0 z-0 pointer-events-none">
             {heroUrl ? (
@@ -69,11 +68,12 @@ export default async function HomePage() {
               Hudson Valley, New York
             </h2>
 
-            <div className="mb-14">
-              <h1 className="text-4xl md:text-7xl font-black uppercase tracking-tight text-white leading-tight">
+            {/* HEADER GROUP - Removed negative margin, added flex gap */}
+            <div className="mb-14 flex flex-col items-center gap-1 md:gap-2">
+              <h1 className="text-4xl md:text-7xl font-black uppercase tracking-tight text-white leading-none">
                 Catskill
               </h1>
-              <h1 className="text-2xl md:text-5xl font-light uppercase tracking-[0.3em] text-zinc-500 -mt-2">
+              <h1 className="text-xl md:text-5xl font-light uppercase tracking-[0.3em] text-zinc-500 leading-none">
                 Architectural Salvage
               </h1>
             </div>
@@ -117,10 +117,8 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* FEATURED SHOPS SECTION - Now scrollable below the fold */}
         <FeaturedShops vendors={featuredVendors} />
 
-        {/* Optional: Simple Footer */}
         <footer className="bg-white py-10 px-10 border-t border-zinc-100 flex justify-between items-center">
           <p className="text-[9px] font-mono uppercase tracking-[0.3em] text-zinc-400">
             © 2026 Catskill Architectural Salvage
