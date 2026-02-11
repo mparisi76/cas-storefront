@@ -33,6 +33,7 @@ export default async function MoreFromVendor({
         "purchase_price",
         "availability",
         "classification",
+        "source_url", // Added this so ArtifactCard knows if it's external
         { user_created: ["id", "shop_name"] },
         { category: ["id", "slug", "name"] },
       ],

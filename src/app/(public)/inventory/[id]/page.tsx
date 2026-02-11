@@ -10,7 +10,7 @@ import { createCheckout } from "@/app/actions/checkout";
 import type { Metadata } from "next";
 import ViewTracker from "@/components/inventory/ViewTracker";
 import RecentlyViewed from "@/components/inventory/RecentlyViewed";
-import { Store, ExternalLink, Info, MessageSquare } from "lucide-react";
+import { Store, ExternalLink, MessageSquare, Globe } from "lucide-react";
 import MoreFromVendor from "@/components/inventory/MoreFromVendor";
 
 export async function generateMetadata({
@@ -19,30 +19,31 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const item = await directus.request(
-    readItem("props", id, {
-      fields: ["name", "description", "thumbnail", "classification"],
-    }),
-  );
+  try {
+    const item = await directus.request(
+      readItem("props", id, {
+        fields: ["name", "description", "thumbnail", "classification"],
+      }),
+    );
 
-  if (!item) return { title: "Item Not Found" };
+    if (!item) return { title: "Item Not Found" };
 
-  const eraTag = item.classification ? ` | ${item.classification.toUpperCase()}` : "";
+    const eraTag = item.classification ? ` | ${item.classification.toUpperCase()}` : "";
 
-  return {
-    title: `${item.name}${eraTag}`,
-    description:
-      item.description?.replace(/<[^>]*>/g, "").substring(0, 160) ||
-      "Curated Collections from Catskill Architectural Salvage.",
-    openGraph: {
-      title: `${item.name}${eraTag} | Catskill Architectural Salvage`,
-      images: item.thumbnail ? [
-        {
-          url: `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${item.thumbnail}`,
-        },
-      ] : [],
-    },
-  };
+    return {
+      title: `${item.name}${eraTag}`,
+      openGraph: {
+        title: `${item.name}${eraTag} | Catskill Architectural Salvage`,
+        images: item.thumbnail ? [
+          {
+            url: `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${item.thumbnail}`,
+          },
+        ] : [],
+      },
+    };
+  } catch {
+    return { title: "Item Not Found" };
+  }
 }
 
 export default async function ProductPage({
@@ -52,26 +53,29 @@ export default async function ProductPage({
 }) {
   const { id } = await params;
 
-  const item = await directus.request(
-    readItem("props", id, {
-      fields: [
-        "*",
-        "photo_gallery.*",
-        "availability",
-        "date_sold",
-        "source_url",
-        { category: ["id", "name", "slug"] },
-        {
-          user_created: [
-            "id",
-            "description",
-            "avatar",
-            "shop_name",
-          ],
-        },
-      ],
-    }),
-  );
+  let item;
+  try {
+    item = await directus.request(
+      readItem("props", id, {
+        fields: [
+          "*",
+          "photo_gallery.*",
+          "availability",
+          "date_sold",
+          "source_url",
+          { category: ["id", "name", "slug"] },
+          {
+            user_created: ["id", "description", "avatar", "shop_name"],
+          },
+        ],
+      }),
+    );
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error(`Error fetching item ${id}:`, error.message);
+    }
+    notFound(); 
+  }
 
   if (!item) notFound();
 
@@ -79,9 +83,9 @@ export default async function ProductPage({
   const hasPrice = item.purchase_price && Number(item.purchase_price) > 0;
   const isExternal = Boolean(item.source_url);
   
-  const vendorName = item.user_created
-    ? `${item.user_created.shop_name || ""}`.trim()
-    : "Unnamed Shop";
+  const vendorName = item.user_created?.shop_name 
+    ? String(item.user_created.shop_name).trim() 
+    : "Catskill Archive";
 
   const hasDimensions =
     Boolean(item.weight) &&
@@ -89,14 +93,13 @@ export default async function ProductPage({
     Boolean(item.width) &&
     Boolean(item.height);
 
-  // Prepare contact link with pre-filled parameters
   const contactLink = `/contact?type=${isExternal ? "general" : "request"}&item=${encodeURIComponent(`${item.name} (CAS-${String(id).padStart(4, "0")})`)}`;
 
   return (
     <main className="min-h-full w-full bg-[#F9F8F6] text-zinc-700 selection:bg-blue-100 pb-24">
       <ViewTracker id={id} />
       <div className="max-w-6xl mx-auto px-8 py-12 lg:py-8">
-        {/* BREADCRUMBS - Updated with flex-nowrap and overflow control */}
+        {/* BREADCRUMBS */}
         <nav className="mb-10 border-b border-zinc-200 pb-4 flex items-center gap-3 w-full overflow-hidden whitespace-nowrap">
           <Link
             href="/inventory"
@@ -133,18 +136,8 @@ export default async function ProductPage({
 
           <section className="lg:col-span-5">
             <div className="mb-10">
-              {/* EXTERNAL SOURCE NOTICE */}
-              {isExternal && (
-                <div className="mb-6 flex items-center gap-2 bg-blue-50 border border-blue-100 px-3 py-2">
-                  <Info size={14} className="text-blue-600" />
-                  <span className="text-detail font-bold uppercase tracking-widest text-blue-700">
-                    External
-                  </span>
-                </div>
-              )}
-
               <Link
-                href={`/inventory?vendor=${item.user_created?.id}`}
+                href={`/inventory?vendor=${item.user_created?.id || ''}`}
                 className="inline-flex items-center gap-2 mb-6 group"
               >
                 <div className="w-6 h-6 rounded-full bg-zinc-200 flex items-center justify-center overflow-hidden border border-zinc-300">
@@ -163,9 +156,19 @@ export default async function ProductPage({
               </Link>
 
               <div className="flex items-center gap-3 mb-4 flex-wrap">
-                <span className="text-detail font-mono font-bold uppercase tracking-[0.2em] bg-zinc-800 text-white px-2 py-0.5">
-                  CAS—{String(item.id).padStart(4, "0")}
-                </span>
+                {/* ID SWAP: BLACK CAS BOX vs BLUE EXTERNAL BADGE */}
+                {isExternal ? (
+                  <div className="flex items-center gap-2 bg-blue-50 border border-blue-100 px-3 py-1">
+                    <Globe size={12} className="text-blue-600" />
+                    <span className="text-detail font-bold uppercase tracking-widest text-blue-700">
+                      External
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-detail font-mono font-bold uppercase tracking-[0.2em] bg-zinc-800 text-white px-2 py-0.5">
+                    CAS—{String(item.id).padStart(4, "0")}
+                  </span>
+                )}
 
                 {item.classification && (
                   <>
@@ -176,7 +179,7 @@ export default async function ProductPage({
                   </>
                 )}
 
-                <span className="text-zinc-300 text-detail">|</span>
+                <span className="text-zinc-400 text-detail">|</span>
                 <span
                   className={`text-detail font-black uppercase tracking-[0.2em] ${isSold ? "text-zinc-400" : "text-blue-600"}`}
                 >
@@ -185,7 +188,7 @@ export default async function ProductPage({
               </div>
 
               <h1
-                className={`text-4xl font-bold uppercase tracking-tighter italic leading-[0.9] mb-6 ${isSold ? "text-zinc-400" : "text-zinc-800"}`}
+                className={`text-2xl font-bold uppercase tracking-tighter italic leading-[0.9] mb-6 ${isSold ? "text-zinc-400" : "text-zinc-800"}`}
               >
                 {item.name}
               </h1>
@@ -235,64 +238,59 @@ export default async function ProductPage({
             </div>
 
             <div className="space-y-4">
-              {/* PRIMARY ACTION BUTTONS */}
               {!isSold && (
                 <div className="flex flex-col gap-4">
                   {isExternal ? (
-                    <div className="group relative">
-                      <a
-                        href={item.source_url!}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full bg-blue-600 text-white py-5 text-label font-black uppercase tracking-[0.4em] hover:bg-zinc-800 transition-all shadow-xl flex items-center justify-center gap-3"
-                      >
-                        View Original Listing <ExternalLink size={16} />
-                      </a>
-                      <div className="mt-4 p-4 border border-blue-100 bg-blue-50/50">
-                        <p className="text-detail font-bold uppercase tracking-widest text-blue-700 mb-1">
-                          Note
-                        </p>
-                        <p className="text-detail text-blue-600/80 leading-relaxed">
-                          This item is part of our aggregated digital collection. 
-                          Final transaction and logistics are managed directly by the 
-                          originating archive.
-                        </p>
-                      </div>
-                    </div>
-                  ) : hasPrice ? (
-                    <form action={createCheckout}>
-                      <input type="hidden" name="price" value={item.purchase_price} />
-                      <input type="hidden" name="itemName" value={item.name} />
-                      <input type="hidden" name="itemId" value={item.id} />
-                      <button
-                        type="submit"
-                        className="w-full bg-zinc-800 text-white py-5 text-label font-black uppercase tracking-[0.4em] hover:bg-blue-600 transition-all shadow-xl active:scale-[0.98]"
-                      >
-                        Purchase
-                      </button>
-                    </form>
-                  ) : (
                     <a
-                      href={`mailto:info@catskillas.com?subject=Inquiry: ${item.name} (Ref: CAS-${item.id})`}
-                      className="w-full bg-zinc-800 text-white py-5 text-label font-black uppercase tracking-[0.4em] hover:bg-blue-600 transition-all text-center block"
+                      href={item.source_url!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full bg-blue-600 text-white py-5 text-label font-black uppercase tracking-[0.4em] hover:bg-zinc-800 transition-all shadow-xl flex items-center justify-center gap-3"
                     >
-                      Request Pricing
+                      View Original Listing <ExternalLink size={16} />
                     </a>
+                  ) : hasPrice ? (
+                    <>
+                      <form action={createCheckout}>
+                        <input type="hidden" name="price" value={item.purchase_price} />
+                        <input type="hidden" name="itemName" value={item.name} />
+                        <input type="hidden" name="itemId" value={item.id} />
+                        <button
+                          type="submit"
+                          className="w-full bg-zinc-800 text-white py-5 text-label font-black uppercase tracking-[0.4em] hover:bg-blue-600 transition-all shadow-xl active:scale-[0.98]"
+                        >
+                          Purchase
+                        </button>
+                      </form>
+                      <Link
+                        href={contactLink}
+                        className="w-full border border-zinc-300 text-zinc-500 py-4 text-label font-black uppercase tracking-[0.2em] hover:bg-zinc-800 hover:text-white hover:border-zinc-800 transition-all flex items-center justify-center gap-3"
+                      >
+                        <MessageSquare size={14} /> Contact Vendor
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <a
+                        href={`mailto:info@catskillas.com?subject=Inquiry: ${item.name} (Ref: CAS-${item.id})`}
+                        className="w-full bg-zinc-800 text-white py-5 text-label font-black uppercase tracking-[0.4em] hover:bg-blue-600 transition-all text-center block"
+                      >
+                        Request Pricing
+                      </a>
+                      <Link
+                        href={contactLink}
+                        className="w-full border border-zinc-300 text-zinc-500 py-4 text-label font-black uppercase tracking-[0.2em] hover:bg-zinc-800 hover:text-white hover:border-zinc-800 transition-all flex items-center justify-center gap-3"
+                      >
+                        <MessageSquare size={14} /> Contact Vendor
+                      </Link>
+                    </>
                   )}
-                  
-                  {/* DYNAMIC CONTACT VENDOR BUTTON */}
-                  <Link
-                    href={contactLink}
-                    className="w-full border border-zinc-300 text-zinc-500 py-4 text-label font-black uppercase tracking-[0.2em] hover:bg-zinc-800 hover:text-white hover:border-zinc-800 transition-all flex items-center justify-center gap-3"
-                  >
-                    <MessageSquare size={14} /> Contact Vendor
-                  </Link>
                 </div>
               )}
 
               {isSold && (
                 <div className="w-full bg-zinc-100 text-zinc-400 py-5 text-label font-black uppercase tracking-[0.4em] border border-zinc-200 text-center cursor-not-allowed">
-                  Item Out of Circulation
+                  Item No Longer Available
                 </div>
               )}
 
@@ -307,16 +305,6 @@ export default async function ProductPage({
                     id={item.id}
                     disabled={!hasDimensions || isExternal}
                   />
-                  
-                  {/* TOOLTIP WITH 11PX TEXT */}
-                  {(!hasDimensions || isExternal) && (
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-zinc-800 text-white text-[11px] font-bold uppercase tracking-widest opacity-0 group-hover/shipping:opacity-100 transition-opacity pointer-events-none z-10 text-center shadow-xl">
-                      {isExternal 
-                        ? "Logistics for external items are handled by the original seller." 
-                        : "Dimensional data required for automated shipping quotes."}
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-zinc-800" />
-                    </div>
-                  )}
                 </div>
               )}
             </div>

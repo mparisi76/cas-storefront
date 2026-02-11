@@ -22,7 +22,6 @@ export default function ArtifactCard({
   const isSold = item.availability === "sold";
   const isExternal = Boolean(item.source_url);
 
-  // Check if price exists and is greater than 0
   const hasPrice = item.purchase_price && Number(item.purchase_price) > 0;
 
   useEffect(() => {
@@ -44,7 +43,7 @@ export default function ArtifactCard({
   return (
     <Link
       href={`/inventory/${item.id}`}
-      className={`group flex flex-col p-6 md:p-6 transition-all duration-500 ease-out h-full ${
+      className={`group flex flex-col p-6 md:p-6 transition-all duration-500 ease-out h-full relative ${
         isSold ? "opacity-90 cursor-default" : "hover:bg-zinc-50/80"
       }`}
     >
@@ -52,25 +51,10 @@ export default function ArtifactCard({
       <div className="aspect-4/5 bg-zinc-100 overflow-hidden mb-6 md:mb-8 relative shrink-0">
         {item.featured && !isSold && <FeaturedBadge />}
 
-        {/* EXTERNAL INDICATOR - Matched to Detail Page Notice Style */}
-        {isExternal && !isSold && (
-          <div className="absolute top-0 right-0 z-20 bg-blue-50 border-b border-l border-blue-100 px-3 py-1.5 flex items-center gap-2">
-            <Globe size={12} className="text-blue-600" />
-            <span className="text-detail font-bold uppercase tracking-widest text-blue-700">
-              External
-            </span>
-          </div>
-        )}
-
-        {/* LOADING STATE */}
         {!isLoaded && !hasError && item.thumbnail && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-50 z-20">
             <div className="animate-pulse flex flex-col items-center">
-              <ImageIcon
-                className="text-zinc-400 mb-2"
-                size={24}
-                strokeWidth={1}
-              />
+              <ImageIcon className="text-zinc-400 mb-2" size={24} strokeWidth={1} />
               <span className="text-detail font-black uppercase tracking-[0.2em] text-zinc-500">
                 Retrieving
               </span>
@@ -78,7 +62,6 @@ export default function ArtifactCard({
           </div>
         )}
 
-        {/* ERROR STATE */}
         {hasError && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-50 z-20">
             <AlertCircle className="text-zinc-300 mb-1" size={20} />
@@ -88,7 +71,6 @@ export default function ArtifactCard({
           </div>
         )}
 
-        {/* SOLD OVERLAY */}
         {isSold && (
           <div className="absolute inset-0 z-30 flex items-center justify-center bg-[#F9F8F6]/40 backdrop-blur-[1px]">
             <div className="border-2 border-zinc-800 px-4 py-1 text-zinc-800 font-black uppercase tracking-[0.3em] -rotate-12 text-xs shadow-sm bg-white">
@@ -97,7 +79,6 @@ export default function ArtifactCard({
           </div>
         )}
 
-        {/* IMAGE RENDER OR NO-IMAGE FALLBACK */}
         {imageUrl ? (
           <img
             ref={imgRef}
@@ -124,7 +105,7 @@ export default function ArtifactCard({
       <div className="flex-1 flex flex-col relative min-h-25">
         <div className="flex flex-col gap-1 mb-2">
           {!hideVendor && (
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 overflow-hidden">
               <Store size={10} className="text-zinc-400 shrink-0" />
               <p className="text-detail font-black uppercase tracking-[0.2em] text-zinc-400 italic truncate">
                 {vendorName}
@@ -135,10 +116,8 @@ export default function ArtifactCard({
 
         <div className="flex justify-between items-start gap-4">
           <h3
-            className={`font-bold uppercase text-base md:text-lg leading-[1.1] transition-colors tracking-tight flex-1 ${
-              isSold
-                ? "text-zinc-500"
-                : "text-zinc-800 group-hover:text-blue-600"
+            className={`font-bold uppercase text-base md:text-lg leading-[1.1] transition-colors tracking-tight flex-1 truncate ${
+              isSold ? "text-zinc-500" : "text-zinc-800 group-hover:text-blue-600"
             }`}
           >
             {item.name}
@@ -157,9 +136,21 @@ export default function ArtifactCard({
           </div>
         </div>
 
-        <p className="absolute -bottom-4 -right-4 text-detail font-black uppercase tracking-[0.3em] text-zinc-400 pointer-events-none">
-          CAS—{String(item.id).padStart(4, "0")}
-        </p>
+        {/* REFINED POSITIONING FOR BADGE/SERIAL */}
+        <div className="absolute bottom-0 right-0 z-10 translate-y-2">
+          {isExternal ? (
+            <div className="flex items-center gap-1.5 bg-blue-50 border border-blue-100 px-2 py-0.5 shadow-sm">
+              <Globe size={10} className="text-blue-600" />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-blue-700">
+                External
+              </span>
+            </div>
+          ) : (
+            <p className="text-detail font-black uppercase tracking-[0.3em] text-zinc-400 pointer-events-none">
+              CAS—{String(item.id).padStart(4, "0")}
+            </p>
+          )}
+        </div>
       </div>
     </Link>
   );
