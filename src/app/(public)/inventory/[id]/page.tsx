@@ -22,13 +22,13 @@ export async function generateMetadata({
   try {
     const item = await directus.request(
       readItem("props", id, {
-        fields: ["name", "description", "thumbnail", "classification"],
+        fields: ["name", "classification", "thumbnail"],
       }),
     );
 
     if (!item) return { title: "Item Not Found" };
 
-    const eraTag = item.classification ? ` | ${item.classification.toUpperCase()}` : "";
+    const eraTag = item.classification ? ` | ${String(item.classification).toUpperCase()}` : "";
 
     return {
       title: `${item.name}${eraTag}`,
@@ -53,29 +53,23 @@ export default async function ProductPage({
 }) {
   const { id } = await params;
 
-  let item;
-  try {
-    item = await directus.request(
-      readItem("props", id, {
-        fields: [
-          "*",
-          "photo_gallery.*",
-          "availability",
-          "date_sold",
-          "source_url",
-          { category: ["id", "name", "slug"] },
-          {
-            user_created: ["id", "description", "avatar", "shop_name"],
-          },
-        ],
-      }),
-    );
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error(`Error fetching item ${id}:`, error.message);
-    }
-    notFound(); 
-  }
+  const item = await directus.request(
+    readItem("props", id, {
+      fields: [
+        "*",
+        "photo_gallery.*",
+        "availability",
+        "date_sold",
+        "source_url",
+        { category: ["id", "name", "slug"] },
+        {
+          user_created: ["id", "description", "avatar", "shop_name"],
+        },
+      ],
+    }),
+  ).catch(() => {
+    notFound();
+  });
 
   if (!item) notFound();
 
@@ -99,6 +93,7 @@ export default async function ProductPage({
     <main className="min-h-full w-full bg-[#F9F8F6] text-zinc-700 selection:bg-blue-100 pb-24">
       <ViewTracker id={id} />
       <div className="max-w-6xl mx-auto px-8 py-12 lg:py-8">
+        
         {/* BREADCRUMBS */}
         <nav className="mb-10 border-b border-zinc-200 pb-4 flex items-center gap-3 w-full overflow-hidden whitespace-nowrap">
           <Link
@@ -156,7 +151,6 @@ export default async function ProductPage({
               </Link>
 
               <div className="flex items-center gap-3 mb-4 flex-wrap">
-                {/* ID SWAP: BLACK CAS BOX vs BLUE EXTERNAL BADGE */}
                 {isExternal ? (
                   <div className="flex items-center gap-2 bg-blue-50 border border-blue-100 px-3 py-1">
                     <Globe size={12} className="text-blue-600" />
@@ -187,16 +181,12 @@ export default async function ProductPage({
                 </span>
               </div>
 
-              <h1
-                className={`text-2xl font-bold uppercase tracking-tighter italic leading-[0.9] mb-6 ${isSold ? "text-zinc-400" : "text-zinc-800"}`}
-              >
+              <h1 className={`text-2xl font-bold uppercase tracking-tighter italic leading-[0.9] mb-6 ${isSold ? "text-zinc-400" : "text-zinc-800"}`}>
                 {item.name}
               </h1>
 
               <div className="flex items-baseline gap-4">
-                <span
-                  className={`text-4xl font-light tracking-tighter ${isSold ? "text-zinc-300 line-through" : "text-zinc-900"}`}
-                >
+                <span className={`text-4xl font-light tracking-tighter ${isSold ? "text-zinc-300 line-through" : "text-zinc-900"}`}>
                   {hasPrice
                     ? `$${Number(item.purchase_price).toLocaleString()}`
                     : "Call for Price"}
@@ -218,17 +208,13 @@ export default async function ProductPage({
 
             <div className="grid grid-cols-1 border-t border-zinc-200 mb-12">
               <div className="flex justify-between py-4 border-b border-zinc-100 items-baseline">
-                <h4 className="text-detail uppercase font-black tracking-[0.3em] text-zinc-400">
-                  Object Weight
-                </h4>
+                <h4 className="text-detail uppercase font-black tracking-[0.3em] text-zinc-400">Object Weight</h4>
                 <p className="text-label font-bold text-zinc-600 font-mono">
                   {item.weight ? `${item.weight} LBS` : "—"}
                 </p>
               </div>
               <div className="flex justify-between py-4 border-b border-zinc-100 items-baseline">
-                <h4 className="text-detail uppercase font-black tracking-[0.3em] text-zinc-400">
-                  Dimensions (L×W×H)
-                </h4>
+                <h4 className="text-detail uppercase font-black tracking-[0.3em] text-zinc-400">Dimensions (L×W×H)</h4>
                 <p className="text-label font-bold text-zinc-600 font-mono">
                   {item.length && item.width && item.height
                     ? `${item.length}" × ${item.width}" × ${item.height}"`
@@ -241,46 +227,22 @@ export default async function ProductPage({
               {!isSold && (
                 <div className="flex flex-col gap-4">
                   {isExternal ? (
-                    <a
-                      href={item.source_url!}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full bg-blue-600 text-white py-5 text-label font-black uppercase tracking-[0.4em] hover:bg-zinc-800 transition-all shadow-xl flex items-center justify-center gap-3"
-                    >
+                    <a href={item.source_url!} target="_blank" rel="noopener noreferrer" className="w-full bg-blue-600 text-white py-5 text-label font-black uppercase tracking-[0.4em] hover:bg-zinc-800 transition-all shadow-xl flex items-center justify-center gap-3">
                       View Original Listing <ExternalLink size={16} />
                     </a>
-                  ) : hasPrice ? (
-                    <>
-                      <form action={createCheckout}>
-                        <input type="hidden" name="price" value={item.purchase_price} />
-                        <input type="hidden" name="itemName" value={item.name} />
-                        <input type="hidden" name="itemId" value={item.id} />
-                        <button
-                          type="submit"
-                          className="w-full bg-zinc-800 text-white py-5 text-label font-black uppercase tracking-[0.4em] hover:bg-blue-600 transition-all shadow-xl active:scale-[0.98]"
-                        >
-                          Purchase
-                        </button>
-                      </form>
-                      <Link
-                        href={contactLink}
-                        className="w-full border border-zinc-300 text-zinc-500 py-4 text-label font-black uppercase tracking-[0.2em] hover:bg-zinc-800 hover:text-white hover:border-zinc-800 transition-all flex items-center justify-center gap-3"
-                      >
-                        <MessageSquare size={14} /> Contact Vendor
-                      </Link>
-                    </>
                   ) : (
                     <>
-                      <a
-                        href={`mailto:info@catskillas.com?subject=Inquiry: ${item.name} (Ref: CAS-${item.id})`}
-                        className="w-full bg-zinc-800 text-white py-5 text-label font-black uppercase tracking-[0.4em] hover:bg-blue-600 transition-all text-center block"
-                      >
-                        Request Pricing
-                      </a>
-                      <Link
-                        href={contactLink}
-                        className="w-full border border-zinc-300 text-zinc-500 py-4 text-label font-black uppercase tracking-[0.2em] hover:bg-zinc-800 hover:text-white hover:border-zinc-800 transition-all flex items-center justify-center gap-3"
-                      >
+                      {hasPrice && (
+                        <form action={createCheckout}>
+                          <input type="hidden" name="price" value={item.purchase_price} />
+                          <input type="hidden" name="itemName" value={item.name} />
+                          <input type="hidden" name="itemId" value={item.id} />
+                          <button type="submit" className="w-full bg-zinc-800 text-white py-5 text-label font-black uppercase tracking-[0.4em] hover:bg-blue-600 transition-all shadow-xl active:scale-[0.98]">
+                            Purchase
+                          </button>
+                        </form>
+                      )}
+                      <Link href={contactLink} className="w-full border border-zinc-300 text-zinc-500 py-4 text-label font-black uppercase tracking-[0.2em] hover:bg-zinc-800 hover:text-white hover:border-zinc-800 transition-all flex items-center justify-center gap-3">
                         <MessageSquare size={14} /> Contact Vendor
                       </Link>
                     </>
@@ -294,6 +256,7 @@ export default async function ProductPage({
                 </div>
               )}
 
+              {/* RESTORED SHIPPING DRAWER LOGIC */}
               {!isSold && (
                 <div className="pt-2 group/shipping relative">
                   <ShippingDrawer
@@ -313,21 +276,10 @@ export default async function ProductPage({
 
         <div className="mt-24 space-y-24">
           {item.user_created?.id && (
-            <MoreFromVendor
-              vendorId={item.user_created.id}
-              vendorName={item.user_created.shop_name}
-              currentId={id}
-            />
+            <MoreFromVendor vendorId={item.user_created.id} vendorName={item.user_created.shop_name} currentId={id} />
           )}
-
           {item.category && (
-            <RelatedArtifacts
-              categoryId={item.category.id}
-              categoryName={item.category.name}
-              categorySlug={item.category.slug}
-              currentId={id}
-              classification={item.classification}
-            />
+            <RelatedArtifacts categoryId={item.category.id} categoryName={item.category.name} categorySlug={item.category.slug} currentId={id} classification={item.classification} />
           )}
           <RecentlyViewed currentId={id} />
         </div>
