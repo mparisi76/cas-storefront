@@ -116,7 +116,7 @@ export default async function ProductPage({
       "@type": "Offer",
       url: canonicalUrl,
       priceCurrency: "USD",
-      ...(hasPrice && { price: Number(item.purchase_price) }),
+      price: hasPrice ? String(item.purchase_price) : "0",
       availability: isSold
         ? "https://schema.org/SoldOut"
         : "https://schema.org/InStock",
