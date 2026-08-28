@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import ShopSidebar from "@/components/inventory/ShopSidebar";
 import MobileFilters from "@/components/inventory/MobileFilters";
@@ -14,6 +15,19 @@ import { getActiveVendors } from "@/services/(public)/vendors";
 import GridIcon from "@/components/ui/icons/GridIcon";
 import ListIcon from "@/components/ui/icons/ListIcon";
 import ShopSkeleton from "@/components/inventory/ShopSkeleton";
+
+export const metadata: Metadata = {
+  title: "Inventory — Architectural Salvage & Antiques",
+  description:
+    "Browse architectural salvage, antique hardware, salvaged doors, barn beams, and vintage industrial pieces from dealers across the Hudson Valley and Catskills.",
+  alternates: { canonical: "/inventory" },
+  openGraph: {
+    title: "Inventory — Catskill Architectural Salvage",
+    description:
+      "Curated architectural salvage and antiques from the Hudson Valley and Catskills.",
+    url: "https://catskillas.com/inventory",
+  },
+};
 
 // 1. Define a strict interface for your URL parameters
 interface ShopParams {

@@ -1,32 +1,62 @@
-"use client"; // We need this for the scroll listener
-
-import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import type { Metadata } from "next";
 import "./globals.css";
-import { ToastProvider } from "@/context/ToastContext";
-import { FontSizeProvider } from "@/app/providers/FontSizeProvider";
+import { AppShell } from "@/app/providers/AppShell";
+
+const siteUrl = "https://catskillas.com";
+const siteName = "Catskill Architectural Salvage";
+const siteDescription =
+  "A regional directory of architectural salvage, antique hardware, and historic building materials from dealers across the Hudson Valley and Catskills.";
+
+export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: `${siteName} — Hudson Valley & Catskills`,
+    template: `%s | ${siteName}`,
+  },
+  description: siteDescription,
+  keywords: [
+    "architectural salvage",
+    "antique hardware",
+    "salvaged doors",
+    "reclaimed wood",
+    "barn beams",
+    "vintage industrial",
+    "Hudson Valley",
+    "Catskills",
+    "historic preservation",
+    "reclaimed building materials",
+  ],
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    url: siteUrl,
+    siteName,
+    title: `${siteName} — Hudson Valley & Catskills`,
+    description: siteDescription,
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${siteName} — Hudson Valley & Catskills`,
+    description: siteDescription,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large" },
+  },
+};
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
-
-  useEffect(() => {
-    // This forces the window to the top every time the route changes
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-  }, [pathname]);
-
   return (
     <html lang="en">
       <body className="flex flex-col min-h-screen bg-[#F9F8F6] text-zinc-700 antialiased">
         <main className="flex-1">
-          <FontSizeProvider>
-            <ToastProvider>
-              {children}
-            </ToastProvider>
-          </FontSizeProvider>
+          <AppShell>{children}</AppShell>
         </main>
       </body>
     </html>

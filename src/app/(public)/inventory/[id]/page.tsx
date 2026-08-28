@@ -13,6 +13,11 @@ import RecentlyViewed from "@/components/inventory/RecentlyViewed";
 import { Store, ExternalLink, MessageSquare, Globe } from "lucide-react";
 import MoreFromVendor from "@/components/inventory/MoreFromVendor";
 
+function stripHtml(html: string | null | undefined): string {
+  if (!html) return "";
+  return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -22,18 +27,22 @@ export async function generateMetadata({
   try {
     const item = await directus.request(
       readItem("props", id, {
-        fields: ["name", "classification", "thumbnail"],
+        fields: ["name", "classification", "thumbnail", "description"],
       }),
     );
 
     if (!item) return { title: "Item Not Found" };
 
     const eraTag = item.classification ? ` | ${String(item.classification).toUpperCase()}` : "";
+    const plainDescription = stripHtml(item.description).slice(0, 160);
 
     return {
       title: `${item.name}${eraTag}`,
+      description: plainDescription || `${item.name} — architectural salvage from the Hudson Valley & Catskills.`,
+      alternates: { canonical: `/inventory/${id}` },
       openGraph: {
         title: `${item.name}${eraTag} | Catskill Architectural Salvage`,
+        description: plainDescription,
         images: item.thumbnail ? [
           {
             url: `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${item.thumbnail}`,
@@ -89,8 +98,39 @@ export default async function ProductPage({
 
   const contactLink = `/contact?type=${isExternal ? "general" : "request"}&item=${encodeURIComponent(`${item.name} (CAS-${String(id).padStart(4, "0")})`)}`;
 
+  const canonicalUrl = `https://catskillas.com/inventory/${id}`;
+  const imageUrl = item.thumbnail
+    ? `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${item.thumbnail}`
+    : undefined;
+
+  const productJsonLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: item.name,
+    description: stripHtml(item.description) || item.name,
+    ...(imageUrl && { image: imageUrl }),
+    ...(item.category && { category: item.category.name }),
+    sku: `CAS-${String(id).padStart(4, "0")}`,
+    brand: { "@type": "Brand", name: vendorName },
+    offers: {
+      "@type": "Offer",
+      url: canonicalUrl,
+      priceCurrency: "USD",
+      ...(hasPrice && { price: Number(item.purchase_price) }),
+      availability: isSold
+        ? "https://schema.org/SoldOut"
+        : "https://schema.org/InStock",
+      itemCondition: "https://schema.org/UsedCondition",
+      seller: { "@type": "Organization", name: vendorName },
+    },
+  };
+
   return (
     <main className="min-h-full w-full bg-[#F9F8F6] text-zinc-700 selection:bg-blue-100 pb-24">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
       <ViewTracker id={id} />
       <div className="max-w-6xl mx-auto px-8 py-12 lg:py-8">
         
