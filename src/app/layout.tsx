@@ -5,7 +5,7 @@ import { AppShell } from "@/app/providers/AppShell";
 const siteUrl = "https://catskillas.com";
 const siteName = "Catskill Architectural Salvage";
 const siteDescription =
-  "A regional directory of architectural salvage, antique hardware, and historic building materials from dealers across the Hudson Valley and Catskills.";
+  "Architectural salvage, antique hardware, and reclaimed building materials from our own warehouse and a directory of dealers across the Hudson Valley and Catskills.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
