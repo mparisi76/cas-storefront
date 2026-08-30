@@ -13,6 +13,8 @@ import RecentlyViewed from "@/components/inventory/RecentlyViewed";
 import { Store, ExternalLink, MessageSquare, Globe } from "lucide-react";
 import MoreFromVendor from "@/components/inventory/MoreFromVendor";
 
+export const revalidate = 86400;
+
 function stripHtml(html: string | null | undefined): string {
   if (!html) return "";
   return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
