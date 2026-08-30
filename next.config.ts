@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone", // Generates a lightweight production build (~100MB)
   // Disable Vercel's CPU & bandwidth-heavy image proxy
   images: {
     unoptimized: true,
