@@ -26,7 +26,7 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  // Ensure static assets and JS bundles are cached aggressively at the edge
+  // ensure static assets and JS bundles are cached aggressively at the edge
   async headers() {
     return [
       {
