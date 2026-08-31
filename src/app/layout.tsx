@@ -52,8 +52,39 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: siteName,
+    url: siteUrl,
+    description: siteDescription,
+    areaServed: [
+      {
+        "@type": "AdministrativeArea",
+        name: "Hudson Valley",
+      },
+      {
+        "@type": "AdministrativeArea",
+        name: "Catskills",
+      },
+    ],
+    knowsAbout: [
+      "Architectural salvage",
+      "Antique hardware",
+      "Reclaimed building materials",
+      "Salvaged doors",
+      "Barn beams",
+    ],
+  };
+
   return (
     <html lang="en">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className="flex flex-col min-h-screen bg-[#F9F8F6] text-zinc-700 antialiased">
         <main className="flex-1">
           <AppShell>{children}</AppShell>
