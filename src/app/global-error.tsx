@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 // Last-resort fallback if the root layout itself fails. Must render its own
 // <html>/<body> and can't rely on the site's components or styles loading.
 export default function GlobalError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
@@ -22,9 +24,12 @@ export default function GlobalError({ reset }: { error: Error & { digest?: strin
               >
                 Try again
               </button>
-              <a href="/" style={{ border: "1px solid #d4d4d8", padding: "12px 24px", color: "#27272a", textDecoration: "none" }}>
+              <Link
+                href="/"
+                style={{ border: "1px solid #d4d4d8", padding: "12px 24px", color: "#27272a", textDecoration: "none" }}
+              >
                 Home
-              </a>
+              </Link>
             </div>
           </div>
         </div>

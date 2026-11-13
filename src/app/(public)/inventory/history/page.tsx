@@ -10,34 +10,29 @@ export default function HistoryPage() {
   const [items, setItems] = useState<Artifact[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchHistory = async () => {
-    try {
-      const history = localStorage.getItem("recently_viewed");
-      if (!history) {
-        setItems([]);
-        setLoading(false);
-        return;
-      }
-
-      const idsToFetch = JSON.parse(history) as string[];
-
-      if (idsToFetch.length === 0) {
-        setItems([]);
-        setLoading(false);
-        return;
-      }
-
-      const sorted = await getArtifactsByIds(idsToFetch);
-      setItems(sorted);
-    } catch (error) {
-      console.error("History Page Error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchHistory();
+    let cancelled = false;
+
+    let ids: string[] = [];
+    try {
+      ids = JSON.parse(localStorage.getItem("recently_viewed") || "[]") as string[];
+    } catch {
+      ids = [];
+    }
+
+    const load = ids.length > 0 ? getArtifactsByIds(ids) : Promise.resolve([] as Artifact[]);
+    load
+      .then((sorted) => {
+        if (!cancelled) setItems(sorted);
+      })
+      .catch((error) => console.error("History Page Error:", error))
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const clearHistory = () => {

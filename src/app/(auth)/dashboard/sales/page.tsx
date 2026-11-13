@@ -13,6 +13,16 @@ const day = (iso: string | null) =>
   iso ? new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—";
 const ref = (id: number) => `CAS-${String(id).padStart(4, "0")}`;
 
+function summarize(sales: VendorSale[]) {
+  const since30 = Date.now() - 30 * 24 * 3600 * 1000;
+  const last30 = sales.filter((s) => s.dateSold && Date.parse(s.dateSold) >= since30);
+  return {
+    revenue: sales.reduce((sum, s) => sum + s.itemPrice, 0),
+    last30Count: last30.length,
+    revenue30: last30.reduce((sum, s) => sum + s.itemPrice, 0),
+  };
+}
+
 export default async function SalesPage() {
   const token = (await cookies()).get(ACCESS_COOKIE)?.value;
   if (!token) redirect("/login");
@@ -26,15 +36,12 @@ export default async function SalesPage() {
     loadError = true;
   }
 
-  const since30 = Date.now() - 30 * 24 * 3600 * 1000;
-  const revenue = sales.reduce((sum, s) => sum + s.itemPrice, 0);
-  const last30 = sales.filter((s) => s.dateSold && Date.parse(s.dateSold) >= since30);
-  const revenue30 = last30.reduce((sum, s) => sum + s.itemPrice, 0);
+  const { revenue, last30Count, revenue30 } = summarize(sales);
 
   const cards = [
     { label: "Pieces Sold", value: String(sales.length) },
     { label: "Total Sales", value: usd(revenue) },
-    { label: "Last 30 Days", value: `${last30.length} · ${usd(revenue30)}` },
+    { label: "Last 30 Days", value: `${last30Count} · ${usd(revenue30)}` },
   ];
 
   return (
