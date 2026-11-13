@@ -17,6 +17,8 @@ export function ActiveFilters({ vendors, className = "" }: ActiveFiltersProps) {
   const activeVendorId = searchParams.get("vendor");
   const activeEra = searchParams.get("classification");
   const activeSearch = searchParams.get("search");
+  const activeState = (searchParams.get("state") || "").toUpperCase();
+  const activeCity = searchParams.get("city");
 
   const activeVendor = vendors.find(
     (v) => v.id === activeVendorId || v.slug === activeVendorId,
@@ -25,6 +27,7 @@ export function ActiveFilters({ vendors, className = "" }: ActiveFiltersProps) {
   const clearFilter = (key: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.delete(key);
+    if (key === "state") params.delete("city"); // a town without its state is meaningless
     params.set("page", "1");
     router.push(`/inventory?${params.toString()}`, { scroll: false });
   };
@@ -35,7 +38,8 @@ export function ActiveFilters({ vendors, className = "" }: ActiveFiltersProps) {
     activeVendorId ||
     (activeSlug && activeSlug !== "all") ||
     (activeEra && activeEra !== "all") ||
-    activeSearch;
+    activeSearch ||
+    activeState;
 
   if (!hasFilters) return null;
 
@@ -77,6 +81,16 @@ export function ActiveFilters({ vendors, className = "" }: ActiveFiltersProps) {
           className="flex items-center gap-2 px-3 py-1.5 bg-white border border-zinc-200 text-zinc-900 text-tiny font-black uppercase tracking-widest hover:bg-zinc-50 transition-colors"
         >
           {activeEra.replace(/-/g, " ")} <X size={10} />
+        </button>
+      )}
+
+      {/* Location Chip */}
+      {activeState && (
+        <button
+          onClick={() => clearFilter("state")}
+          className="flex items-center gap-2 px-3 py-1.5 bg-white border border-zinc-200 text-zinc-900 text-tiny font-black uppercase tracking-widest hover:bg-zinc-50 transition-colors"
+        >
+          {activeCity ? `${activeCity}, ${activeState}` : activeState} <X size={10} />
         </button>
       )}
 

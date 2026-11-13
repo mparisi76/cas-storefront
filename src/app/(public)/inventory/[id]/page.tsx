@@ -96,7 +96,7 @@ export default async function ProductPage({
           "source_url",
           { category: ["id", "name", "slug"] },
           {
-            user_created: ["id", "description", "avatar", "shop_name"],
+            user_created: ["id", "description", "avatar", "shop_name", "city", "state"],
           },
         ],
       }),
@@ -216,6 +216,14 @@ export default async function ProductPage({
                 </div>
                 <span className="text-detail font-black uppercase tracking-[0.2em] text-zinc-500 group-hover:text-blue-600 transition-colors">
                   {vendorName}
+                  {(item.user_created?.city || item.user_created?.state) && (
+                    <span className="font-medium">
+                      {" · "}
+                      {[item.user_created?.city?.trim(), item.user_created?.state?.trim().toUpperCase()]
+                        .filter(Boolean)
+                        .join(", ")}
+                    </span>
+                  )}
                 </span>
               </Link>
 

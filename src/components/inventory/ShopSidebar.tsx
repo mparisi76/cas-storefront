@@ -8,15 +8,18 @@ import { VendorFilter } from "./VendorFilter";
 import { EraFilter } from "./EraFilter";
 import { PublicVendor } from "@/types/vendor";
 import { ActiveFilters } from "./ActiveChips";
+import { LocationFilter } from "./LocationFilter";
+import type { LocationOption } from "@/services/(public)/artifacts";
 
 type CategoryTree = Record<string, TreeParent>;
 
 interface ShopSidebarProps {
   tree: CategoryTree;
   vendors: PublicVendor[];
+  locations: LocationOption[];
 }
 
-export default function ShopSidebar({ tree, vendors }: ShopSidebarProps) {
+export default function ShopSidebar({ tree, vendors, locations }: ShopSidebarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeSlug = searchParams.get("category") || "all";
@@ -76,6 +79,14 @@ export default function ShopSidebar({ tree, vendors }: ShopSidebarProps) {
             By Shop
           </h3>
           <VendorFilter vendors={vendors} />
+        </section>
+
+        {/* LOCATION */}
+        <section>
+          <h3 className="text-label font-black uppercase tracking-[0.4em] text-zinc-500 mb-4 italic">
+            By Location
+          </h3>
+          <LocationFilter locations={locations} />
         </section>
 
         {/* CATEGORY NAV */}

@@ -9,7 +9,8 @@ import Pagination from "@/components/inventory/Pagination";
 import EmptyState from "@/components/inventory/EmptyState";
 import { ActiveFilters } from "@/components/inventory/ActiveChips";
 import { getCategoryTree, flattenTree } from "@/lib/utils";
-import { getCategoryCounts, getShopItems, SORT_OPTIONS, isSortKey, type SortKey } from "@/services/(public)/artifacts";
+import { getCategoryCounts, getLocationCounts, getShopItems, normalizeCity, normalizeState, SORT_OPTIONS, isSortKey, type SortKey } from "@/services/(public)/artifacts";
+import { LocationSelect } from "@/components/inventory/LocationFilter";
 import { getCategories } from "@/services/categories";
 import { getActiveVendors } from "@/services/(public)/vendors";
 import GridIcon from "@/components/ui/icons/GridIcon";
@@ -39,6 +40,8 @@ interface ShopParams {
   view?: "grid" | "list";
   limit?: string;
   sort?: string;
+  state?: string;
+  city?: string;
 }
 
 // 2. Apply the type to the Results component
@@ -51,6 +54,8 @@ async function ArtifactResults({ params }: { params: ShopParams }) {
     classification: params.classification || "all",
     search: params.search || "",
     vendor: params.vendor || "all",
+    state: params.state,
+    city: params.city,
     page: currentPage,
     limit: itemsPerPage,
     sort: params.sort,
@@ -100,15 +105,25 @@ export default async function ShopPage({
   const activeView = params.view || "grid";
   const itemsPerPage = Number(params.limit) || 25;
   const activeSort: SortKey = isSortKey(params.sort) ? params.sort : "featured";
+  const activeState = /^[A-Za-z]{2}$/.test(params.state || "") ? normalizeState(params.state) : "";
+  const activeCity = activeState ? normalizeCity(params.city) : "";
 
-  const [categories, counts, vendors] = await Promise.all([
+  const [categories, counts, vendors, locations] = await Promise.all([
     getCategories(),
     getCategoryCounts({
       search: activeSearch,
       classification: activeEra,
       vendor: activeVendor,
+      state: activeState,
+      city: activeCity,
     }),
     getActiveVendors(),
+    getLocationCounts({
+      category: activeSlug,
+      search: activeSearch,
+      classification: activeEra,
+      vendor: activeVendor,
+    }),
   ]);
 
   const categoriesWithCounts = categories.map((cat) => ({
@@ -126,12 +141,17 @@ export default async function ShopPage({
     activeSlug !== "all" ||
     activeEra !== "all" ||
     activeSearch !== "" ||
-    activeVendor !== "all";
+    activeVendor !== "all" ||
+    activeState !== "";
 
   let displayTitle = "All Inventory";
   if (currentVendor) displayTitle = currentVendor.shop_name;
   else if (activeSearch) displayTitle = `Results for "${activeSearch}"`;
   else if (currentCategory) displayTitle = currentCategory.name;
+  if (!currentVendor && !activeSearch && activeState) {
+    const place = activeCity ? `${activeCity}, ${activeState}` : activeState;
+    displayTitle = currentCategory ? `${currentCategory.name} in ${place}` : `Pieces in ${place}`;
+  }
 
   const getQueryLink = (newParams: Partial<ShopParams>) => {
     const p = new URLSearchParams({
@@ -139,6 +159,8 @@ export default async function ShopPage({
       ...(params.classification && { classification: params.classification }),
       ...(params.search && { search: params.search }),
       ...(params.vendor && { vendor: params.vendor }),
+      ...(activeState && { state: activeState }),
+      ...(activeCity && { city: activeCity }),
       ...(params.view && { view: params.view }),
       ...(activeSort !== "featured" && { sort: activeSort }),
       limit: String(itemsPerPage),
@@ -157,7 +179,7 @@ export default async function ShopPage({
     <main className="bg-[#F9F8F6] min-h-screen px-4 md:px-10 text-zinc-900">
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start relative">
         <div className="hidden lg:block w-64 sticky top-20 shrink-0 self-start pt-6">
-          <ShopSidebar tree={categoryTree} vendors={vendors} />
+          <ShopSidebar tree={categoryTree} vendors={vendors} locations={locations} />
         </div>
 
         <div className="flex-1 w-full">
@@ -168,6 +190,9 @@ export default async function ShopPage({
                 activeSlug={activeSlug}
                 vendors={vendors}
               />
+            </div>
+            <div className="pb-2.5">
+              <LocationSelect locations={locations} />
             </div>
             <div className="flex items-center gap-3 pb-2.5 overflow-x-auto whitespace-nowrap">
               <span className="text-detail font-bold uppercase tracking-widest text-zinc-500">Sort:</span>

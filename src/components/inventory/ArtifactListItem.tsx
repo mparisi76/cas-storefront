@@ -16,6 +16,9 @@ export default function ArtifactListItem({ item }: ArtifactListItemProps) {
   const vendorName = item.user_created
     ? `${item.user_created.shop_name || ""}`.trim()
     : "Unnamed Shop";
+  const vendorLocation = [item.user_created?.city?.trim(), item.user_created?.state?.trim().toUpperCase()]
+    .filter(Boolean)
+    .join(", ");
 
   const imageUrl = item.thumbnail
     ? `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${item.thumbnail}?width=400&height=400&fit=cover&format=webp`
@@ -59,6 +62,7 @@ export default function ArtifactListItem({ item }: ArtifactListItemProps) {
             <div className="flex items-center gap-2 mb-1">
               <span className="text-ui-detail font-black uppercase tracking-widest text-zinc-500 italic">
                 {vendorName}
+                {vendorLocation && <span className="not-italic font-medium"> · {vendorLocation}</span>}
               </span>
               <span className="text-zinc-200 text-ui-micro">•</span>
               <span className="text-ui-micro font-mono text-zinc-500">

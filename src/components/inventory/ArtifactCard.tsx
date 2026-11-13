@@ -39,6 +39,9 @@ export default function ArtifactCard({
   const vendorName = item.user_created
     ? `${item.user_created.shop_name || ""}`.trim()
     : "Unnamed Shop";
+  const vendorLocation = [item.user_created?.city?.trim(), item.user_created?.state?.trim().toUpperCase()]
+    .filter(Boolean)
+    .join(", ");
 
   return (
     <Link
@@ -109,6 +112,7 @@ export default function ArtifactCard({
               <Store size={10} className="text-zinc-500 shrink-0" />
               <p className="text-detail font-black uppercase tracking-[0.2em] text-zinc-500 italic truncate">
                 {vendorName}
+                {vendorLocation && <span className="not-italic font-medium"> · {vendorLocation}</span>}
               </p>
             </div>
           )}
