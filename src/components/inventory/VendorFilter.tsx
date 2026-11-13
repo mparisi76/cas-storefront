@@ -58,7 +58,7 @@ export function VendorFilter({ vendors }: VendorFilterProps) {
           <Store
             size={12}
             className={
-              activeVendorSlug !== "all" ? "text-blue-600" : "text-zinc-400"
+              activeVendorSlug !== "all" ? "text-blue-600" : "text-zinc-500"
             }
           />
           <span className="text-detail font-bold uppercase tracking-widest text-zinc-800 truncate">
@@ -67,7 +67,7 @@ export function VendorFilter({ vendors }: VendorFilterProps) {
         </div>
         <ChevronDown
           size={14}
-          className={`text-zinc-400 shrink-0 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
+          className={`text-zinc-500 shrink-0 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
         />
       </button>
 

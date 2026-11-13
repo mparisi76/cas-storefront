@@ -76,7 +76,7 @@ export default function StockRequestDrawer({
           >
             <X
               size={24}
-              className="text-zinc-300 group-hover:text-zinc-900 transition-colors"
+              className="text-zinc-500 group-hover:text-zinc-900 transition-colors"
             />
           </button>
         </div>
@@ -90,7 +90,7 @@ export default function StockRequestDrawer({
             >
               <div className="space-y-8">
                 <div className="border-l-2 border-zinc-100 pl-6 space-y-2">
-                  <p className="text-detail font-bold uppercase tracking-widest text-zinc-400">
+                  <p className="text-detail font-bold uppercase tracking-widest text-zinc-500">
                     The Mission
                   </p>
                   <p className="text-sm text-zinc-600 leading-relaxed italic">
@@ -171,7 +171,7 @@ export default function StockRequestDrawer({
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-detail font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-900 transition-colors pt-4 cursor-pointer"
+                className="text-detail font-black uppercase tracking-widest text-zinc-500 hover:text-zinc-900 transition-colors pt-4 cursor-pointer"
               >
                 Return to Inventory
               </button>
@@ -181,7 +181,7 @@ export default function StockRequestDrawer({
 
         {/* Footer - Fixed Height */}
         <div className="p-8 md:p-12 pt-0 border-t border-zinc-50 mt-auto">
-          <p className="text-tiny text-zinc-400 uppercase tracking-tight leading-relaxed font-medium">
+          <p className="text-tiny text-zinc-500 uppercase tracking-tight leading-relaxed font-medium">
             * Source requests are prioritized for trade professionals and
             verified acquisition partners.
           </p>

@@ -24,7 +24,7 @@ export function IdentityFields({
           </label>
           <span
             className={`text-[10px] font-mono ${
-              name.length > maxNameLength ? "text-red-500 font-bold" : "text-zinc-400"
+              name.length > maxNameLength ? "text-red-500 font-bold" : "text-zinc-500"
             }`}
           >
             {name.length}/{maxNameLength}

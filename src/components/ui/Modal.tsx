@@ -59,7 +59,7 @@ export function Modal({
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="absolute top-6 right-6 text-zinc-400 hover:text-zinc-900 transition-colors z-10"
+                className="absolute top-6 right-6 text-zinc-500 hover:text-zinc-900 transition-colors z-10"
               >
                 <X className="w-5 h-5" />
               </button>

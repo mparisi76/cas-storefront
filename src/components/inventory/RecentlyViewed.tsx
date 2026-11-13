@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import ArtifactCard from "./ArtifactCard";
-import directus from "@/lib/directus";
-import { readItems } from "@directus/sdk";
+import { getArtifactsByIds } from "@/app/actions/public-artifacts";
 import { Artifact } from "@/types/artifact";
 import Link from "next/link";
 
@@ -32,23 +31,7 @@ export default function RecentlyViewed({ currentId }: { currentId: string }) {
           return;
         }
 
-        const response = await directus.request(
-          readItems("props", {
-            filter: { id: { _in: idsToFetch } },
-            fields: [
-              "id", "name", "thumbnail", "purchase_price", 
-              "availability", "classification", 
-              { category: ["name", "slug"] },
-              { user_created: ["id", "shop_name"] }
-            ],
-          })
-        );
-
-        const data = response as Artifact[];
-        const sorted = data.sort((a, b) => 
-          idsToFetch.indexOf(String(a.id)) - idsToFetch.indexOf(String(b.id))
-        );
-
+        const sorted = await getArtifactsByIds(idsToFetch);
         setItems(sorted);
       } catch (error) {
         console.error("RecentlyViewed Error:", error);
@@ -66,7 +49,7 @@ export default function RecentlyViewed({ currentId }: { currentId: string }) {
     <section className="border-t border-zinc-200 pt-16">
       <div className="flex justify-between items-end mb-10">
         <div>
-          <h3 className="text-detail font-black uppercase tracking-[0.4em] text-zinc-400 mb-2">
+          <h3 className="text-detail font-black uppercase tracking-[0.4em] text-zinc-500 mb-2">
             Your History
           </h3>
           <h2 className="text-2xl font-bold uppercase tracking-tighter text-zinc-800 italic">

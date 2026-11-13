@@ -7,4 +7,7 @@ export interface PublicVendor {
   slug: string;
   logo: string | null;
   featured_vendor?: boolean;
+  description?: string | null;
+  city?: string | null;
+  state?: string | null;
 }

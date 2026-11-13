@@ -56,7 +56,7 @@ export function EraFilter({ activeEra, options }: EraFilterProps) {
           <History
             size={12}
             className={
-              activeEra !== "all" ? "text-blue-600" : "text-zinc-400"
+              activeEra !== "all" ? "text-blue-600" : "text-zinc-500"
             }
           />
           <span className="text-detail font-bold uppercase tracking-widest text-zinc-800 truncate">
@@ -65,7 +65,7 @@ export function EraFilter({ activeEra, options }: EraFilterProps) {
         </div>
         <ChevronDown
           size={14}
-          className={`text-zinc-400 shrink-0 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
+          className={`text-zinc-500 shrink-0 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
         />
       </button>
 

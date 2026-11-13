@@ -36,7 +36,7 @@ function LoginForm() {
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white mb-1">
             Application Received
           </p>
-          <p className="text-[9px] text-zinc-400 uppercase tracking-widest leading-relaxed">
+          <p className="text-[9px] text-zinc-500 uppercase tracking-widest leading-relaxed">
             We are reviewing your shop details.<br/>
             You will receive an email once approved.
           </p>
@@ -62,7 +62,7 @@ function LoginForm() {
         )}
 
         <div className="space-y-2">
-          <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+          <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
             Email Address
           </label>
           <input
@@ -74,7 +74,7 @@ function LoginForm() {
         </div>
 
         <div className="space-y-2">
-          <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+          <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
             Password
           </label>
           <input
@@ -95,7 +95,7 @@ function LoginForm() {
           </button>
 
           <div className="text-center">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">
               New to the marketplace?
             </p>
             <Link
@@ -116,7 +116,7 @@ export default function LoginPage() {
     <main className="min-h-[80dvh] flex items-center justify-center bg-[#F9F8F6] px-6">
       <Suspense
         fallback={
-          <div className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+          <div className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
             Loading...
           </div>
         }

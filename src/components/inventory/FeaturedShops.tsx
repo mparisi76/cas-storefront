@@ -26,7 +26,7 @@ export default function FeaturedShops({
           </div>
           <Link
             href="/inventory"
-            className="group text-detail font-bold uppercase tracking-widest text-zinc-400 hover:text-zinc-900 transition-colors flex items-center gap-2"
+            className="group text-detail font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-900 transition-colors flex items-center gap-2"
           >
             View All Sources
             <span className="group-hover:translate-x-1 transition-transform">
@@ -39,7 +39,7 @@ export default function FeaturedShops({
           {vendors.map((vendor) => (
             <Link
               key={vendor.id}
-              href={`/inventory?vendor=${vendor.id}`}
+              href={`/shop/${vendor.id}`}
               className="group flex-none w-72 snap-start"
             >
               {/* Logo Container */}
@@ -54,7 +54,7 @@ export default function FeaturedShops({
                   <Store
                     size={48}
                     strokeWidth={1}
-                    className="text-zinc-300 group-hover:text-blue-600 transition-colors"
+                    className="text-zinc-500 group-hover:text-blue-600 transition-colors"
                   />
                 )}
 
@@ -74,7 +74,7 @@ export default function FeaturedShops({
                 )}
               </div>
 
-              <p className="text-detail font-mono text-zinc-400 uppercase tracking-[0.2em] italic">
+              <p className="text-detail font-mono text-zinc-500 uppercase tracking-[0.2em] italic">
                 Direct Source — Hudson Valley, NY
               </p>
             </Link>

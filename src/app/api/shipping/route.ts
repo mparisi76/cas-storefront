@@ -1,95 +1,42 @@
 import { NextResponse } from "next/server";
-import { ShippingRate } from "./types";
+import { getShippingMode, quoteRates } from "@/lib/shipping";
+import type { ShippingQuoteResponse } from "./types";
 
+/**
+ * POST { itemId, zipCode } -> shipping options for that item.
+ * Weight, dimensions, and ship-from address come from Directus, never from the
+ * browser, and each rate carries a signed token that checkout verifies.
+ */
 export async function POST(req: Request) {
+  let body: { itemId?: unknown; zipCode?: unknown };
   try {
-    const body = await req.json();
-    const { zipCode, weight, length, width, height } = body;
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+  }
 
-    // 1. FREIGHT GATEKEEPER
-    // Carriers like UPS/USPS usually cap at 150lbs, but for salvage, 
-    // anything over 100lbs often needs a custom pallet/freight quote.
-    if (Number(weight) > 100) {
-      return NextResponse.json({ 
-        error: "Freight Required", 
-        message: "Items over 100lbs require a custom freight quote for safe transit." 
-      });
+  const itemId = String(body.itemId ?? "");
+  const zip = String(body.zipCode ?? "").trim();
+  if (!/^\d{5}$/.test(zip)) {
+    return NextResponse.json({ error: "Please enter a valid 5-digit ZIP code." }, { status: 400 });
+  }
+
+  const ship = await getShippingMode(itemId);
+  if (!ship) {
+    return NextResponse.json({ error: "This item is no longer available." }, { status: 404 });
+  }
+  if (ship.mode === "freight") {
+    return NextResponse.json<ShippingQuoteResponse>({ mode: "freight", reason: ship.reason });
+  }
+
+  try {
+    const rates = await quoteRates(ship, zip);
+    if (rates.length === 0) {
+      return NextResponse.json({ error: "No carrier rates found for that ZIP code." }, { status: 404 });
     }
-
-    const response = await fetch("https://api.goshippo.com/shipments/", {
-      method: "POST",
-      headers: {
-        Authorization: `ShippoToken ${process.env.SHIPPO_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        address_from: {
-          name: "Catskill Architectural Salvage",
-          street1: "123 Main St", 
-          city: "Catskill",
-          state: "NY",
-          zip: "12414", // Updated to Catskill, NY Zip
-          country: "US",
-        },
-        address_to: {
-          zip: zipCode,
-          country: "US",
-        },
-        parcels: [
-          {
-            length: length,
-            width: width,
-            height: height,
-            distance_unit: "in",
-            weight: weight,
-            mass_unit: "lb",
-          },
-        ],
-        async: false,
-      }),
-    });
-
-    const data = await response.json();
-
-    // 2. MARKUP CONFIGURATION
-    const HANDLING_FLAT_FEE = 5.00; // Covers packing materials
-    const MARKUP_PERCENTAGE = 1.15; // 15% buffer for historical item insurance/handling
-
-    if (!data.rates) {
-      return NextResponse.json({ error: "No rates found" }, { status: 404 });
-    }
-
-    const rates = data.rates
-      .map((rate: { 
-        provider: string; 
-        servicelevel: { name: string }; 
-        amount: string; 
-        currency: string; 
-        estimated_days: number 
-      }) => {
-        // Apply Markup Logic
-        const basePrice = parseFloat(rate.amount);
-        const markedUpPrice = (basePrice * MARKUP_PERCENTAGE) + HANDLING_FLAT_FEE;
-
-        return {
-          provider: rate.provider,
-          service: rate.servicelevel.name,
-          price: markedUpPrice.toFixed(2),
-          currency: rate.currency,
-          estimated_days: rate.estimated_days,
-        };
-      })
-      .sort(
-        (a: ShippingRate, b: ShippingRate) =>
-          parseFloat(a.price) - parseFloat(b.price)
-      );
-
-    return NextResponse.json(rates.slice(0, 3));
+    return NextResponse.json<ShippingQuoteResponse>({ mode: "parcel", rates });
   } catch (error) {
-    console.error("Shipping API Error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch rates" },
-      { status: 500 }
-    );
+    console.error("Shipping quote failed:", error);
+    return NextResponse.json({ error: "Couldn't get shipping rates right now. Please try again." }, { status: 502 });
   }
 }

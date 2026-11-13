@@ -1,210 +1,296 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Calculator, Truck, Mail, AlertCircle } from "lucide-react";
-import { ShippingRate } from "@/app/api/shipping/types";
+import { useFormStatus } from "react-dom";
+import { X, Calculator, Truck, Mail, AlertCircle, Check, Lock } from "lucide-react";
+import type { ShippingRate, ShippingQuoteResponse } from "@/app/api/shipping/types";
+import { createCheckout } from "@/app/actions/checkout";
 
 interface ShippingDrawerProps {
+  id: string | number;
+  itemName: string;
+  price?: number;
   weight: number;
   length: number;
   width: number;
   height: number;
-  itemName: string;
-  id: string | number;
-  disabled?: boolean;
+  /**
+   * checkout: trigger is the Purchase button; buyer picks a rate, then pays.
+   * estimate: trigger is "Calculate Shipping" (item can't be bought on-site).
+   * freight:  item too heavy / missing dimensions; manual quote only.
+   */
+  mode: "checkout" | "estimate" | "freight";
 }
 
-export default function ShippingDrawer({
-  id,
-  itemName,
-  weight,
-  length,
-  width,
-  height,
-  disabled,
-}: ShippingDrawerProps) {
+const usd = (n: number) =>
+  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
+
+function CheckoutButton({ label }: { label: string }) {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="w-full bg-zinc-900 text-white py-5 text-label font-black uppercase tracking-[0.3em] hover:bg-blue-600 transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+    >
+      <Lock size={14} /> {pending ? "Opening secure checkout..." : label}
+    </button>
+  );
+}
+
+export default function ShippingDrawer({ id, itemName, price, weight, length, width, height, mode }: ShippingDrawerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [zipCode, setZipCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [rates, setRates] = useState<ShippingRate[]>([]);
+  const [selected, setSelected] = useState<ShippingRate | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isFreight, setIsFreight] = useState(false);
+  // The server may decide an item ships by freight (e.g. vendor has no address yet).
+  const [serverFreight, setServerFreight] = useState(false);
 
-  // Auto-trigger Freight mode if dimensions are missing or excessively large
-  useEffect(() => {
-    if (disabled) {
-      setIsFreight(true);
-    }
-  }, [disabled]);
+  const isFreight = mode === "freight" || serverFreight;
+  const isCheckout = mode === "checkout";
 
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
+    document.body.style.overflow = isOpen ? "hidden" : "unset";
   }, [isOpen]);
 
   const calculateShipping = async () => {
-    if (!zipCode || zipCode.length < 5) {
-      setError("Please enter a valid zip code");
+    if (!/^\d{5}$/.test(zipCode)) {
+      setError("Please enter a valid 5-digit ZIP code.");
       return;
     }
-
     setLoading(true);
     setError(null);
     setRates([]);
-    setIsFreight(false);
+    setSelected(null);
 
     try {
       const res = await fetch("/api/shipping", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ zipCode, weight, length, width, height }),
+        body: JSON.stringify({ itemId: id, zipCode }),
       });
+      const data = (await res.json()) as ShippingQuoteResponse | { error: string };
 
-      const data = await res.json();
-
-      if (data.error === "Freight Required" || weight > 150) {
-        setIsFreight(true);
-      } else if (data.error) {
-        setError(data.message || "Shipping calculation unavailable.");
-      } else if (data.length === 0) {
-        setError("No standard rates found. Freight inquiry recommended.");
+      if ("error" in data) {
+        setError(data.error);
+      } else if (data.mode === "freight") {
+        setServerFreight(true);
       } else {
-        setRates(data);
+        setRates(data.rates);
+        setSelected(data.rates[0] ?? null); // cheapest preselected
       }
     } catch {
-      setError("Connectivity issue with shipping carrier.");
+      setError("Couldn't reach the shipping service. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  const ref = `CAS-${String(id).padStart(4, "0")}`;
   const handleFreightInquiry = () => {
-    const subject = encodeURIComponent(`Freight Inquiry: CAS—${String(id).padStart(4, "0")}`);
+    const subject = encodeURIComponent(`Freight Inquiry: ${ref}`);
     const body = encodeURIComponent(
-      `Inquiry regarding logistics for: ${itemName}\n` +
-      `Reference: CAS—${String(id).padStart(4, "0")}\n` +
-      `Destination Zip: ${zipCode || "[Enter Zip]"}\n\n` +
-      `Specs: ${weight} lbs | ${length}" x ${width}" x ${height}"`
+      `Inquiry regarding shipping for: ${itemName}\nReference: ${ref}\nDestination ZIP: ${zipCode || "[Enter ZIP]"}\n\n` +
+        `Specs: ${weight || "?"} lbs | ${length || "?"}" x ${width || "?"}" x ${height || "?"}"`,
     );
     window.location.href = `mailto:info@catskillas.com?subject=${subject}&body=${body}`;
   };
 
-  return (
-    <>
+  const trigger =
+    mode === "checkout" ? (
       <button
-        disabled={disabled}
+        onClick={() => setIsOpen(true)}
+        className="w-full bg-zinc-800 text-white py-5 text-label font-black uppercase tracking-[0.4em] hover:bg-blue-600 transition-all shadow-xl active:scale-[0.98]"
+      >
+        Purchase
+      </button>
+    ) : (
+      <button
         onClick={() => setIsOpen(true)}
         className={`w-full border py-4 text-label font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 ${
-          disabled 
-            ? "border-zinc-200 text-zinc-400 bg-zinc-50 hover:bg-zinc-100" 
+          mode === "freight"
+            ? "border-zinc-200 text-zinc-500 bg-zinc-50 hover:bg-zinc-100"
             : "border-zinc-300 text-zinc-500 hover:bg-zinc-800 hover:text-white hover:border-zinc-800"
         }`}
       >
-        {disabled ? <Mail size={14} /> : <Calculator size={14} />}
-        {disabled ? "Request Freight Quote" : "Calculate Shipping"}
+        {mode === "freight" ? <Mail size={14} /> : <Calculator size={14} />}
+        {mode === "freight" ? "Request Freight Quote" : "Calculate Shipping"}
       </button>
+    );
+
+  return (
+    <>
+      {trigger}
 
       <div className={`fixed inset-0 z-50 transition-visibility duration-300 ${isOpen ? "visible" : "invisible"}`}>
-        <div 
-          className={`absolute inset-0 bg-zinc-900/40 backdrop-blur-sm transition-opacity duration-500 ${isOpen ? "opacity-100" : "opacity-0"}`} 
-          onClick={() => setIsOpen(false)} 
+        <div
+          className={`absolute inset-0 bg-zinc-900/40 backdrop-blur-sm transition-opacity duration-500 ${isOpen ? "opacity-100" : "opacity-0"}`}
+          onClick={() => setIsOpen(false)}
         />
 
-        <div className={`absolute right-0 top-0 h-full w-full max-w-md bg-[#F9F8F6] shadow-2xl transition-transform duration-500 ease-out p-10 flex flex-col ${isOpen ? "translate-x-0" : "translate-x-full"}`}>
-          
-          <div className="flex justify-between items-center mb-12">
+        <div
+          className={`absolute right-0 top-0 h-full w-full max-w-md bg-[#F9F8F6] shadow-2xl transition-transform duration-500 ease-out p-8 md:p-10 flex flex-col overflow-y-auto ${isOpen ? "translate-x-0" : "translate-x-full"}`}
+        >
+          <div className="flex justify-between items-center mb-10">
             <div>
-              <h2 className="text-2xl font-bold uppercase tracking-tighter text-zinc-800 italic leading-none">Logistics</h2>
-              <p className="text-detail uppercase tracking-widest text-zinc-400 font-bold mt-1">Estimate</p>
+              <h2 className="text-2xl font-bold uppercase tracking-tighter text-zinc-800 italic leading-none">
+                {isCheckout ? "Checkout" : "Shipping"}
+              </h2>
+              <p className="text-detail uppercase tracking-widest text-zinc-500 font-bold mt-1">
+                {isCheckout ? "Choose delivery" : "Estimate"}
+              </p>
             </div>
             <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-zinc-200 rounded-full transition-colors cursor-pointer">
-              <X size={24} className="text-zinc-400" />
+              <X size={24} className="text-zinc-500" />
             </button>
           </div>
 
-          <div className="space-y-10">
-            {/* Item Summary Card */}
+          <div className="space-y-8">
+            {/* Item summary */}
             <div className="bg-white border border-zinc-200 p-6">
-              <p className="text-detail font-black uppercase tracking-widest text-zinc-400 mb-4 border-b border-zinc-50 pb-2">Artifact Manifest</p>
-              <div className="space-y-1">
+              <p className="text-detail font-black uppercase tracking-widest text-zinc-500 mb-4 border-b border-zinc-50 pb-2">{ref}</p>
+              <div className="flex justify-between items-start gap-4">
                 <p className="text-sm font-bold text-zinc-800">{itemName}</p>
-                <div className="flex justify-between items-center pt-2">
-                  <span className="text-label font-mono text-zinc-500 uppercase">{weight || "—"} LBS</span>
-                  <span className="text-label font-mono text-zinc-500 uppercase">Size: {length || "0"}&rdquo;×{width || "0"}&rdquo;×{height || "0"}&rdquo;</span>
-                </div>
+                {typeof price === "number" && <p className="text-sm font-bold text-zinc-800">{usd(price)}</p>}
+              </div>
+              <div className="flex justify-between items-center pt-2">
+                <span className="text-label font-mono text-zinc-500 uppercase">{weight || "—"} LBS</span>
+                <span className="text-label font-mono text-zinc-500 uppercase">
+                  {length || "?"}&rdquo;×{width || "?"}&rdquo;×{height || "?"}&rdquo;
+                </span>
               </div>
             </div>
 
-            {/* Input Section */}
-            {!disabled && (
+            {/* ZIP entry */}
+            {!isFreight && (
               <div className="space-y-4">
-                <label className="block text-label font-black uppercase tracking-widest text-zinc-800">Destination Zip Code</label>
+                <label className="block text-label font-black uppercase tracking-widest text-zinc-800">Delivery ZIP Code</label>
                 <div className="flex gap-2">
                   <input
                     type="text"
+                    inputMode="numeric"
                     maxLength={5}
                     placeholder="12401"
-                    className="flex-1 bg-white border border-zinc-200 p-4 font-mono text-lg text-zinc-700 focus:border-zinc-900 outline-none transition-colors"
+                    className="flex-1 min-w-0 bg-white border border-zinc-200 p-4 font-mono text-lg text-zinc-700 focus:border-zinc-900 outline-none transition-colors"
                     value={zipCode}
                     onChange={(e) => setZipCode(e.target.value.replace(/\D/g, ""))}
+                    onKeyDown={(e) => e.key === "Enter" && calculateShipping()}
                   />
                   <button
                     onClick={calculateShipping}
                     disabled={loading}
-                    className="bg-zinc-900 text-white px-8 font-bold uppercase tracking-widest hover:bg-blue-600 transition-colors text-label disabled:bg-zinc-200"
+                    className="bg-zinc-900 text-white px-6 font-bold uppercase tracking-widest hover:bg-blue-600 transition-colors text-label disabled:bg-zinc-300"
                   >
                     {loading ? "..." : "Get Rates"}
                   </button>
                 </div>
-                {error && <p className="text-detail font-bold text-red-600 uppercase italic flex items-center gap-2"><AlertCircle size={12}/> {error}</p>}
+                {error && (
+                  <p className="text-detail font-bold text-red-600 uppercase italic flex items-center gap-2">
+                    <AlertCircle size={12} /> {error}
+                  </p>
+                )}
               </div>
             )}
 
-            {/* Results Display */}
-            <div className="space-y-4 max-h-[45vh] overflow-y-auto pr-2">
-              {isFreight || disabled ? (
-                <div className="bg-white border border-zinc-200 p-8 text-center space-y-6">
-                  <Truck size={32} className="mx-auto text-zinc-800" strokeWidth={1} />
-                  <div>
-                    <p className="text-label font-black uppercase tracking-widest text-zinc-800">Specialized Handling Required</p>
-                    <p className="text-base text-zinc-500 mt-3 leading-relaxed italic">
-                      Due to the architectural scale or weight of this piece, standard parcel service is unavailable. We utilize specialized crate-and-freight carriers.
-                    </p>
-                  </div>
+            {/* Results */}
+            {isFreight ? (
+              <div className="bg-white border border-zinc-200 p-8 text-center space-y-6">
+                <Truck size={32} className="mx-auto text-zinc-800" strokeWidth={1} />
+                <div>
+                  <p className="text-label font-black uppercase tracking-widest text-zinc-800">Shipping arranged after purchase</p>
+                  <p className="text-base text-zinc-500 mt-3 leading-relaxed italic">
+                    This piece needs freight or custom handling, so we&apos;ll quote and arrange delivery with you directly.
+                  </p>
+                </div>
+                {isCheckout ? (
+                  <form action={createCheckout} className="space-y-3">
+                    <input type="hidden" name="itemId" value={String(id)} />
+                    <CheckoutButton label="Continue to Payment" />
+                    <button
+                      type="button"
+                      onClick={handleFreightInquiry}
+                      className="w-full border border-zinc-300 text-zinc-500 py-4 text-label font-bold uppercase tracking-[0.2em] hover:border-zinc-900 hover:text-zinc-900 transition-all"
+                    >
+                      Ask about shipping first
+                    </button>
+                  </form>
+                ) : (
                   <button
                     onClick={handleFreightInquiry}
                     className="w-full bg-zinc-900 text-white py-4 text-label font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-blue-600 transition-all"
                   >
                     <Mail size={14} /> Request Manual Quote
                   </button>
-                </div>
-              ) : (
-                rates.map((rate, i) => (
-                  <div key={i} className="flex justify-between items-center bg-white border border-zinc-200 p-5 hover:border-zinc-900 transition-colors">
-                    <div>
-                      <p className="text-detail font-black text-zinc-400 uppercase tracking-widest mb-1">{rate.provider} • {rate.service}</p>
-                      <p className="text-sm font-bold text-zinc-800 italic">Est. {rate.estimated_days} Day Delivery</p>
-                    </div>
-                    <p className="text-xl font-light text-zinc-900">${parseFloat(rate.price).toFixed(2)}</p>
-                  </div>
-                ))
-              )}
+                )}
+              </div>
+            ) : rates.length > 0 ? (
+              <div className="space-y-3" role="radiogroup" aria-label="Shipping options">
+                {rates.map((rate) => {
+                  const active = selected?.token === rate.token;
+                  return (
+                    <button
+                      key={rate.token}
+                      type="button"
+                      role="radio"
+                      aria-checked={active}
+                      onClick={() => setSelected(rate)}
+                      className={`w-full text-left flex justify-between items-center bg-white border p-5 transition-colors ${
+                        active ? "border-zinc-900 ring-1 ring-zinc-900" : "border-zinc-200 hover:border-zinc-400"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className={`w-4 h-4 rounded-full border flex items-center justify-center ${active ? "bg-zinc-900 border-zinc-900" : "border-zinc-300"}`}>
+                          {active && <Check size={10} className="text-white" />}
+                        </span>
+                        <div>
+                          <p className="text-detail font-black text-zinc-500 uppercase tracking-widest mb-1">
+                            {rate.provider} • {rate.service}
+                          </p>
+                          <p className="text-sm font-bold text-zinc-800 italic">
+                            {rate.estimatedDays ? `Est. ${rate.estimatedDays} day delivery` : "Delivery time varies"}
+                          </p>
+                        </div>
+                      </div>
+                      <p className="text-xl font-light text-zinc-900">{usd(rate.price)}</p>
+                    </button>
+                  );
+                })}
 
-              {!loading && rates.length === 0 && !error && !isFreight && !disabled && (
-                <div className="py-16 text-center border border-dashed border-zinc-200 opacity-50">
-                  <Truck size={24} className="mx-auto text-zinc-400 mb-3" />
-                  <p className="text-detail uppercase font-black text-zinc-400 tracking-widest">Awaiting Destination</p>
+                {isCheckout && selected && (
+                  <form action={createCheckout} className="pt-4 space-y-3">
+                    <input type="hidden" name="itemId" value={String(id)} />
+                    <input type="hidden" name="shippingQuote" value={selected.token} />
+                    {typeof price === "number" && (
+                      <div className="flex justify-between text-sm text-zinc-600 border-t border-zinc-200 pt-4">
+                        <span>Total with shipping</span>
+                        <span className="font-bold text-zinc-900">{usd(price + selected.price)}</span>
+                      </div>
+                    )}
+                    <CheckoutButton label="Continue to Payment" />
+                    <p className="text-detail text-zinc-500 text-center">
+                      Enter a delivery address in ZIP {zipCode} at checkout.
+                    </p>
+                  </form>
+                )}
+              </div>
+            ) : (
+              !loading &&
+              !error && (
+                <div className="py-14 text-center border border-dashed border-zinc-200 opacity-60">
+                  <Truck size={24} className="mx-auto text-zinc-500 mb-3" />
+                  <p className="text-detail uppercase font-black text-zinc-500 tracking-widest">
+                    Enter your ZIP to see delivery options
+                  </p>
                 </div>
-              )}
-            </div>
+              )
+            )}
           </div>
 
-          <div className="mt-auto border-t border-zinc-200 pt-8">
-            <p className="text-detail text-zinc-400 uppercase tracking-tight leading-relaxed italic">
-              * rates include white-glove packaging. definitive transit costs finalized upon invoice.
+          <div className="mt-auto border-t border-zinc-200 pt-6">
+            <p className="text-detail text-zinc-500 uppercase tracking-tight leading-relaxed italic">
+              * rates include careful packing. Items over {100} lbs ship by freight, quoted separately.
             </p>
           </div>
         </div>

@@ -13,11 +13,13 @@ export default function EmptyState({ activeSearch }: EmptyStateProps) {
     : "/contact?type=request";
 
   return (
-    <div className="py-20 md:py-32 text-center border border-dashed border-zinc-200 bg-white/50 animate-in fade-in zoom-in-95 duration-500">
-      <div className="max-w-sm mx-auto space-y-8 px-6">
+    // flex-1 fills the results column (which has a min height), and the inner
+    // flex centers the content vertically within it.
+    <div className="flex-1 flex items-center justify-center py-20 md:py-32 text-center border border-dashed border-zinc-200 bg-white/50 animate-in fade-in zoom-in-95 duration-500">
+      <div className="w-full max-w-sm mx-auto space-y-8 px-6">
         <div className="flex justify-center">
           <div className="w-12 h-12 bg-zinc-50 border border-zinc-100 flex items-center justify-center rounded-full">
-            <SearchX className="text-zinc-300" size={20} strokeWidth={1.5} />
+            <SearchX className="text-zinc-500" size={20} strokeWidth={1.5} />
           </div>
         </div>
 
@@ -42,7 +44,7 @@ export default function EmptyState({ activeSearch }: EmptyStateProps) {
           
           <Link
             href={requestUrl}
-            className="group inline-flex items-center justify-center gap-2 text-tiny font-bold uppercase tracking-[0.2em] text-zinc-400 hover:text-zinc-900 transition-colors py-2"
+            className="group inline-flex items-center justify-center gap-2 text-tiny font-bold uppercase tracking-[0.2em] text-zinc-500 hover:text-zinc-900 transition-colors py-2"
           >
             Place a Stock Request 
             <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />

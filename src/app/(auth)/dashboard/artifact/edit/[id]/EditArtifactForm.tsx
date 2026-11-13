@@ -209,15 +209,15 @@ export default function EditArtifactForm({
         {/* Bottom Row: Metadata (Now sitting under the line) */}
         <div className="flex flex-wrap items-center gap-x-6 gap-y-1">
           <div className="flex items-center gap-1.5 font-mono text-[10px]">
-            <span className="uppercase text-zinc-400 font-black tracking-widest text-[9px]">Ref:</span>
+            <span className="uppercase text-zinc-500 font-black tracking-widest text-[9px]">Ref:</span>
             <span className="font-bold text-zinc-600 bg-zinc-50 px-1.5 py-0.5 border border-zinc-100">{id.slice(0, 8)}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Catalogued:</span>
+            <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500">Catalogued:</span>
             <span className="text-[10px] font-medium text-zinc-600">{dateCreated}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Modified:</span>
+            <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500">Modified:</span>
             <span className="text-[10px] font-medium text-zinc-600 italic">
               {lastUpdated}
             </span>

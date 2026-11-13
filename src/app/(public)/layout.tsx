@@ -2,8 +2,8 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Suspense, useEffect } from "react";
-import Header from "@/components/inventory/Header";
+import { useEffect } from "react";
+import SiteHeader from "@/components/layout/SiteHeader";
 import Footer from "@/components/inventory/Footer";
 
 export default function PublicLayout({
@@ -19,9 +19,7 @@ export default function PublicLayout({
 
   return (
     <>
-      <Suspense fallback={<div className="h-20 bg-[#F9F8F6] border-b border-zinc-200 w-full" />}>
-        <Header />
-      </Suspense>
+      <SiteHeader />
       <main className="flex-1">{children}</main>
       <Footer />
     </>

@@ -20,6 +20,8 @@ export default async function SettingsPage() {
   const user = (await client.request(
     readMe({
       fields: [
+        "id",
+        "avatar",
         "first_name",
         "last_name",
         "email",
@@ -28,6 +30,8 @@ export default async function SettingsPage() {
         "phone",
         "city",
         "state",
+        "street_address",
+        "zip_code",
         { role: ["name"] },
       ],
     }),
@@ -58,7 +62,7 @@ export default async function SettingsPage() {
         </div>
 
         {/* Right: The Client Form Component */}
-        <ProfileForm user={user} />
+        <ProfileForm user={user} shopUrl={user.id ? `/shop/${user.id}` : null} />
       </div>
 
       <div className="h-px w-full bg-zinc-100" />
@@ -83,7 +87,7 @@ export default async function SettingsPage() {
       {/* Role Badge Footer */}
       <div className="bg-zinc-50 border border-zinc-100 p-6 flex items-center justify-between">
         <div className="space-y-1">
-          <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400">
+          <p className="text-[9px] font-black uppercase tracking-widest text-zinc-500">
             Access Level
           </p>
           <div className="flex items-center gap-2">

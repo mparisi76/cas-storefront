@@ -16,7 +16,7 @@ export default function RegisterClient() {
             Vendor Application
           </h1>
           <p className="text-[11px] text-zinc-500 uppercase tracking-widest leading-relaxed">
-            Join the collective of Catskill <br/> architectural scouts.
+            Join our collective of <br/> dealers &amp; pickers.
           </p>
         </header>
 
@@ -31,33 +31,38 @@ export default function RegisterClient() {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">First Name</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">First Name</label>
               <input name="firstName" type="text" required defaultValue={state?.fields?.firstName} className="w-full border-b border-zinc-200 py-2 outline-none focus:border-zinc-800 text-sm bg-transparent" />
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Last Name</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Last Name</label>
               <input name="lastName" type="text" required defaultValue={state?.fields?.lastName} className="w-full border-b border-zinc-200 py-2 outline-none focus:border-zinc-800 text-sm bg-transparent" />
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Shop Name</label>
+            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Shop Name</label>
             <input name="shopName" type="text" required defaultValue={state?.fields?.shopName} className="w-full border-b border-zinc-200 py-2 outline-none focus:border-zinc-800 text-sm bg-transparent placeholder:text-zinc-200" placeholder="e.g. Iron & Oak" />
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Primary Inventory Type</label>
-            <select name="inventoryType" required defaultValue={state?.fields?.inventoryType || "architectural"} className="w-full border-b border-zinc-200 py-2 outline-none focus:border-zinc-800 text-sm bg-transparent appearance-none cursor-pointer">
+            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Primary Inventory Type</label>
+            <select name="inventoryType" required defaultValue={state?.fields?.inventoryType || "antiques"} className="w-full border-b border-zinc-200 py-2 outline-none focus:border-zinc-800 text-sm bg-transparent appearance-none cursor-pointer">
+              <option value="antiques">Antiques</option>
+              <option value="vintage">Vintage &amp; Retro</option>
+              <option value="mid-century">Mid-Century Modern</option>
+              <option value="furniture">Furniture</option>
+              <option value="decor">Home Decor &amp; Smalls</option>
+              <option value="lighting">Lighting</option>
               <option value="architectural">Architectural Salvage</option>
-              <option value="industrial">Industrial Artifacts</option>
-              <option value="furniture">Period Furniture</option>
-              <option value="hardware">Vintage Hardware</option>
-              <option value="other">Mixed / General Decor</option>
+              <option value="industrial">Industrial</option>
+              <option value="hardware">Hardware</option>
+              <option value="other">Mixed / Other</option>
             </select>
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Email Address</label>
+            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Email Address</label>
             <input 
               name="email" 
               type="email" 
@@ -71,7 +76,7 @@ export default function RegisterClient() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Create Password</label>
+            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Create Password</label>
             <input name="password" type="password" required minLength={8} className="w-full border-b border-zinc-200 py-2 outline-none focus:border-zinc-800 text-sm bg-transparent" />
           </div>
 
@@ -83,10 +88,15 @@ export default function RegisterClient() {
             >
               {isPending ? "Submitting..." : "Apply as Vendor"}
             </button>
+            <p className="mt-4 text-[11px] leading-relaxed text-zinc-500 text-center">
+              By applying, you agree to our{" "}
+              <Link href="/terms" className="underline hover:text-zinc-900">Terms of Service</Link> and{" "}
+              <Link href="/privacy" className="underline hover:text-zinc-900">Privacy Policy</Link>.
+            </p>
           </div>
 
           <div className="text-center pt-4">
-            <Link href="/login" className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-zinc-900 transition-colors">
+            <Link href="/login" className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-900 transition-colors">
               Already registered? Login
             </Link>
           </div>

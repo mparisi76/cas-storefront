@@ -76,9 +76,12 @@ export default async function HomePage() {
               <h1 className="text-xl md:text-5xl font-light uppercase tracking-[0.3em] text-zinc-500 leading-none">
                 Architectural Salvage
               </h1>
+              <p className="mt-3 md:mt-5 text-[10px] md:text-sm uppercase tracking-[0.4em] text-zinc-400">
+                Antiques · Vintage · Salvage
+              </p>
             </div>
 
-            <p className="max-w-md mb-12 text-[10px] md:text-xs leading-relaxed text-zinc-400 font-medium tracking-[0.2em] uppercase italic opacity-90">
+            <p className="max-w-md mb-12 text-[10px] md:text-xs leading-relaxed text-zinc-500 font-medium tracking-[0.2em] uppercase italic opacity-90">
               Carefully Curated Objects • Machinery • Antiques
             </p>
 
@@ -120,19 +123,19 @@ export default async function HomePage() {
         <FeaturedShops vendors={featuredVendors} />
 
         <footer className="bg-white py-10 px-10 border-t border-zinc-100 flex justify-between items-center">
-          <p className="text-[9px] font-mono uppercase tracking-[0.3em] text-zinc-400">
+          <p className="text-[9px] font-mono uppercase tracking-[0.3em] text-zinc-500">
             © 2026 Catskill Architectural Salvage
           </p>
           <div className="flex gap-6">
             <Link
               href="/privacy"
-              className="text-[9px] font-mono uppercase text-zinc-400 hover:text-zinc-900"
+              className="text-[9px] font-mono uppercase text-zinc-500 hover:text-zinc-900"
             >
               Privacy
             </Link>
             <Link
               href="/terms"
-              className="text-[9px] font-mono uppercase text-zinc-400 hover:text-zinc-900"
+              className="text-[9px] font-mono uppercase text-zinc-500 hover:text-zinc-900"
             >
               Terms
             </Link>

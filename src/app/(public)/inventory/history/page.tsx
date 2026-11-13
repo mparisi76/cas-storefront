@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import ArtifactCard from "@/components/inventory/ArtifactCard";
-import directus from "@/lib/directus";
-import { readItems } from "@directus/sdk";
+import { getArtifactsByIds } from "@/app/actions/public-artifacts";
 import { Artifact } from "@/types/artifact";
 import Link from "next/link";
 
@@ -28,23 +27,7 @@ export default function HistoryPage() {
         return;
       }
 
-      const response = await directus.request(
-        readItems("props", {
-          filter: { id: { _in: idsToFetch } },
-          fields: [
-            "id", "name", "thumbnail", "purchase_price", 
-            "availability", "classification", 
-            { category: ["name", "slug"] },
-            { user_created: ["id", "first_name", "last_name"] }
-          ],
-        })
-      );
-
-      const data = response as Artifact[];
-      const sorted = data.sort((a, b) => 
-        idsToFetch.indexOf(String(a.id)) - idsToFetch.indexOf(String(b.id))
-      );
-
+      const sorted = await getArtifactsByIds(idsToFetch);
       setItems(sorted);
     } catch (error) {
       console.error("History Page Error:", error);
@@ -72,7 +55,7 @@ export default function HistoryPage() {
           <div className="flex items-center gap-3 mb-2">
             <Link 
               href="/inventory" 
-              className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-blue-600 transition-colors"
+              className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-blue-600 transition-colors"
             >
               ← Back to Shop
             </Link>
@@ -93,7 +76,7 @@ export default function HistoryPage() {
       </div>
 
       {loading ? (
-        <div className="py-20 text-center text-zinc-400 animate-pulse uppercase tracking-widest text-xs">
+        <div className="py-20 text-center text-zinc-500 animate-pulse uppercase tracking-widest text-xs">
           Loading your history...
         </div>
       ) : items.length > 0 ? (
@@ -111,7 +94,7 @@ export default function HistoryPage() {
         </div>
       ) : (
         <div className="py-32 text-center border border-dashed border-zinc-200 bg-white/50">
-          <p className="text-[11px] uppercase tracking-[0.3em] text-zinc-400 font-bold mb-6">
+          <p className="text-[11px] uppercase tracking-[0.3em] text-zinc-500 font-bold mb-6">
             You haven&apos;t viewed any items yet.
           </p>
           <Link

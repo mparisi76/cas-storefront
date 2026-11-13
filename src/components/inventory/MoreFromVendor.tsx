@@ -46,7 +46,7 @@ export default async function MoreFromVendor({
     <section className="border-t border-zinc-200 pt-16">
       <div className="flex justify-between items-end mb-10">
         <div>
-          <h3 className="text-detail font-black uppercase tracking-[0.4em] text-zinc-400 mb-2">
+          <h3 className="text-detail font-black uppercase tracking-[0.4em] text-zinc-500 mb-2">
             Shop Selection
           </h3>
           <h2 className="text-2xl font-bold uppercase tracking-tighter text-zinc-800 italic">
@@ -54,7 +54,7 @@ export default async function MoreFromVendor({
           </h2>
         </div>
         <Link
-          href={`/inventory?vendor=${vendorId}`}
+          href={`/shop/${vendorId}`}
           className="text-detail font-black uppercase tracking-widest text-blue-600 border-b border-blue-600 pb-1 hover:text-zinc-900 hover:border-zinc-900 transition-all"
         >
           View All

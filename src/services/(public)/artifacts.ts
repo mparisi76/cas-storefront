@@ -70,6 +70,17 @@ const buildFilters = (params: {
   return { _and: andFilters };
 };
 
+/** Catalog sort options. Only these keys are accepted from the URL. */
+export const SORT_OPTIONS = {
+  featured: { label: "Featured", sort: ["-featured", "-date_created", "-id"] },
+  newest: { label: "Newest", sort: ["-date_created", "-id"] },
+  price_asc: { label: "Price: Low to High", sort: ["purchase_price", "-id"] },
+  price_desc: { label: "Price: High to Low", sort: ["-purchase_price", "-id"] },
+} as const;
+export type SortKey = keyof typeof SORT_OPTIONS;
+export const isSortKey = (v: unknown): v is SortKey =>
+  typeof v === "string" && Object.prototype.hasOwnProperty.call(SORT_OPTIONS, v);
+
 export const getShopItems = cache(
   async (params: {
     category?: string;
@@ -78,8 +89,10 @@ export const getShopItems = cache(
     vendor?: string;
     page?: number;
     limit?: number;
+    sort?: string;
   }) => {
     const { page = 1, limit = 12 } = params;
+    const sortKey: SortKey = isSortKey(params.sort) ? params.sort : "featured";
     const filter = buildFilters(params);
 
     const data = await directus.request(
@@ -97,8 +110,7 @@ export const getShopItems = cache(
           { category: ["id", "slug", "name", { parent: ["id", "slug"] }] },
           { user_created: ["id", "first_name", "last_name", "shop_name"] },
         ],
-        // Multi-level sort: Featured items first, then newest first
-        sort: ["-featured", "-date_created", "-id"],
+        sort: [...SORT_OPTIONS[sortKey].sort],
         limit,
         page,
       }),

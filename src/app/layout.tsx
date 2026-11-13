@@ -5,7 +5,7 @@ import { AppShell } from "@/app/providers/AppShell";
 const siteUrl = "https://catskillas.com";
 const siteName = "Catskill Architectural Salvage";
 const siteDescription =
-  "Architectural salvage, antique hardware, and reclaimed building materials from our own warehouse and a directory of dealers across the Hudson Valley and Catskills.";
+  "Antiques, vintage, mid-century, and architectural salvage, from furniture, lighting, and decor to hardware and reclaimed building materials, from our own collection and dealers across the Hudson Valley and Catskills.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -15,16 +15,16 @@ export const metadata: Metadata = {
   },
   description: siteDescription,
   keywords: [
+    "antiques",
+    "vintage furniture",
+    "mid-century modern",
+    "vintage lighting",
+    "vintage decor",
     "architectural salvage",
     "antique hardware",
-    "salvaged doors",
-    "reclaimed wood",
-    "barn beams",
-    "vintage industrial",
-    "Hudson Valley",
-    "Catskills",
-    "historic preservation",
     "reclaimed building materials",
+    "Hudson Valley antiques",
+    "Catskills",
   ],
   alternates: { canonical: "/" },
   openGraph: {

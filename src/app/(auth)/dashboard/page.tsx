@@ -80,7 +80,7 @@ export default async function PortalPage({
       />
 
       {/* Table shows the filtered items */}
-      <ArtifactTable items={filteredItems} token={token} />
+      <ArtifactTable items={filteredItems} />
     </div>
   );
 }

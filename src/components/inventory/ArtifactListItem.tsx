@@ -39,7 +39,7 @@ export default function ArtifactListItem({ item }: ArtifactListItemProps) {
             }`}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-zinc-300">
+          <div className="w-full h-full flex items-center justify-center text-zinc-500">
             <Store size={20} strokeWidth={1} />
           </div>
         )}
@@ -57,11 +57,11 @@ export default function ArtifactListItem({ item }: ArtifactListItemProps) {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-ui-detail font-black uppercase tracking-widest text-zinc-400 italic">
+              <span className="text-ui-detail font-black uppercase tracking-widest text-zinc-500 italic">
                 {vendorName}
               </span>
               <span className="text-zinc-200 text-ui-micro">•</span>
-              <span className="text-ui-micro font-mono text-zinc-400">
+              <span className="text-ui-micro font-mono text-zinc-500">
                 CAS—{String(item.id).padStart(4, "0")}
               </span>
             </div>
@@ -78,7 +78,7 @@ export default function ArtifactListItem({ item }: ArtifactListItemProps) {
 
           <div className="flex items-center gap-4">
             <span
-              className={`${isSold ? "text-zinc-400 font-mono text-ui-detail italic" : "text-blue-600 font-bold text-base"}`}
+              className={`${isSold ? "text-zinc-500 font-mono text-ui-detail italic" : "text-blue-600 font-bold text-base"}`}
             >
               {isSold
                 ? "[ SOLD ]"

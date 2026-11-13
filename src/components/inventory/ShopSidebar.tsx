@@ -61,7 +61,7 @@ export default function ShopSidebar({ tree, vendors }: ShopSidebarProps) {
 
         {/* ERA SELECTION */}
         <section>
-          <h3 className="text-label font-black uppercase tracking-[0.4em] text-zinc-400 mb-4 italic">
+          <h3 className="text-label font-black uppercase tracking-[0.4em] text-zinc-500 mb-4 italic">
             By Era
           </h3>
           <EraFilter
@@ -72,7 +72,7 @@ export default function ShopSidebar({ tree, vendors }: ShopSidebarProps) {
 
         {/* VENDOR SELECTION */}
         <section>
-          <h3 className="text-label font-black uppercase tracking-[0.4em] text-zinc-400 mb-4 italic">
+          <h3 className="text-label font-black uppercase tracking-[0.4em] text-zinc-500 mb-4 italic">
             By Shop
           </h3>
           <VendorFilter vendors={vendors} />
@@ -80,7 +80,7 @@ export default function ShopSidebar({ tree, vendors }: ShopSidebarProps) {
 
         {/* CATEGORY NAV */}
         <section>
-          <h3 className="text-label font-black uppercase tracking-[0.4em] text-zinc-400 mb-6 italic">
+          <h3 className="text-label font-black uppercase tracking-[0.4em] text-zinc-500 mb-6 italic">
             By Category
           </h3>
           <nav className="space-y-0.5">
@@ -116,7 +116,7 @@ export default function ShopSidebar({ tree, vendors }: ShopSidebarProps) {
                       }`}
                     >
                       {parent.name}
-                      <span className="ml-1 text-tiny font-medium text-zinc-400">
+                      <span className="ml-1 text-tiny font-medium text-zinc-500">
                         ({parent.totalCount})
                       </span>
                     </button>
@@ -124,7 +124,7 @@ export default function ShopSidebar({ tree, vendors }: ShopSidebarProps) {
                     {hasChildren && (
                       <button
                         onClick={(e) => toggleExpand(id, e)}
-                        className="p-1 hover:bg-zinc-100 rounded transition-colors text-zinc-400"
+                        className="p-1 hover:bg-zinc-100 rounded transition-colors text-zinc-500"
                       >
                         <ChevronRight
                           size={12}

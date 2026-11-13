@@ -39,12 +39,12 @@ export function EraClassification({
               className={`flex flex-col items-center justify-center py-4 transition-all duration-200 border ${
                 isSelected
                   ? "bg-white border-zinc-200 shadow-sm"
-                  : "bg-transparent border-transparent hover:bg-zinc-200/50 text-zinc-400"
+                  : "bg-transparent border-transparent hover:bg-zinc-200/50 text-zinc-500"
               }`}
             >
               <span
                 className={`text-[10px] font-bold uppercase tracking-widest leading-tight ${
-                  isSelected ? "text-zinc-900" : "text-zinc-400"
+                  isSelected ? "text-zinc-900" : "text-zinc-500"
                 }`}
               >
                 {opt.label}

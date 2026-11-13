@@ -57,16 +57,16 @@ export default function GalleryEditor({
         method: "POST",
         body: formData,
       });
-      if (!response.ok) throw new Error("Upload failed");
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result?.error || "Upload failed.");
 
-      const result = await response.json();
       const newIds = Array.isArray(result)
         ? result.map((f: DirectusFile) => f.id)
         : [result.id];
 
       updateItems([...items, ...newIds]);
-    } catch {
-      alert("Upload failed.");
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Upload failed.");
     } finally {
       setIsUploading(false);
       e.target.value = "";
@@ -131,14 +131,14 @@ export default function GalleryEditor({
             <input
               type="file"
               multiple
-              accept="image/*"
+              accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
               onChange={handleFileUpload}
               className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed z-10"
               disabled={isUploading}
             />
             <div className="text-center space-y-2 px-2">
               <span
-                className={`block text-[10px] font-black uppercase tracking-widest ${isUploading ? "text-zinc-900 animate-pulse" : "text-zinc-400"}`}
+                className={`block text-[10px] font-black uppercase tracking-widest ${isUploading ? "text-zinc-900 animate-pulse" : "text-zinc-500"}`}
               >
                 {isUploading ? "Syncing..." : "+ Add"}
               </span>

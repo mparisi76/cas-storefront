@@ -3,10 +3,10 @@ import ContactClient from "./ContactClient";
 
 export const metadata: Metadata = {
   title: "Contact | Catskill Architectural Salvage",
-  description: "Inquire about specific architectural artifacts or visit our Hudson Valley yard.",
+  description: "Ask about a piece, request something you're hunting for, or arrange a visit in the Hudson Valley.",
   openGraph: {
     title: "Inquire | Catskill Architectural Salvage",
-    description: "Sourcing 19th-century architectural relics in the Hudson Valley.",
+    description: "Antiques, vintage, mid-century, and salvage, sourced across the Hudson Valley.",
     type: "website",
     images: [
       {

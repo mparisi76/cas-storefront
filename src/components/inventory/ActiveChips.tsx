@@ -44,7 +44,7 @@ export function ActiveFilters({ vendors, className = "" }: ActiveFiltersProps) {
       {/* Clear All Button */}
       <button
         onClick={resetAll}
-        className="flex items-center justify-center w-7 h-7 bg-white border border-zinc-200 text-zinc-400 hover:text-red-600 transition-colors"
+        className="flex items-center justify-center w-7 h-7 bg-white border border-zinc-200 text-zinc-500 hover:text-red-600 transition-colors"
         title="Clear All Filters"
       >
         <Trash2 size={12} />

@@ -63,7 +63,7 @@ export default async function EditPage({
       {/* Visual fix: using the aligned arrow logic from earlier */}
       <Link
         href="/dashboard"
-        className="group inline-flex items-center gap-3 mb-2 text-[12px] font-bold uppercase tracking-[0.25em] text-zinc-400 hover:text-zinc-900 transition-colors"
+        className="group inline-flex items-center gap-3 mb-2 text-[12px] font-bold uppercase tracking-[0.25em] text-zinc-500 hover:text-zinc-900 transition-colors"
       >
         <span className="text-lg leading-none group-hover:-translate-x-1 transition-transform duration-200">
           &larr;

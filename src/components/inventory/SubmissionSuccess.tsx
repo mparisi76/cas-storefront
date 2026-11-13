@@ -6,8 +6,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Artifact } from "@/types/artifact";
 import ArtifactCard from "@/components/inventory/ArtifactCard";
-
-const DIRECTUS_URL = process.env.NEXT_PUBLIC_DIRECTUS_URL;
+import { getRecentArrivals } from "@/app/actions/public-artifacts";
 
 export function SubmissionSuccess() {
   const searchParams = useSearchParams();
@@ -19,24 +18,7 @@ export function SubmissionSuccess() {
   useEffect(() => {
     async function fetchRecentArrivals() {
       try {
-        // limit=4 to match the RelatedArtifacts grid
-        const fields = "id,name,thumbnail,featured,purchase_price,availability,classification,category.id,category.slug,category.name,user_created.id,user_created.shop_name";
-        
-        const response = await fetch(
-          `${DIRECTUS_URL}/items/props?limit=4&sort=-date_created&filter[status][_eq]=published&filter[featured][_eq]=1&fields=${fields}`,
-        );
-        const result = await response.json();
-
-        if (result.data && result.data.length > 0) {
-          setRecentItems(result.data);
-        } else {
-          // Fallback to limit 4 as well
-          const fallbackResponse = await fetch(
-            `${DIRECTUS_URL}/items/props?limit=4&sort=-date_created&filter[status][_eq]=published&fields=${fields}`,
-          );
-          const fallbackResult = await fallbackResponse.json();
-          setRecentItems(fallbackResult.data);
-        }
+        setRecentItems(await getRecentArrivals());
       } catch (error) {
         console.error("Failed to fetch yard arrivals:", error);
       } finally {
@@ -65,7 +47,7 @@ export function SubmissionSuccess() {
       <div className="border-t border-zinc-200 pt-16">
         <div className="flex justify-between items-end mb-10">
           <div>
-            <h3 className="text-detail font-black uppercase tracking-[0.4em] text-zinc-400 mb-2">
+            <h3 className="text-detail font-black uppercase tracking-[0.4em] text-zinc-500 mb-2">
               Discovery
             </h3>
             <h2 className="text-2xl font-bold uppercase tracking-tighter text-zinc-800 italic">

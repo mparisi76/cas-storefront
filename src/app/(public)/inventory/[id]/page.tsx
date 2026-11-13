@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
+import { sanitizeDescription } from "@/lib/sanitize";
 import ShippingDrawer from "@/components/inventory/ShippingDrawer";
 import ArtifactGallery from "@/components/inventory/ArtifactGallery";
 import RelatedArtifacts from "@/components/inventory/RelatedArtifacts";
@@ -55,13 +56,13 @@ export async function generateMetadata({
   return {
     metadataBase: new URL("https://catskillas.com"),
     title: `${item.name}${eraTag} | Catskill Architectural Salvage`,
-    description: plainDescription || `${item.name} — architectural salvage from the Hudson Valley & Catskills.`,
+    description: plainDescription || `${item.name}: antiques, vintage & salvage from the Hudson Valley & Catskills.`,
     alternates: {
       canonical: canonicalUrl,
     },
     openGraph: {
       title: `${item.name}${eraTag} | Catskill Architectural Salvage`,
-      description: plainDescription || `${item.name} — architectural salvage from the Hudson Valley & Catskills.`,
+      description: plainDescription || `${item.name}: antiques, vintage & salvage from the Hudson Valley & Catskills.`,
       url: canonicalUrl,
       siteName: "Catskill Architectural Salvage",
       type: "article",
@@ -76,10 +77,13 @@ export async function generateMetadata({
 
 export default async function ProductPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ shipping?: string; unavailable?: string }>;
 }) {
   const { id } = await params;
+  const notice = await searchParams;
 
   const item = await directus
     .request(
@@ -116,6 +120,11 @@ export default async function ProductPage({
     Boolean(item.length) &&
     Boolean(item.width) &&
     Boolean(item.height);
+
+  // Parcel items: Purchase opens the shipping drawer (pick a rate, then pay).
+  // Freight / missing dimensions: buy directly, shipping arranged afterwards.
+  const shipsByParcel = hasDimensions && Number(item.weight) <= 100;
+  const priceNumber = Number(item.purchase_price) || 0;
 
   const contactLink = `/contact?type=${isExternal ? "general" : "request"}&item=${encodeURIComponent(`${item.name} (CAS-${String(id).padStart(4, "0")})`)}`;
 
@@ -158,11 +167,11 @@ export default async function ProductPage({
         <nav className="mb-10 border-b border-zinc-200 pb-4 flex items-center gap-3 w-full overflow-hidden whitespace-nowrap">
           <Link
             href="/inventory"
-            className="text-detail font-black uppercase tracking-[0.3em] text-zinc-400 hover:text-blue-600 transition-colors shrink-0"
+            className="text-detail font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-blue-600 transition-colors shrink-0"
           >
             Home
           </Link>
-          <span className="text-zinc-300 text-detail shrink-0">—</span>
+          <span className="text-zinc-500 text-detail shrink-0">—</span>
           {item.category ? (
             <Link
               href={`/inventory?category=${item.category.slug}`}
@@ -171,11 +180,11 @@ export default async function ProductPage({
               {item.category.name}
             </Link>
           ) : (
-            <span className="text-detail font-black uppercase tracking-[0.3em] text-zinc-300 shrink-0">
-              General Salvage
+            <span className="text-detail font-black uppercase tracking-[0.3em] text-zinc-500 shrink-0">
+              Uncategorized
             </span>
           )}
-          <span className="text-zinc-300 text-detail shrink-0">—</span>
+          <span className="text-zinc-500 text-detail shrink-0">—</span>
           <span className="text-detail font-black uppercase tracking-[0.3em] text-zinc-800 truncate min-w-0">
             {item.name}
           </span>
@@ -192,7 +201,7 @@ export default async function ProductPage({
           <section className="lg:col-span-5">
             <div className="mb-10">
               <Link
-                href={`/inventory?vendor=${item.user_created?.id || ""}`}
+                href={item.user_created?.id ? `/shop/${item.user_created.id}` : "/inventory"}
                 className="inline-flex items-center gap-2 mb-6 group"
               >
                 <div className="w-6 h-6 rounded-full bg-zinc-200 flex items-center justify-center overflow-hidden border border-zinc-300">
@@ -226,37 +235,37 @@ export default async function ProductPage({
 
                 {item.classification && (
                   <>
-                    <span className="text-zinc-300 text-detail">|</span>
+                    <span className="text-zinc-500 text-detail">|</span>
                     <span className="text-detail font-black uppercase tracking-[0.2em] text-zinc-500 italic">
                       {item.classification.replace(/-/g, " ")}
                     </span>
                   </>
                 )}
 
-                <span className="text-zinc-400 text-detail">|</span>
+                <span className="text-zinc-500 text-detail">|</span>
                 <span
-                  className={`text-detail font-black uppercase tracking-[0.2em] ${isSold ? "text-zinc-400" : "text-blue-600"}`}
+                  className={`text-detail font-black uppercase tracking-[0.2em] ${isSold ? "text-zinc-500" : "text-blue-600"}`}
                 >
                   {isSold ? "Sold" : "Available"}
                 </span>
               </div>
 
               <h1
-                className={`text-2xl font-bold uppercase tracking-tighter italic leading-[0.9] mb-6 ${isSold ? "text-zinc-400" : "text-zinc-800"}`}
+                className={`text-2xl font-bold uppercase tracking-tighter italic leading-[0.9] mb-6 ${isSold ? "text-zinc-500" : "text-zinc-800"}`}
               >
                 {item.name}
               </h1>
 
               <div className="flex items-baseline gap-4">
                 <span
-                  className={`text-4xl font-light tracking-tighter ${isSold ? "text-zinc-300 line-through" : "text-zinc-900"}`}
+                  className={`text-4xl font-light tracking-tighter ${isSold ? "text-zinc-500 line-through" : "text-zinc-900"}`}
                 >
                   {hasPrice
                     ? `$${Number(item.purchase_price).toLocaleString()}`
                     : "Call for Price"}
                 </span>
                 {!isSold && hasPrice && (
-                  <span className="text-detail font-black uppercase tracking-widest text-zinc-400">
+                  <span className="text-detail font-black uppercase tracking-widest text-zinc-500">
                     USD + Shipping
                   </span>
                 )}
@@ -266,13 +275,13 @@ export default async function ProductPage({
             <div className="mb-12 text-zinc-500 leading-relaxed border-l border-zinc-200 pl-8 text-base font-medium max-w-prose">
               <div
                 className="prose prose-zinc prose-sm italic"
-                dangerouslySetInnerHTML={{ __html: item.description || "" }}
+                dangerouslySetInnerHTML={{ __html: sanitizeDescription(item.description) }}
               />
             </div>
 
             <div className="grid grid-cols-1 border-t border-zinc-200 mb-12">
               <div className="flex justify-between py-4 border-b border-zinc-100 items-baseline">
-                <h4 className="text-detail uppercase font-black tracking-[0.3em] text-zinc-400">
+                <h4 className="text-detail uppercase font-black tracking-[0.3em] text-zinc-500">
                   Object Weight
                 </h4>
                 <p className="text-label font-bold text-zinc-600 font-mono">
@@ -280,7 +289,7 @@ export default async function ProductPage({
                 </p>
               </div>
               <div className="flex justify-between py-4 border-b border-zinc-100 items-baseline">
-                <h4 className="text-detail uppercase font-black tracking-[0.3em] text-zinc-400">
+                <h4 className="text-detail uppercase font-black tracking-[0.3em] text-zinc-500">
                   Dimensions (L×W×H)
                 </h4>
                 <p className="text-label font-bold text-zinc-600 font-mono">
@@ -290,6 +299,15 @@ export default async function ProductPage({
                 </p>
               </div>
             </div>
+
+            {/* Why checkout sent the buyer back here */}
+            {(notice.shipping === "required" || notice.unavailable) && (
+              <p className="mb-4 border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                {notice.unavailable
+                  ? "Sorry, this item is no longer available for purchase."
+                  : "Your shipping quote expired. Click Purchase to get a fresh rate, then continue to payment."}
+              </p>
+            )}
 
             <div className="space-y-4">
               {!isSold && (
@@ -305,18 +323,20 @@ export default async function ProductPage({
                     </a>
                   ) : (
                     <>
-                      {hasPrice && (
-                        <form action={createCheckout}>
-                          <input
-                            type="hidden"
-                            name="price"
-                            value={item.purchase_price}
-                          />
-                          <input
-                            type="hidden"
-                            name="itemName"
-                            value={item.name}
-                          />
+                      {hasPrice && shipsByParcel && (
+                        <ShippingDrawer
+                          mode="checkout"
+                          id={item.id}
+                          itemName={item.name}
+                          price={priceNumber}
+                          weight={Number(item.weight) || 0}
+                          length={Number(item.length) || 0}
+                          width={Number(item.width) || 0}
+                          height={Number(item.height) || 0}
+                        />
+                      )}
+                      {hasPrice && !shipsByParcel && (
+                        <form action={createCheckout} className="space-y-2">
                           <input type="hidden" name="itemId" value={item.id} />
                           <button
                             type="submit"
@@ -324,6 +344,9 @@ export default async function ProductPage({
                           >
                             Purchase
                           </button>
+                          <p className="text-detail text-zinc-500 uppercase tracking-widest text-center">
+                            Freight item · shipping arranged after purchase
+                          </p>
                         </form>
                       )}
                       <Link
@@ -338,22 +361,23 @@ export default async function ProductPage({
               )}
 
               {isSold && (
-                <div className="w-full bg-zinc-100 text-zinc-400 py-5 text-label font-black uppercase tracking-[0.4em] border border-zinc-200 text-center cursor-not-allowed">
+                <div className="w-full bg-zinc-100 text-zinc-500 py-5 text-label font-black uppercase tracking-[0.4em] border border-zinc-200 text-center cursor-not-allowed">
                   Item No Longer Available
                 </div>
               )}
 
-              {/* RESTORED SHIPPING DRAWER LOGIC */}
-              {!isSold && (
+              {/* Shipping estimate / freight inquiry. Purchasable parcel items
+                  already reach the drawer through the Purchase button. */}
+              {!isSold && !isExternal && !(hasPrice && shipsByParcel) && (
                 <div className="pt-2 group/shipping relative">
                   <ShippingDrawer
+                    mode={shipsByParcel ? "estimate" : "freight"}
                     weight={Number(item.weight) || 0}
                     length={Number(item.length) || 0}
                     width={Number(item.width) || 0}
                     height={Number(item.height) || 0}
                     itemName={item.name}
                     id={item.id}
-                    disabled={!hasDimensions || isExternal}
                   />
                 </div>
               )}

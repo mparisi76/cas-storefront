@@ -9,7 +9,7 @@ import Pagination from "@/components/inventory/Pagination";
 import EmptyState from "@/components/inventory/EmptyState";
 import { ActiveFilters } from "@/components/inventory/ActiveChips";
 import { getCategoryTree, flattenTree } from "@/lib/utils";
-import { getCategoryCounts, getShopItems } from "@/services/(public)/artifacts";
+import { getCategoryCounts, getShopItems, SORT_OPTIONS, isSortKey, type SortKey } from "@/services/(public)/artifacts";
 import { getCategories } from "@/services/categories";
 import { getActiveVendors } from "@/services/(public)/vendors";
 import GridIcon from "@/components/ui/icons/GridIcon";
@@ -17,14 +17,14 @@ import ListIcon from "@/components/ui/icons/ListIcon";
 import ShopSkeleton from "@/components/inventory/ShopSkeleton";
 
 export const metadata: Metadata = {
-  title: "Inventory — Architectural Salvage & Antiques",
+  title: "Shop Antiques, Vintage & Salvage",
   description:
-    "Browse architectural salvage, antique hardware, salvaged doors, barn beams, and vintage industrial pieces from dealers across the Hudson Valley and Catskills.",
+    "Browse antiques, vintage and mid-century furniture, lighting, decor, and architectural salvage from dealers across the Hudson Valley and Catskills.",
   alternates: { canonical: "/inventory" },
   openGraph: {
     title: "Inventory — Catskill Architectural Salvage",
     description:
-      "Curated architectural salvage and antiques from the Hudson Valley and Catskills.",
+      "Antiques, vintage, mid-century, and salvage from the Hudson Valley and Catskills.",
     url: "https://catskillas.com/inventory",
   },
 };
@@ -38,6 +38,7 @@ interface ShopParams {
   vendor?: string;
   view?: "grid" | "list";
   limit?: string;
+  sort?: string;
 }
 
 // 2. Apply the type to the Results component
@@ -52,6 +53,7 @@ async function ArtifactResults({ params }: { params: ShopParams }) {
     vendor: params.vendor || "all",
     page: currentPage,
     limit: itemsPerPage,
+    sort: params.sort,
   });
 
   const totalCount = meta?.filter_count || 0;
@@ -97,6 +99,7 @@ export default async function ShopPage({
   const activeVendor = params.vendor || "all";
   const activeView = params.view || "grid";
   const itemsPerPage = Number(params.limit) || 25;
+  const activeSort: SortKey = isSortKey(params.sort) ? params.sort : "featured";
 
   const [categories, counts, vendors] = await Promise.all([
     getCategories(),
@@ -137,14 +140,18 @@ export default async function ShopPage({
       ...(params.search && { search: params.search }),
       ...(params.vendor && { vendor: params.vendor }),
       ...(params.view && { view: params.view }),
+      ...(activeSort !== "featured" && { sort: activeSort }),
       limit: String(itemsPerPage),
       page: "1",
       ...(newParams as Record<string, string>),
     });
+    if (p.get("sort") === "featured") p.delete("sort"); // default; keep URLs clean
     return `/inventory?${p.toString()}`;
   };
 
   const limitOptions = [25, 50, 100, 200];
+  const sortLink = (key: SortKey) => getQueryLink({ sort: key });
+  const sortEntries = Object.entries(SORT_OPTIONS) as [SortKey, (typeof SORT_OPTIONS)[SortKey]][];
 
   return (
     <main className="bg-[#F9F8F6] min-h-screen px-4 md:px-10 text-zinc-900">
@@ -162,22 +169,34 @@ export default async function ShopPage({
                 vendors={vendors}
               />
             </div>
+            <div className="flex items-center gap-3 pb-2.5 overflow-x-auto whitespace-nowrap">
+              <span className="text-detail font-bold uppercase tracking-widest text-zinc-500">Sort:</span>
+              {sortEntries.map(([key, opt]) => (
+                <Link
+                  key={key}
+                  href={sortLink(key)}
+                  className={`text-detail font-black uppercase tracking-wider transition-colors ${activeSort === key ? "text-zinc-900 underline underline-offset-4" : "text-zinc-500"}`}
+                >
+                  {key === "price_asc" ? "Price ↑" : key === "price_desc" ? "Price ↓" : opt.label}
+                </Link>
+              ))}
+            </div>
             <ActiveFilters vendors={vendors} className="pb-3" />
           </div>
 
           <div className="hidden lg:block sticky top-20 z-40 bg-[#F9F8F6] w-full">
-            <header className="flex items-end justify-between py-6 border-b border-zinc-200">
-              <div className="flex flex-col">
-                <div className="flex items-center gap-3 mb-1">
+            <header className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4 py-6 border-b border-zinc-200">
+              <div className="flex flex-col min-w-0">
+                <div className="flex items-center gap-3 mb-1 whitespace-nowrap">
                   {currentVendor && (
-                    <span className="text-label font-black uppercase tracking-[0.4em] text-blue-600">
+                    <span className="shrink-0 text-label font-black uppercase tracking-[0.4em] text-blue-600">
                       Verified Source
                     </span>
                   )}
                   {isFiltered && (
                     <Link
                       href="/inventory"
-                      className="text-label font-black uppercase tracking-[0.4em] text-zinc-400 hover:text-blue-600 transition-colors"
+                      className="shrink-0 text-label font-black uppercase tracking-[0.4em] text-zinc-500 hover:text-blue-600 transition-colors"
                     >
                       [ Clear All ]
                     </Link>
@@ -188,9 +207,26 @@ export default async function ShopPage({
                 </h1>
               </div>
 
-              <div className="flex items-center gap-8 pb-1">
+              <div className="ml-auto flex items-center gap-8 pb-1 shrink-0">
                 <div className="flex items-center gap-3">
-                  <span className="text-detail font-bold uppercase tracking-widest text-zinc-400">
+                  <span className="text-detail font-bold uppercase tracking-widest text-zinc-500">
+                    Sort:
+                  </span>
+                  <div className="flex gap-3">
+                    {sortEntries.map(([key, opt]) => (
+                      <Link
+                        key={key}
+                        href={sortLink(key)}
+                        className={`text-label font-black uppercase tracking-wider whitespace-nowrap transition-colors ${activeSort === key ? "text-zinc-900 underline underline-offset-4" : "text-zinc-500 hover:text-zinc-900"}`}
+                      >
+                        {key === "price_asc" ? "Price ↑" : key === "price_desc" ? "Price ↓" : opt.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <span className="text-detail font-bold uppercase tracking-widest text-zinc-500">
                     Show:
                   </span>
                   <div className="flex gap-2">
@@ -198,7 +234,7 @@ export default async function ShopPage({
                       <Link
                         key={opt}
                         href={getQueryLink({ limit: String(opt) })}
-                        className={`text-label font-black transition-colors ${itemsPerPage === opt ? "text-zinc-900 underline underline-offset-4" : "text-zinc-400 hover:text-zinc-900"}`}
+                        className={`text-label font-black transition-colors ${itemsPerPage === opt ? "text-zinc-900 underline underline-offset-4" : "text-zinc-500 hover:text-zinc-900"}`}
                       >
                         {opt}
                       </Link>
@@ -209,13 +245,13 @@ export default async function ShopPage({
                 <div className="flex bg-white border border-zinc-200 rounded-sm p-0.5">
                   <Link
                     href={getQueryLink({ view: "grid" })}
-                    className={`p-1.5 transition-colors ${activeView === "grid" ? "bg-zinc-900 text-white" : "text-zinc-400 hover:text-zinc-900"}`}
+                    className={`p-1.5 transition-colors ${activeView === "grid" ? "bg-zinc-900 text-white" : "text-zinc-500 hover:text-zinc-900"}`}
                   >
                     <GridIcon />
                   </Link>
                   <Link
                     href={getQueryLink({ view: "list" })}
-                    className={`p-1.5 border-l border-zinc-100 transition-colors ${activeView === "list" ? "bg-zinc-900 text-white" : "text-zinc-400 hover:text-zinc-900"}`}
+                    className={`p-1.5 border-l border-zinc-100 transition-colors ${activeView === "list" ? "bg-zinc-900 text-white" : "text-zinc-500 hover:text-zinc-900"}`}
                   >
                     <ListIcon />
                   </Link>

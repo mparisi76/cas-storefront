@@ -31,7 +31,7 @@ export default function EraSelector({
   return (
     <div className={`w-full bg-transparent ${className}`}>
       <div className="flex items-center gap-6 overflow-x-auto no-scrollbar whitespace-nowrap h-full">
-        <span className="hidden lg:block text-label font-black uppercase tracking-[0.2em] text-zinc-400 shrink-0">
+        <span className="hidden lg:block text-label font-black uppercase tracking-[0.2em] text-zinc-500 shrink-0">
           Era:
         </span>
 

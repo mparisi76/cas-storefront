@@ -13,7 +13,7 @@ export function TechnicalSpecs({ weight, length, width, height, onChange }: Tech
     <div className="pt-4 space-y-8">
       <div className="flex items-center gap-4">
         <div className="h-px flex-1 bg-zinc-100" />
-        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 shrink-0">
+        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 shrink-0">
           Logistics & Specs
         </h3>
         <div className="h-px flex-1 bg-zinc-100" />

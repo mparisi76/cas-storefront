@@ -44,12 +44,12 @@ export function CategorySelect({ categories, value, onChange }: CategorySelectPr
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between border border-zinc-200 bg-white px-4 py-3 text-xs uppercase tracking-widest hover:border-zinc-900 transition-colors focus:outline-none"
       >
-        <span className={selectedCategory ? "text-zinc-900 font-medium" : "text-zinc-400"}>
+        <span className={selectedCategory ? "text-zinc-900 font-medium" : "text-zinc-500"}>
           {selectedCategory ? (
             <>
               {selectedCategory.name}
               {parentOfSelected && (
-                <span className="text-zinc-400 font-normal ml-2 lowercase italic">
+                <span className="text-zinc-500 font-normal ml-2 lowercase italic">
                   ({parentOfSelected.name})
                 </span>
               )}
@@ -58,14 +58,14 @@ export function CategorySelect({ categories, value, onChange }: CategorySelectPr
             "Select Category"
           )}
         </span>
-        <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+        <ChevronDown className={`w-4 h-4 text-zinc-500 transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
       {/* Dropdown Menu */}
       {isOpen && (
         <div className="absolute z-50 w-full mt-1 bg-white border border-zinc-200 shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-1">
           <div className="flex items-center px-3 border-b border-zinc-100">
-            <Search className="w-3.5 h-3.5 text-zinc-400" />
+            <Search className="w-3.5 h-3.5 text-zinc-500" />
             <input
               autoFocus
               className="w-full p-3 text-[11px] uppercase tracking-wider focus:outline-none bg-transparent"
@@ -92,7 +92,7 @@ export function CategorySelect({ categories, value, onChange }: CategorySelectPr
 
               return (
                 <div key={parent.id} className="mb-2">
-                  <div className="px-4 py-1 text-[9px] font-bold text-zinc-400 uppercase tracking-[0.2em]">
+                  <div className="px-4 py-1 text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em]">
                     {parent.name}
                   </div>
                   {filteredChildren.map((child) => (

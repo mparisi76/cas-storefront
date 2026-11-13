@@ -1,6 +1,8 @@
 // app/(dashboard)/dashboard/settings/page.tsx
 
 export interface DirectusUser {
+  id?: string;
+  avatar?: string | null;
   first_name: string | null;
   last_name: string | null;
   email: string;
@@ -10,6 +12,8 @@ export interface DirectusUser {
   phone: string | null;
   city: string | null;
   state: string | null;
+  street_address: string | null;
+  zip_code: string | null;
   role: {
     name: string;
   } | null;

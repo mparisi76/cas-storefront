@@ -65,7 +65,7 @@ export async function registerAction(
         email: email,
         password: password,
         role: vendorRoleId,
-        status: "pending",
+        status: "draft", // awaiting approval: an admin sets it to "active"
         shop_name: shopName,
         inventory_type: inventoryType,
       } as DirectusUser & { shop_name: string; inventory_type: string })

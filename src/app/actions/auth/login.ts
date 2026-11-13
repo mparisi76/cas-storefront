@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { setSessionCookies } from "@/lib/session";
 
 export type AuthState = { error?: string } | null;
 
@@ -18,7 +19,9 @@ export async function loginAction(
       body: JSON.stringify({ 
         email, 
         password,
-        mode: "cookie" // This tells Directus to manage the long-lived session
+        // json mode returns the refresh token in the body so we can store it
+        // in our own httpOnly cookie (see lib/session.ts).
+        mode: "json",
       }),
       headers: { "Content-Type": "application/json" },
     });
@@ -27,21 +30,12 @@ export async function loginAction(
 
     if (!res.ok) return { error: "Invalid Credentials" };
 
-    // Directus will return the access_token, but it also sends back 
-    // a 'Set-Cookie' header for the refresh_token automatically.
-    const cookieStore = await cookies();
-    
-    // We store the access_token so our Middleware can quickly check it,
-    // but the real "anchor" is now the refresh_token Directus just set.
-    cookieStore.set("directus_session", authData.data.access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      // We set a long maxAge here so the browser keeps the cookie for a week
-      maxAge: 60 * 60 * 24 * 7, 
-    });
+    const tokens = authData?.data;
+    if (!tokens?.access_token || !tokens?.refresh_token) {
+      return { error: "Login failed. Please try again." };
+    }
 
+    setSessionCookies(await cookies(), tokens);
   } catch {
     return { error: "Connection to Server failed" };
   }

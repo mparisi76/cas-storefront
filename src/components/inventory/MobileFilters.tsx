@@ -52,7 +52,7 @@ export default function MobileFilters({
   return (
     <div className="flex w-full border border-zinc-200 bg-white">
       {/* VENDOR SELECTOR */}
-      <div className="flex-1 relative border-r border-zinc-100">
+      <div className="flex-1 min-w-0 relative border-r border-zinc-100">
         <button
           onClick={() => {
             setIsVendorOpen(!isVendorOpen);
@@ -69,7 +69,7 @@ export default function MobileFilters({
         </button>
 
         {isVendorOpen && (
-          <div className="absolute top-full -left-1px w-[calc(100%+1px)] bg-white border border-zinc-200 shadow-2xl z-50 max-h-[60vh] overflow-y-auto animate-in fade-in slide-in-from-top-1">
+          <div className="absolute top-full -left-px w-[calc(100%+1px)] bg-white border border-zinc-200 shadow-2xl z-50 max-h-[60vh] overflow-y-auto animate-in fade-in slide-in-from-top-1">
             <Link
               href={`/inventory?${createQueryString("vendor", "all")}`}
               onClick={() => setIsVendorOpen(false)}
@@ -92,7 +92,7 @@ export default function MobileFilters({
       </div>
 
       {/* CATEGORY SELECTOR */}
-      <div className="flex-1 relative">
+      <div className="flex-1 min-w-0 relative">
         <button
           onClick={() => {
             setIsCategoryOpen(!isCategoryOpen);

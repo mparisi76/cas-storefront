@@ -24,6 +24,7 @@ function ContactForm() {
       email: formData.get("email"),
       type: formData.get("type"),
       message: formData.get("message"),
+      website: formData.get("website"),
     };
 
     try {
@@ -91,7 +92,7 @@ function ContactForm() {
               </div>
             </div>
 
-            <p className="text-label text-zinc-400 leading-relaxed uppercase tracking-tight max-w-xs pt-4">
+            <p className="text-label text-zinc-500 leading-relaxed uppercase tracking-tight max-w-xs pt-4">
               Specialized search services are prioritized for trade
               professionals, architects, and verified acquisition partners.
             </p>
@@ -102,6 +103,15 @@ function ContactForm() {
           onSubmit={handleSubmit}
           className="space-y-10 bg-white border border-zinc-100 p-8 md:p-12 shadow-sm"
         >
+          {/* Honeypot: hidden from humans, bots tend to fill it in */}
+          <input
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            className="absolute -left-[9999px] h-0 w-0 opacity-0"
+          />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-2">
               <label className="text-detail font-black uppercase tracking-[0.2em] text-zinc-900">
@@ -144,7 +154,7 @@ function ContactForm() {
                 <option value="shipping">Logistics & Freight</option>
                 <option value="vendor">Become a Vendor</option>
               </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-zinc-400">
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-zinc-500">
                 <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
                   <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
                 </svg>
@@ -191,7 +201,7 @@ export default function ContactClient() {
       <div className="mb-12">
         <Link
           href="/inventory"
-          className="inline-flex items-center gap-2 text-label font-bold uppercase tracking-widest text-zinc-400 hover:text-zinc-900 transition-colors"
+          className="inline-flex items-center gap-2 text-label font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-900 transition-colors"
         >
           <ArrowLeft size={14} /> Back to Inventory
         </Link>

@@ -43,7 +43,7 @@ export default function ArtifactGallery({
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-50 z-0">
             <div className="animate-pulse flex flex-col items-center">
               <ImageIcon
-                className="text-zinc-400 mb-2"
+                className="text-zinc-500 mb-2"
                 size={32}
                 strokeWidth={1}
               />
@@ -83,7 +83,7 @@ export default function ArtifactGallery({
         {/* ERROR STATE (z-20) */}
         {isError && (
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-100 p-8 text-center">
-            <AlertCircle className="text-zinc-400 mb-3" size={24} />
+            <AlertCircle className="text-zinc-500 mb-3" size={24} />
             <p className="text-detail font-bold uppercase tracking-widest text-zinc-500">
               Image Unreachable
             </p>

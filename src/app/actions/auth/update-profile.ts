@@ -17,6 +17,10 @@ interface UpdateUserPayload {
   shop_name: string;
   city: string;
   state: string;
+  street_address: string;
+  zip_code: string;
+  description: string;
+  avatar: string | null;
 }
 
 /**
@@ -41,7 +45,19 @@ export async function updateProfileAction(
   const shopName = formData.get("shop_name") as string;
   const phone = formData.get("phone") as string;
   const city = formData.get("city") as string;
-  const state = formData.get("state") as string;
+  const state = ((formData.get("state") as string) || "").trim().toUpperCase().slice(0, 2);
+  const streetAddress = ((formData.get("street_address") as string) || "").trim().slice(0, 200);
+  const zipCode = ((formData.get("zip_code") as string) || "").trim();
+
+  if (zipCode && !/^\d{5}$/.test(zipCode)) {
+    return { error: "ZIP code must be 5 digits." };
+  }
+
+  const description = ((formData.get("description") as string) || "").trim().slice(0, 1500);
+  const avatarRaw = ((formData.get("avatar") as string) || "").trim();
+  if (avatarRaw && !/^[0-9a-f-]{36}$/i.test(avatarRaw)) {
+    return { error: "Invalid logo. Please upload it again." };
+  }
 
   try {
     const client = createDirectus(process.env.NEXT_PUBLIC_DIRECTUS_URL!)
@@ -60,6 +76,10 @@ export async function updateProfileAction(
       shop_name: shopName,
       city: city,
       state: state,
+      street_address: streetAddress,
+      zip_code: zipCode,
+      description,
+      avatar: avatarRaw || null,
     } as UpdateUserPayload;
 
     await client.request(updateMe(payload));
@@ -68,7 +88,10 @@ export async function updateProfileAction(
     // Revalidates the settings page to show the new values
     revalidatePath("/dashboard/settings");
     // Revalidates the layout to ensure initials/name in the header update
-    revalidatePath("/dashboard");
+    revalidatePath("/dashboard", "layout"); // header name + logo
+    // Public shop page and listings show the shop name, logo, bio, and location.
+    revalidatePath("/shop", "layout");
+    revalidatePath("/inventory", "layout");
 
     return { success: true };
   } catch (e: unknown) {

@@ -28,7 +28,7 @@ export function ShopForm({ initialData }: { initialData: ShopData }) {
     <form onSubmit={handleSave} className="md:col-span-2 space-y-6">
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Shop Name</label>
+          <label className="text-[9px] font-black uppercase tracking-widest text-zinc-500">Shop Name</label>
           <input 
             type="text" 
             defaultValue={initialData.name}
@@ -38,7 +38,7 @@ export function ShopForm({ initialData }: { initialData: ShopData }) {
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Primary Location</label>
+            <label className="text-[9px] font-black uppercase tracking-widest text-zinc-500">Primary Location</label>
             <input 
               type="text" 
               defaultValue={initialData.location}
@@ -46,7 +46,7 @@ export function ShopForm({ initialData }: { initialData: ShopData }) {
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Website</label>
+            <label className="text-[9px] font-black uppercase tracking-widest text-zinc-500">Website</label>
             <input 
               type="url" 
               defaultValue={initialData.website}

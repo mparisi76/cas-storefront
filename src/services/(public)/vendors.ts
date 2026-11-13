@@ -15,6 +15,9 @@ interface DirectusUserRaw {
   shop_name?: string | null;
   avatar?: string | null;
   featured_vendor?: boolean | null;
+  description?: string | null;
+  city?: string | null;
+  state?: string | null;
 }
 
 /**
@@ -33,6 +36,9 @@ const mapUserToVendor = (user: DirectusUserRaw): PublicVendor => {
       ? `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${user.avatar}`
       : null,
     featured_vendor: !!user.featured_vendor,
+    description: user.description ?? null,
+    city: user.city ?? null,
+    state: user.state ?? null,
   };
 };
 
@@ -98,19 +104,25 @@ export const getFeaturedVendors = cache(async (): Promise<PublicVendor[]> => {
   }
 });
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Public shop profile for /shop/[id]. Email and private address fields are never fetched. */
 export const getVendorBySlug = cache(
   async (slug: string): Promise<PublicVendor | null> => {
+    if (!UUID_RE.test(slug)) return null;
     try {
       const response = await directus.request(
         readUsers({
           fields: [
             "id",
-            "email",
             "first_name",
             "last_name",
             "shop_name",
             "avatar",
             "featured_vendor",
+            "description",
+            "city",
+            "state",
           ],
           filter: {
             id: { _eq: slug },

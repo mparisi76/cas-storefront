@@ -3,7 +3,7 @@
 
 import { useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { createDirectus, rest, passwordReset } from "@directus/sdk";
+import { completePasswordResetAction } from "@/app/actions/auth/reset-password";
 import { useToast } from "@/context/ToastContext";
 
 // 1. Move the logic into a sub-component
@@ -22,13 +22,15 @@ function ResetPasswordForm() {
 
     setLoading(true);
     try {
-      const client = createDirectus(process.env.NEXT_PUBLIC_DIRECTUS_URL!).with(rest());
-      await client.request(passwordReset(token, password));
-      
-      showToast("Password updated successfully");
-      router.push("/login");
+      const result = await completePasswordResetAction(token, password);
+      if ("success" in result) {
+        showToast("Password updated successfully");
+        router.push("/login");
+      } else {
+        showToast(result.error);
+      }
     } catch {
-      showToast("Link expired. Please request a new one.");
+      showToast("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -36,7 +38,7 @@ function ResetPasswordForm() {
 
   if (!token) {
     return (
-      <div className="p-20 text-center uppercase tracking-widest text-[10px] font-black text-zinc-400">
+      <div className="p-20 text-center uppercase tracking-widest text-[10px] font-black text-zinc-500">
         Invalid or Missing Reset Token
       </div>
     );
@@ -53,7 +55,7 @@ function ResetPasswordForm() {
 
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">New Password</label>
+          <label className="text-[9px] font-black uppercase tracking-widest text-zinc-500">New Password</label>
           <input 
             required
             type="password" 
@@ -79,7 +81,7 @@ export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-6">
       <Suspense fallback={
-        <div className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+        <div className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
           Loading Security Protocol...
         </div>
       }>

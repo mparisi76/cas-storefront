@@ -54,7 +54,7 @@ export default function ArtifactCard({
         {!isLoaded && !hasError && item.thumbnail && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-50 z-20">
             <div className="animate-pulse flex flex-col items-center">
-              <ImageIcon className="text-zinc-400 mb-2" size={24} strokeWidth={1} />
+              <ImageIcon className="text-zinc-500 mb-2" size={24} strokeWidth={1} />
               <span className="text-detail font-black uppercase tracking-[0.2em] text-zinc-500">
                 Retrieving
               </span>
@@ -64,8 +64,8 @@ export default function ArtifactCard({
 
         {hasError && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-50 z-20">
-            <AlertCircle className="text-zinc-300 mb-1" size={20} />
-            <span className="text-detail font-bold uppercase tracking-widest text-zinc-400">
+            <AlertCircle className="text-zinc-500 mb-1" size={20} />
+            <span className="text-detail font-bold uppercase tracking-widest text-zinc-500">
               Asset Missing
             </span>
           </div>
@@ -92,7 +92,7 @@ export default function ArtifactCard({
             } ${isSold ? "grayscale contrast-75" : "grayscale group-hover:grayscale-0 group-hover:scale-105"}`}
           />
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-50 text-zinc-300">
+          <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-50 text-zinc-500">
             <ImageIcon size={32} strokeWidth={0.5} className="mb-2" />
             <span className="uppercase tracking-[0.2em] text-detail font-bold">
               No Image Available
@@ -106,8 +106,8 @@ export default function ArtifactCard({
         <div className="flex flex-col gap-1 mb-2">
           {!hideVendor && (
             <div className="flex items-center gap-1.5 overflow-hidden">
-              <Store size={10} className="text-zinc-400 shrink-0" />
-              <p className="text-detail font-black uppercase tracking-[0.2em] text-zinc-400 italic truncate">
+              <Store size={10} className="text-zinc-500 shrink-0" />
+              <p className="text-detail font-black uppercase tracking-[0.2em] text-zinc-500 italic truncate">
                 {vendorName}
               </p>
             </div>
@@ -125,7 +125,7 @@ export default function ArtifactCard({
 
           <div className="text-right shrink-0">
             <span
-              className={`${isSold ? "text-zinc-400 font-mono text-detail italic" : "text-blue-600 font-medium text-sm md:text-base"}`}
+              className={`${isSold ? "text-zinc-500 font-mono text-detail italic" : "text-blue-600 font-medium text-sm md:text-base"}`}
             >
               {isSold
                 ? "[ SOLD ]"
@@ -146,7 +146,7 @@ export default function ArtifactCard({
               </span>
             </div>
           ) : (
-            <p className="text-detail font-black uppercase tracking-[0.3em] text-zinc-400 pointer-events-none">
+            <p className="text-detail font-black uppercase tracking-[0.3em] text-zinc-500 pointer-events-none">
               CAS—{String(item.id).padStart(4, "0")}
             </p>
           )}

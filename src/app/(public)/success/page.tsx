@@ -1,30 +1,28 @@
 import Link from "next/link";
-import directus from "@/lib/directus";
-import { readItem } from "@directus/sdk";
+import { stripe } from "@/lib/stripe";
 import { CheckCircle2, ArrowRight, Home } from "lucide-react";
 import { notFound } from "next/navigation";
 
 export default async function SuccessPage({
   searchParams,
 }: {
-  searchParams: Promise<{ id: string }>;
+  searchParams: Promise<{ session_id?: string }>;
 }) {
-  const { id } = await searchParams;
+  const { session_id } = await searchParams;
 
-  if (!id) notFound();
+  if (!session_id || !session_id.startsWith("cs_")) notFound();
 
-  // Fetch the item details for the receipt view
-  let item;
-  try {
-    item = await directus.request(
-      readItem("props", id, {
-        fields: ["name", "id", "purchase_price"],
-      }),
-    );
-  } catch (error) {
-    console.error("Error fetching item for success page:", error);
-    notFound();
-  }
+  // Verify the purchase with Stripe rather than trusting the URL.
+  const session = await stripe.checkout.sessions
+    .retrieve(session_id, { expand: ["line_items"] })
+    .catch(() => null);
+
+  if (!session || session.payment_status !== "paid") notFound();
+
+  const item = {
+    id: session.metadata?.itemId ?? "",
+    name: session.line_items?.data[0]?.description ?? "Your item",
+  };
 
   return (
     <main className="h-full w-full flex items-center justify-center p-6 py-12">
@@ -90,7 +88,7 @@ export default async function SuccessPage({
               href="/"
               className="flex items-center justify-center gap-2 border border-zinc-200 text-zinc-500 py-4 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-zinc-50 transition-all"
             >
-              <Home className="w-3 h-3" /> Dashboard
+              <Home className="w-3 h-3" /> Home
             </Link>
           </div>
         </div>

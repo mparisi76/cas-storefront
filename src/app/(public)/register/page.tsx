@@ -4,11 +4,11 @@ import RegisterClient from "./RegisterClient";
 export const metadata: Metadata = {
   title: "Vendor Application | Catskill Architectural Salvage",
   description:
-    "Apply to join our collective of architectural scouts and curators. List your salvage and 19th-century artifacts in our curated marketplace.",
+    "Apply to sell with us. List your antiques, vintage and mid-century pieces, decor, and salvage in our Hudson Valley marketplace.",
   openGraph: {
     title: "Partner with the Yard | Vendor Application",
     description:
-      "Join the network of Catskill architectural curators and craftsmen.",
+      "Join the Hudson Valley's network of antique, vintage, and salvage dealers.",
     images: [
       {
         url: "/og-vendor.png", // The industrial tools image you saved
