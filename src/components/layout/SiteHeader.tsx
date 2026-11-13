@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, X, Search, ChevronDown, LayoutDashboard, ShieldCheck, Settings, LogOut, LogIn } from "lucide-react";
+import { Menu, X, Search, ChevronDown, LayoutDashboard, ShieldCheck, Settings, LogOut, LogIn, Receipt } from "lucide-react";
 import FontSizeControls from "@/components/ui/FontSizeControls";
 import { logoutAction } from "@/app/actions/auth/logout";
 import type { HeaderUser } from "@/lib/header-user";
@@ -124,6 +124,7 @@ export default function SiteHeader({ user: initialUser }: { user?: HeaderUser | 
   const accountLinks = user
     ? [
         { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, badge: 0 },
+        { name: "Sales", href: "/dashboard/sales", icon: Receipt, badge: 0 },
         ...(user.isAdmin
           ? [{ name: "Admin Dashboard", href: "/dashboard/admin", icon: ShieldCheck, badge: user.pendingVendors }]
           : []),

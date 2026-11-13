@@ -69,11 +69,13 @@ export default function RootLayout({
       },
     ],
     knowsAbout: [
+      "Antiques",
+      "Vintage furniture",
+      "Mid-century modern",
+      "Vintage lighting and decor",
       "Architectural salvage",
       "Antique hardware",
       "Reclaimed building materials",
-      "Salvaged doors",
-      "Barn beams",
     ],
   };
 
