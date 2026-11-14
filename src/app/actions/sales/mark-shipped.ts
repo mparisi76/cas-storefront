@@ -15,6 +15,15 @@ import {
   trackingUrl,
 } from "@/lib/tracking";
 
+type SoldItem = {
+  id: number;
+  name: string;
+  date_sold: string | null;
+  tracking_number: string | null;
+  tracking_carrier: string | null;
+  date_shipped: string | null;
+};
+
 export type MarkShippedResult = { success: true; warning?: string } | { success: false; error: string };
 
 /**
@@ -41,14 +50,7 @@ export async function markShippedAction(
   const client = createDirectus(process.env.NEXT_PUBLIC_DIRECTUS_URL!).with(staticToken(token)).with(rest());
 
   // Only the vendor's own sold items.
-  let item: {
-    id: number;
-    name: string;
-    date_sold: string | null;
-    tracking_number: string | null;
-    tracking_carrier: string | null;
-    date_shipped: string | null;
-  } | null = null;
+  let item: SoldItem | null = null;
   try {
     const rows = (await client.request(
       readItems("props", {
@@ -62,7 +64,7 @@ export async function markShippedAction(
         fields: ["id", "name", "date_sold", "tracking_number", "tracking_carrier", "date_shipped"],
         limit: 1,
       }),
-    )) as NonNullable<typeof item>[];
+    )) as SoldItem[];
     item = rows[0] ?? null;
   } catch (err) {
     console.error(`Mark shipped: couldn't read item ${itemId}:`, err);
