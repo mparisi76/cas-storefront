@@ -45,10 +45,28 @@ export default function ShippingDrawer({ id, itemName, price, weight, length, wi
   const [rates, setRates] = useState<ShippingRate[]>([]);
   const [selected, setSelected] = useState<ShippingRate | null>(null);
   const [error, setError] = useState<string | null>(null);
-  // The server may decide an item ships by freight (e.g. vendor has no address yet).
-  const [serverFreight, setServerFreight] = useState(false);
+  // The server may decide rates can't be quoted, and says why.
+  const [serverFreight, setServerFreight] = useState<null | "too_heavy" | "missing_dimensions" | "no_origin">(null);
 
-  const isFreight = mode === "freight" || serverFreight;
+  const isFreight = mode === "freight" || serverFreight !== null;
+  // Only genuinely heavy/oversized pieces are "freight"; the other reasons are
+  // missing seller info, which shouldn't be described to buyers as freight.
+  const reason = serverFreight ?? (mode === "freight" ? "too_heavy" : null);
+  const notice =
+    reason === "no_origin"
+      ? {
+          title: "Shipping arranged after purchase",
+          body: "Online shipping rates aren't available for this seller yet. You can still buy now, and the seller will contact you to arrange delivery and any shipping cost.",
+        }
+      : reason === "missing_dimensions"
+        ? {
+            title: "Shipping arranged after purchase",
+            body: "This listing doesn't have its size and weight yet, so we can't quote shipping online. You can still buy now, and the seller will contact you to arrange delivery.",
+          }
+        : {
+            title: "Freight shipping",
+            body: "Because of its size or weight, this piece ships by freight or custom handling. We'll quote and arrange delivery with you directly.",
+          };
   const isCheckout = mode === "checkout";
 
   useEffect(() => {
@@ -76,7 +94,7 @@ export default function ShippingDrawer({ id, itemName, price, weight, length, wi
       if ("error" in data) {
         setError(data.error);
       } else if (data.mode === "freight") {
-        setServerFreight(true);
+        setServerFreight(data.reason);
       } else {
         setRates(data.rates);
         setSelected(data.rates[0] ?? null); // cheapest preselected
@@ -199,10 +217,8 @@ export default function ShippingDrawer({ id, itemName, price, weight, length, wi
               <div className="bg-white border border-zinc-200 p-8 text-center space-y-6">
                 <Truck size={32} className="mx-auto text-zinc-800" strokeWidth={1} />
                 <div>
-                  <p className="text-label font-black uppercase tracking-widest text-zinc-800">Shipping arranged after purchase</p>
-                  <p className="text-base text-zinc-500 mt-3 leading-relaxed italic">
-                    This piece needs freight or custom handling, so we&apos;ll quote and arrange delivery with you directly.
-                  </p>
+                  <p className="text-label font-black uppercase tracking-widest text-zinc-800">{notice.title}</p>
+                  <p className="text-base text-zinc-500 mt-3 leading-relaxed italic">{notice.body}</p>
                 </div>
                 {isCheckout ? (
                   <form action={createCheckout} className="space-y-3">

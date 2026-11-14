@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { X, Trash2 } from "lucide-react";
 import { PublicVendor } from "@/types/vendor";
+import { getHideSoldPreference, setHideSoldPreference } from "@/lib/client/sold-preference";
 
 interface ActiveFiltersProps {
   vendors: PublicVendor[];
@@ -19,6 +20,7 @@ export function ActiveFilters({ vendors, className = "" }: ActiveFiltersProps) {
   const activeSearch = searchParams.get("search");
   const activeState = (searchParams.get("state") || "").toUpperCase();
   const activeCity = searchParams.get("city");
+  const hideSold = searchParams.get("sold") === "hide";
 
   const activeVendor = vendors.find(
     (v) => v.id === activeVendorId || v.slug === activeVendorId,
@@ -28,18 +30,26 @@ export function ActiveFilters({ vendors, className = "" }: ActiveFiltersProps) {
     const params = new URLSearchParams(searchParams.toString());
     params.delete(key);
     if (key === "state") params.delete("city"); // a town without its state is meaningless
+    if (key === "sold") {
+      // Removing the "Available only" chip turns the saved preference off too.
+      setHideSoldPreference(false);
+      params.set("sold", "show");
+    }
     params.set("page", "1");
     router.push(`/inventory?${params.toString()}`, { scroll: false });
   };
 
-  const resetAll = () => router.push("/inventory", { scroll: false });
+  // Clear filters, but keep the saved "Hide sold items" preference.
+  const resetAll = () =>
+    router.push(getHideSoldPreference() ? "/inventory?sold=hide" : "/inventory", { scroll: false });
 
   const hasFilters =
     activeVendorId ||
     (activeSlug && activeSlug !== "all") ||
     (activeEra && activeEra !== "all") ||
     activeSearch ||
-    activeState;
+    activeState ||
+    hideSold;
 
   if (!hasFilters) return null;
 
@@ -91,6 +101,16 @@ export function ActiveFilters({ vendors, className = "" }: ActiveFiltersProps) {
           className="flex items-center gap-2 px-3 py-1.5 bg-white border border-zinc-200 text-zinc-900 text-tiny font-black uppercase tracking-widest hover:bg-zinc-50 transition-colors"
         >
           {activeCity ? `${activeCity}, ${activeState}` : activeState} <X size={10} />
+        </button>
+      )}
+
+      {/* Hide-sold Chip */}
+      {hideSold && (
+        <button
+          onClick={() => clearFilter("sold")}
+          className="flex items-center gap-2 px-3 py-1.5 bg-white border border-zinc-200 text-zinc-900 text-tiny font-black uppercase tracking-widest hover:bg-zinc-50 transition-colors"
+        >
+          Available only <X size={10} />
         </button>
       )}
 

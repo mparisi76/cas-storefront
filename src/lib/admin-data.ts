@@ -22,6 +22,8 @@ export type AdminSale = {
   purchase_price: string | number | null;
   date_sold: string | null;
   vendor: string;
+  /** undefined = tracking fields not set up in Directus yet */
+  shipped?: { date: string | null; carrier: string | null; number: string | null } | null;
 };
 
 export type AdminStats = {
@@ -144,11 +146,34 @@ export async function listRecentSales(client: AdminClient, limit = 50): Promise<
     user_created: { first_name: string | null; last_name: string | null; shop_name: string | null } | null;
   }[];
 
+  // Tracking fields read separately so this still works before they exist.
+  let tracking: Map<number, AdminSale["shipped"]> | null = null;
+  try {
+    const t = (await client.request(
+      readItems("props", {
+        filter: { id: { _in: rows.map((r) => r.id) } },
+        fields: ["id", "date_shipped", "tracking_carrier", "tracking_number"],
+        limit: rows.length || 1,
+      }),
+    )) as unknown as { id: number; date_shipped: string | null; tracking_carrier: string | null; tracking_number: string | null }[];
+    tracking = new Map(
+      t.map((x) => [
+        x.id,
+        x.date_shipped || x.tracking_number
+          ? { date: x.date_shipped, carrier: x.tracking_carrier, number: x.tracking_number }
+          : null,
+      ]),
+    );
+  } catch {
+    tracking = null;
+  }
+
   return rows.map((r) => ({
     id: r.id,
     name: r.name,
     purchase_price: r.purchase_price,
     date_sold: r.date_sold,
+    shipped: tracking ? (tracking.get(r.id) ?? null) : undefined,
     vendor:
       r.user_created?.shop_name ||
       `${r.user_created?.first_name ?? ""} ${r.user_created?.last_name ?? ""}`.trim() ||

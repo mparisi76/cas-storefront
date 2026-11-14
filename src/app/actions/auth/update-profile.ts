@@ -21,6 +21,10 @@ interface UpdateUserPayload {
   zip_code: string;
   description: string;
   avatar: string | null;
+  ship_from_street?: string;
+  ship_from_city?: string;
+  ship_from_state?: string;
+  ship_from_zip?: string;
 }
 
 /**
@@ -53,6 +57,27 @@ export async function updateProfileAction(
     return { error: "ZIP code must be 5 digits." };
   }
 
+  // Optional separate ship-from address. Only written when the form offered it
+  // (i.e. the Directus fields exist); unticking the box clears it.
+  const shipFromSupported = formData.get("ship_from_supported") === "1";
+  const shipFromEnabled = formData.get("ship_from_enabled") === "1";
+  const shipFrom = {
+    ship_from_street: shipFromEnabled ? ((formData.get("ship_from_street") as string) || "").trim().slice(0, 200) : "",
+    ship_from_city: shipFromEnabled ? ((formData.get("ship_from_city") as string) || "").trim().slice(0, 100) : "",
+    ship_from_state: shipFromEnabled
+      ? ((formData.get("ship_from_state") as string) || "").trim().toUpperCase().slice(0, 2)
+      : "",
+    ship_from_zip: shipFromEnabled ? ((formData.get("ship_from_zip") as string) || "").trim() : "",
+  };
+  if (shipFromEnabled) {
+    if (!shipFrom.ship_from_street || !shipFrom.ship_from_city || !/^[A-Z]{2}$/.test(shipFrom.ship_from_state)) {
+      return { error: "Please complete the ship-from street, city, and 2-letter state." };
+    }
+    if (!/^\d{5}$/.test(shipFrom.ship_from_zip)) {
+      return { error: "Ship-from ZIP code must be 5 digits." };
+    }
+  }
+
   const description = ((formData.get("description") as string) || "").trim().slice(0, 1500);
   const avatarRaw = ((formData.get("avatar") as string) || "").trim();
   if (avatarRaw && !/^[0-9a-f-]{36}$/i.test(avatarRaw)) {
@@ -80,6 +105,7 @@ export async function updateProfileAction(
       zip_code: zipCode,
       description,
       avatar: avatarRaw || null,
+      ...(shipFromSupported ? shipFrom : {}),
     } as UpdateUserPayload;
 
     await client.request(updateMe(payload));

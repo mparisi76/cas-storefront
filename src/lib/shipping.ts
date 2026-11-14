@@ -47,30 +47,40 @@ export type QuotedRate = {
  * zip_code, city, state, shop_name, for vendor AND admin users).
  */
 async function vendorOrigin(userId: string): Promise<ShipFrom | null> {
+  const client = getAdminClient();
+  const complete = (street?: string | null, city?: string | null, state?: string | null, zip?: string | null) => {
+    const z = (zip || "").trim().slice(0, 5);
+    return street?.trim() && city?.trim() && state?.trim() && /^\d{5}$/.test(z)
+      ? { street1: street.trim(), city: city.trim(), state: state.trim().toUpperCase(), zip: z }
+      : null;
+  };
+
+  let shopName = "";
+  let shopAddress: Omit<ShipFrom, "name"> | null = null;
   try {
-    const u = (await getAdminClient().request(
+    const u = (await client.request(
       readUser(userId, { fields: ["shop_name", "street_address", "city", "state", "zip_code"] }),
-    )) as {
-      shop_name?: string | null;
-      street_address?: string | null;
-      city?: string | null;
-      state?: string | null;
-      zip_code?: string | null;
-    };
-    const zip = (u.zip_code || "").trim().slice(0, 5);
-    if (u.street_address && u.city && u.state && /^\d{5}$/.test(zip)) {
-      return {
-        name: u.shop_name || "Catskill Architectural Salvage vendor",
-        street1: u.street_address.trim(),
-        city: u.city.trim(),
-        state: u.state.trim(),
-        zip,
-      };
-    }
+    )) as { shop_name?: string | null; street_address?: string | null; city?: string | null; state?: string | null; zip_code?: string | null };
+    shopName = u.shop_name || "";
+    shopAddress = complete(u.street_address, u.city, u.state, u.zip_code);
   } catch (err) {
     console.error(`Ship-from lookup for vendor ${userId} failed (check service token permissions):`, err);
   }
-  return null;
+
+  // A separate ship-from address (warehouse etc.) wins when it's complete.
+  // Read separately so a missing field/permission doesn't break shop-address quotes.
+  let shipFrom: Omit<ShipFrom, "name"> | null = null;
+  try {
+    const f = (await client.request(
+      readUser(userId, { fields: ["ship_from_street", "ship_from_city", "ship_from_state", "ship_from_zip"] }),
+    )) as { ship_from_street?: string | null; ship_from_city?: string | null; ship_from_state?: string | null; ship_from_zip?: string | null };
+    shipFrom = complete(f.ship_from_street, f.ship_from_city, f.ship_from_state, f.ship_from_zip);
+  } catch {
+    // ship_from_* fields not set up (or not readable) yet: use the shop address
+  }
+
+  const origin = shipFrom ?? shopAddress;
+  return origin ? { name: shopName || "Catskill Architectural Salvage vendor", ...origin } : null;
 }
 
 /**

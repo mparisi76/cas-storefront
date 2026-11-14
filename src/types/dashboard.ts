@@ -2,6 +2,14 @@ export interface DirectusUser {
   id: string;
   first_name: string;
   last_name: string;
+  street_address?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zip_code?: string | null;
+  ship_from_street?: string | null;
+  ship_from_city?: string | null;
+  ship_from_state?: string | null;
+  ship_from_zip?: string | null;
 }
 
 export interface StatCardProps {

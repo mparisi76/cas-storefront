@@ -11,6 +11,8 @@ import { ActiveFilters } from "@/components/inventory/ActiveChips";
 import { getCategoryTree, flattenTree } from "@/lib/utils";
 import { getCategoryCounts, getLocationCounts, getShopItems, normalizeCity, normalizeState, SORT_OPTIONS, isSortKey, type SortKey } from "@/services/(public)/artifacts";
 import { LocationSelect } from "@/components/inventory/LocationFilter";
+import { SoldToggle } from "@/components/inventory/SoldToggle";
+import { SoldPreferenceSync } from "@/components/inventory/SoldPreferenceSync";
 import { getCategories } from "@/services/categories";
 import { getActiveVendors } from "@/services/(public)/vendors";
 import GridIcon from "@/components/ui/icons/GridIcon";
@@ -42,6 +44,7 @@ interface ShopParams {
   sort?: string;
   state?: string;
   city?: string;
+  sold?: string;
 }
 
 // 2. Apply the type to the Results component
@@ -56,6 +59,7 @@ async function ArtifactResults({ params }: { params: ShopParams }) {
     vendor: params.vendor || "all",
     state: params.state,
     city: params.city,
+    hideSold: params.sold === "hide",
     page: currentPage,
     limit: itemsPerPage,
     sort: params.sort,
@@ -107,6 +111,7 @@ export default async function ShopPage({
   const activeSort: SortKey = isSortKey(params.sort) ? params.sort : "featured";
   const activeState = /^[A-Za-z]{2}$/.test(params.state || "") ? normalizeState(params.state) : "";
   const activeCity = activeState ? normalizeCity(params.city) : "";
+  const hideSold = params.sold === "hide";
 
   const [categories, counts, vendors, locations] = await Promise.all([
     getCategories(),
@@ -116,6 +121,7 @@ export default async function ShopPage({
       vendor: activeVendor,
       state: activeState,
       city: activeCity,
+      hideSold,
     }),
     getActiveVendors(),
     getLocationCounts({
@@ -123,6 +129,7 @@ export default async function ShopPage({
       search: activeSearch,
       classification: activeEra,
       vendor: activeVendor,
+      hideSold,
     }),
   ]);
 
@@ -161,6 +168,7 @@ export default async function ShopPage({
       ...(params.vendor && { vendor: params.vendor }),
       ...(activeState && { state: activeState }),
       ...(activeCity && { city: activeCity }),
+      ...(hideSold && { sold: "hide" }),
       ...(params.view && { view: params.view }),
       ...(activeSort !== "featured" && { sort: activeSort }),
       limit: String(itemsPerPage),
@@ -177,6 +185,7 @@ export default async function ShopPage({
 
   return (
     <main className="bg-[#F9F8F6] min-h-screen px-4 md:px-10 text-zinc-900">
+      <SoldPreferenceSync />
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start relative">
         <div className="hidden lg:block w-64 sticky top-20 shrink-0 self-start pt-6">
           <ShopSidebar tree={categoryTree} vendors={vendors} locations={locations} />
@@ -191,8 +200,11 @@ export default async function ShopPage({
                 vendors={vendors}
               />
             </div>
-            <div className="pb-2.5">
-              <LocationSelect locations={locations} />
+            <div className="pb-2.5 flex items-center gap-3">
+              <div className="flex-1 min-w-0">
+                <LocationSelect locations={locations} />
+              </div>
+              <SoldToggle className="shrink-0" />
             </div>
             <div className="flex items-center gap-3 pb-2.5 overflow-x-auto whitespace-nowrap">
               <span className="text-detail font-bold uppercase tracking-widest text-zinc-500">Sort:</span>

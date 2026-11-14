@@ -9,6 +9,7 @@ import { EraFilter } from "./EraFilter";
 import { PublicVendor } from "@/types/vendor";
 import { ActiveFilters } from "./ActiveChips";
 import { LocationFilter } from "./LocationFilter";
+import { SoldToggle } from "./SoldToggle";
 import type { LocationOption } from "@/services/(public)/artifacts";
 
 type CategoryTree = Record<string, TreeParent>;
@@ -61,6 +62,8 @@ export default function ShopSidebar({ tree, vendors, locations }: ShopSidebarPro
     <aside className="w-64 shrink-0 hidden lg:block overflow-visible">
       <div className="sticky top-10 pr-8 space-y-10">
         <ActiveFilters vendors={vendors} />
+
+        <SoldToggle />
 
         {/* ERA SELECTION */}
         <section>

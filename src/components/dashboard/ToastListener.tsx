@@ -13,11 +13,11 @@ function ToastHandler() {
     if (searchParams.get("success") === "true") {
 			const action = searchParams.get("action");
 			if (action === "update") {
-      	showToast("Artifact Updated Successfully");
+      	showToast("Listing updated");
 			} else if (action === "create") {
-				showToast("Artifact Created Successfully");
+				showToast("Listing published");
 			} else if (action === "delete") {
-				showToast("Artifact Deleted Successfully");
+				showToast("Listing deleted");
 			}
       
       // Clean up the URL so the toast doesn't re-fire on refresh

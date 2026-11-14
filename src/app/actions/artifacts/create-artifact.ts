@@ -6,6 +6,7 @@ import { createDirectus, rest, staticToken, createItem } from "@directus/sdk";
 import { revalidatePath } from "next/cache";
 import { ArtifactFormState } from "@/types/dashboard";
 import { handleActionError } from "../utils";
+import { shippingSpecsError } from "@/lib/shipping-specs";
 
 export async function createArtifactAction(
   prevState: ArtifactFormState | null,
@@ -34,6 +35,9 @@ export async function createArtifactAction(
     const lengthRaw = formData.get("length") as string;
     const widthRaw = formData.get("width") as string;
     const heightRaw = formData.get("height") as string;
+
+    const specsError = shippingSpecsError({ weight: weightRaw, length: lengthRaw, width: widthRaw, height: heightRaw });
+    if (specsError) return { error: specsError };
 
     const photoGalleryPayload = galleryIds.map((id) => ({
       directus_files_id: id,
@@ -70,12 +74,12 @@ export async function createArtifactAction(
     revalidatePath("/dashboard");
     revalidatePath("/inventory");
     // Ensure the edit page path is revalidated so it isn't blank
-    revalidatePath(`/dashboard/artifact/edit/${newId}`);
+    revalidatePath(`/dashboard/listing/edit/${newId}`);
 
   } catch (e) {
     return handleActionError(e);
   }
 
   // Redirect to the Edit page instead of the Dashboard
-  redirect(`/dashboard/artifact/edit/${newId}`);
+  redirect(`/dashboard/listing/edit/${newId}`);
 }

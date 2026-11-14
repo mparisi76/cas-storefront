@@ -37,6 +37,19 @@ export default async function SettingsPage() {
     }),
   )) as DirectusUser;
 
+  // The ship-from fields are newer; if they don't exist in Directus yet (or the
+  // role can't read them), hide that option instead of breaking the page.
+  let shipFromSupported = false;
+  try {
+    const shipFrom = (await client.request(
+      readMe({ fields: ["ship_from_street", "ship_from_city", "ship_from_state", "ship_from_zip"] }),
+    )) as Partial<DirectusUser>;
+    Object.assign(user, shipFrom);
+    shipFromSupported = true;
+  } catch {
+    shipFromSupported = false;
+  }
+
   return (
     <div className="max-w-4xl space-y-12 pb-20">
       {/* Header Section */}
@@ -62,7 +75,11 @@ export default async function SettingsPage() {
         </div>
 
         {/* Right: The Client Form Component */}
-        <ProfileForm user={user} shopUrl={user.id ? `/shop/${user.id}` : null} />
+        <ProfileForm
+          user={user}
+          shopUrl={user.id ? `/shop/${user.id}` : null}
+          shipFromSupported={shipFromSupported}
+        />
       </div>
 
       <div className="h-px w-full bg-zinc-100" />

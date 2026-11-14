@@ -34,12 +34,13 @@ const buildFilters = (params: {
   vendor?: string;
   state?: string;
   city?: string;
+  hideSold?: boolean;
 }) => {
   const { category, classification, search, vendor } = params;
 
   const andFilters: DirectusFilter[] = [
     { status: { _eq: "published" } },
-    { availability: { _in: ["available", "sold"] } },
+    params.hideSold ? { availability: { _eq: "available" } } : { availability: { _in: ["available", "sold"] } },
   ];
 
   // VALIDATED VENDOR FILTER
@@ -105,6 +106,7 @@ export const getShopItems = cache(
     vendor?: string;
     state?: string;
     city?: string;
+    hideSold?: boolean;
     page?: number;
     limit?: number;
     sort?: string;
@@ -157,6 +159,7 @@ export const getCategoryCounts = cache(
     vendor?: string;
     state?: string;
     city?: string;
+    hideSold?: boolean;
   }): Promise<Record<string, number>> => {
     const filter = buildFilters({ ...params, category: undefined });
 
@@ -228,6 +231,7 @@ export const getLocationCounts = cache(
     classification?: string;
     search?: string;
     vendor?: string;
+    hideSold?: boolean;
   }): Promise<LocationOption[]> => {
     try {
       const filter = buildFilters({ ...params, state: undefined, city: undefined });

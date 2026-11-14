@@ -4,6 +4,7 @@ import { hasAdminAccess } from "@/lib/admin";
 
 /** What the site header needs to know about the logged-in user. */
 export type HeaderUser = {
+  id: string;
   name: string;
   email: string;
   role: string;
@@ -22,7 +23,8 @@ export async function loadHeaderUser(token: string): Promise<HeaderUser | null> 
 
   try {
     const [me, isAdmin] = await Promise.all([
-      client.request(readMe({ fields: ["first_name", "last_name", "email", "avatar", { role: ["name"] }] })) as Promise<{
+      client.request(readMe({ fields: ["id", "first_name", "last_name", "email", "avatar", { role: ["name"] }] })) as Promise<{
+        id: string;
         first_name: string | null;
         last_name: string | null;
         email: string;
@@ -50,6 +52,7 @@ export async function loadHeaderUser(token: string): Promise<HeaderUser | null> 
     }
 
     return {
+      id: me.id,
       name: `${me.first_name || ""} ${me.last_name || ""}`.trim() || me.email,
       email: me.email,
       role: isAdmin ? "Admin" : me.role?.name || "Vendor",

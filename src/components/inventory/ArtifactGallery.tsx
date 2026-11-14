@@ -48,7 +48,7 @@ export default function ArtifactGallery({
                 strokeWidth={1}
               />
               <span className="text-detail font-black uppercase tracking-[0.3em] text-zinc-600">
-                Retrieving Artifact
+                Loading photos
               </span>
             </div>
           </div>

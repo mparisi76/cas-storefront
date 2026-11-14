@@ -14,6 +14,11 @@ export interface DirectusUser {
   state: string | null;
   street_address: string | null;
   zip_code: string | null;
+  // Optional separate ship-from address (Directus fields may not exist yet)
+  ship_from_street?: string | null;
+  ship_from_city?: string | null;
+  ship_from_state?: string | null;
+  ship_from_zip?: string | null;
   role: {
     name: string;
   } | null;

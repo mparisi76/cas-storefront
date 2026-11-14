@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, X, Search, ChevronDown, LayoutDashboard, ShieldCheck, Settings, LogOut, LogIn, Receipt } from "lucide-react";
+import { Menu, X, Search, ChevronDown, LayoutDashboard, ShieldCheck, Settings, LogOut, LogIn, Plus } from "lucide-react";
 import FontSizeControls from "@/components/ui/FontSizeControls";
 import { logoutAction } from "@/app/actions/auth/logout";
 import type { HeaderUser } from "@/lib/header-user";
@@ -123,8 +123,8 @@ export default function SiteHeader({ user: initialUser }: { user?: HeaderUser | 
 
   const accountLinks = user
     ? [
+        { name: "New Listing", href: "/dashboard/listing/new", icon: Plus, badge: 0 },
         { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, badge: 0 },
-        { name: "Sales", href: "/dashboard/sales", icon: Receipt, badge: 0 },
         ...(user.isAdmin
           ? [{ name: "Admin Dashboard", href: "/dashboard/admin", icon: ShieldCheck, badge: user.pendingVendors }]
           : []),
@@ -193,6 +193,21 @@ export default function SiteHeader({ user: initialUser }: { user?: HeaderUser | 
           <div className="hidden md:block">
             <FontSizeControls />
           </div>
+
+          {user && (
+            <Link
+              href="/dashboard/listing/new"
+              onClick={closeAll}
+              aria-label="New Listing"
+              className={`hidden sm:flex items-center gap-2 bg-zinc-900 text-white hover:bg-blue-600 transition-colors text-[10px] font-black uppercase tracking-[0.2em] whitespace-nowrap h-9 px-3 xl:px-4 ${
+                pathname === "/dashboard/listing/new" ? "bg-blue-600" : ""
+              }`}
+            >
+              <Plus size={14} strokeWidth={2.5} />
+              <span className="xl:hidden">New</span>
+              <span className="hidden xl:inline">New Listing</span>
+            </Link>
+          )}
 
           {user ? (
             <div className="relative" ref={accountRef}>

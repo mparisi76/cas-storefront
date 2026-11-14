@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { stripe } from "@/lib/stripe";
-import { CheckCircle2, ArrowRight, Home } from "lucide-react";
+import { CheckCircle2, ArrowRight, Store, MessageSquare } from "lucide-react";
+import { readItem } from "@directus/sdk";
+import directus from "@/lib/directus";
 import { notFound } from "next/navigation";
 
 export default async function SuccessPage({
@@ -23,6 +25,20 @@ export default async function SuccessPage({
     id: session.metadata?.itemId ?? "",
     name: session.line_items?.data[0]?.description ?? "Your item",
   };
+
+  // The seller, for a "More from this shop" link. Public data; optional.
+  let seller: { id: string; shopName: string } | null = null;
+  if (/^\d+$/.test(item.id)) {
+    try {
+      const row = (await directus.request(
+        readItem("props", item.id, { fields: [{ user_created: ["id", "shop_name"] }] }),
+      )) as { user_created?: { id?: string; shop_name?: string | null } | null };
+      const u = row.user_created;
+      if (u?.id) seller = { id: u.id, shopName: u.shop_name?.trim() || "this shop" };
+    } catch {
+      seller = null;
+    }
+  }
 
   return (
     <main className="h-full w-full flex items-center justify-center p-6 py-12">
@@ -51,16 +67,16 @@ export default async function SuccessPage({
           </header>
 
           <section className="border-y border-zinc-100 py-8 mb-10">
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">
-                Artifact
+            <div className="flex justify-between items-baseline gap-8 mb-4">
+              <span className="shrink-0 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">
+                Item
               </span>
-              <span className="text-zinc-800 font-bold uppercase italic">
+              <span className="min-w-0 text-right text-zinc-800 font-bold uppercase italic leading-snug break-words">
                 {item.name}
               </span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">
+            <div className="flex justify-between items-center gap-8">
+              <span className="shrink-0 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">
                 Status
               </span>
               <span className="text-[10px] font-bold uppercase tracking-widest text-blue-600 border border-blue-100 px-2 py-1 bg-blue-50">
@@ -81,15 +97,25 @@ export default async function SuccessPage({
               href="/inventory"
               className="flex items-center justify-center gap-2 bg-zinc-800 text-white py-4 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-blue-600 transition-all shadow-lg shadow-zinc-200"
             >
-              Catalog <ArrowRight className="w-3 h-3" />
+              Continue Shopping <ArrowRight className="w-3 h-3" />
             </Link>
 
-            <Link
-              href="/"
-              className="flex items-center justify-center gap-2 border border-zinc-200 text-zinc-500 py-4 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-zinc-50 transition-all"
-            >
-              <Home className="w-3 h-3" /> Home
-            </Link>
+            {seller ? (
+              <Link
+                href={`/shop/${seller.id}`}
+                className="flex items-center justify-center gap-2 border border-zinc-200 text-zinc-600 px-3 py-4 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-zinc-50 hover:text-zinc-900 transition-all text-center"
+              >
+                <Store className="w-3 h-3 shrink-0" />
+                <span className="truncate">More from {seller.shopName}</span>
+              </Link>
+            ) : (
+              <Link
+                href={`/contact?type=general&item=${encodeURIComponent(`Order: ${item.name}`)}`}
+                className="flex items-center justify-center gap-2 border border-zinc-200 text-zinc-600 py-4 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-zinc-50 hover:text-zinc-900 transition-all"
+              >
+                <MessageSquare className="w-3 h-3" /> Questions? Contact Us
+              </Link>
+            )}
           </div>
         </div>
       </div>

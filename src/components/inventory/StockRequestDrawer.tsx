@@ -94,7 +94,7 @@ export default function StockRequestDrawer({
                     The Mission
                   </p>
                   <p className="text-sm text-zinc-600 leading-relaxed italic">
-                    If the specific architectural artifact you require is not
+                    If the specific piece you require is not
                     currently in our local stock, our sources can initiate a
                     specialized search across the Hudson Valley.
                   </p>

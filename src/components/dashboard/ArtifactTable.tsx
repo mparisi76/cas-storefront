@@ -188,7 +188,7 @@ export function ArtifactTable({ items }: ArtifactTableProps) {
                   </td>
                   <td className="px-6 py-6 text-sm text-zinc-600 text-right font-mono">${Number(item.purchase_price).toFixed(2)}</td>
                   <td className="px-6 py-6 text-right">
-                    <Link href={`/dashboard/artifact/edit/${item.id}`} className="text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-zinc-900 transition-colors" onClick={(e) => e.stopPropagation()}>Edit</Link>
+                    <Link href={`/dashboard/listing/edit/${item.id}`} className="text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-zinc-900 transition-colors" onClick={(e) => e.stopPropagation()}>Edit</Link>
                   </td>
                 </tr>
               ))
@@ -218,7 +218,7 @@ export function ArtifactTable({ items }: ArtifactTableProps) {
         isOpen={isDeleteModalOpen} 
         onClose={() => setIsDeleteModalOpen(false)} 
         onConfirm={handleBulkDelete} 
-        title={selectedIds.length === 1 ? items.find(i => i.id === selectedIds[0])?.name || "Artifact" : `${selectedIds.length} Selected Artifacts`} 
+        title={selectedIds.length === 1 ? items.find(i => i.id === selectedIds[0])?.name || "This listing" : `${selectedIds.length} Selected Artifacts`} 
         isPending={isProcessing} 
       />
     </div>

@@ -25,10 +25,23 @@ export const vendorArtifactService = {
     try {
       const result = await client.request(
         readMe({
-          fields: ["first_name", "last_name", "id"],
+          fields: ["first_name", "last_name", "id", "street_address", "city", "state", "zip_code"],
         }),
       );
-      return result as DirectusUser;
+      const user = result as DirectusUser;
+      // Optional ship-from fields: read separately so the dashboard still loads
+      // if they haven't been added in Directus yet.
+      try {
+        Object.assign(
+          user,
+          await client.request(
+            readMe({ fields: ["ship_from_street", "ship_from_city", "ship_from_state", "ship_from_zip"] }),
+          ),
+        );
+      } catch {
+        // not set up yet
+      }
+      return user;
     } catch (error) {
       console.error("Profile Fetch Error:", error);
       return null;

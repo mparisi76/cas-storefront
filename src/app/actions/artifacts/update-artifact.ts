@@ -6,6 +6,7 @@ import { createDirectus, rest, staticToken, updateItem } from "@directus/sdk";
 import { revalidatePath } from "next/cache";
 import { ArtifactFormState } from "@/types/dashboard";
 import { handleActionError } from "../utils";
+import { shippingSpecsError } from "@/lib/shipping-specs";
 
 export async function updateArtifactAction(
   id: string,
@@ -33,6 +34,9 @@ export async function updateArtifactAction(
   const lengthRaw = formData.get("length") as string;
   const widthRaw = formData.get("width") as string;
   const heightRaw = formData.get("height") as string;
+
+  const specsError = shippingSpecsError({ weight: weightRaw, length: lengthRaw, width: widthRaw, height: heightRaw });
+  if (specsError) return { error: specsError };
 
   try {
     const numericId = parseInt(id, 10);
@@ -72,7 +76,7 @@ export async function updateArtifactAction(
     );
 
     // Refresh all relevant cache paths
-    revalidatePath(`/dashboard/artifact/edit/${id}`);
+    revalidatePath(`/dashboard/listing/edit/${id}`);
     revalidatePath("/dashboard");
     revalidatePath("/inventory"); 
     revalidatePath(`/inventory/${id}`); 

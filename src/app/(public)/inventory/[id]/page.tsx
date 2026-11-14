@@ -1,5 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { sanitizeDescription } from "@/lib/sanitize";
+import OwnerEditButton from "@/components/inventory/OwnerEditButton";
+import HideFromOwner from "@/components/inventory/HideFromOwner";
 import ShippingDrawer from "@/components/inventory/ShippingDrawer";
 import ArtifactGallery from "@/components/inventory/ArtifactGallery";
 import RelatedArtifacts from "@/components/inventory/RelatedArtifacts";
@@ -280,7 +282,99 @@ export default async function ProductPage({
               </div>
             </div>
 
-            <div className="mb-12 text-zinc-500 leading-relaxed border-l border-zinc-200 pl-8 text-base font-medium max-w-prose">
+            <OwnerEditButton itemId={item.id} ownerId={item.user_created?.id ?? null} />
+
+            {/* Why checkout sent the buyer back here */}
+            {(notice.shipping === "required" || notice.unavailable) && (
+              <p className="mb-4 border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                {notice.unavailable
+                  ? "Sorry, this item is no longer available for purchase."
+                  : "Your shipping quote expired. Click Purchase to get a fresh rate, then continue to payment."}
+              </p>
+            )}
+
+            <div className="space-y-4">
+              <HideFromOwner ownerId={item.user_created?.id ?? null}>
+                {!isSold && (
+                  <div className="flex flex-col gap-4">
+                    {isExternal ? (
+                      <a
+                        href={item.source_url!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full bg-blue-600 text-white py-5 text-label font-black uppercase tracking-[0.4em] hover:bg-zinc-800 transition-all shadow-xl flex items-center justify-center gap-3"
+                      >
+                        View Original Listing <ExternalLink size={16} />
+                      </a>
+                    ) : (
+                      <>
+                        {hasPrice && shipsByParcel && (
+                          <ShippingDrawer
+                            mode="checkout"
+                            id={item.id}
+                            itemName={item.name}
+                            price={priceNumber}
+                            weight={Number(item.weight) || 0}
+                            length={Number(item.length) || 0}
+                            width={Number(item.width) || 0}
+                            height={Number(item.height) || 0}
+                          />
+                        )}
+                        {hasPrice && !shipsByParcel && (
+                          <form action={createCheckout} className="space-y-2">
+                            <input type="hidden" name="itemId" value={item.id} />
+                            <button
+                              type="submit"
+                              className="w-full bg-zinc-800 text-white py-5 text-label font-black uppercase tracking-[0.4em] hover:bg-blue-600 transition-all shadow-xl active:scale-[0.98]"
+                            >
+                              Purchase
+                            </button>
+                            <p className="text-detail text-zinc-500 uppercase tracking-widest text-center">
+                              {Number(item.weight) > 100
+                                ? "Freight item · shipping arranged after purchase"
+                                : "Shipping arranged after purchase"}
+                            </p>
+                          </form>
+                        )}
+                        <Link
+                          href={contactLink}
+                          className="w-full border border-zinc-300 text-zinc-500 py-4 text-label font-black uppercase tracking-[0.2em] hover:bg-zinc-800 hover:text-white hover:border-zinc-800 transition-all flex items-center justify-center gap-3"
+                        >
+                          <MessageSquare size={14} /> Contact Vendor
+                        </Link>
+                      </>
+                    )}
+                  </div>
+                )}
+              </HideFromOwner>
+
+              {isSold && (
+                <div className="w-full bg-zinc-100 text-zinc-500 py-5 text-label font-black uppercase tracking-[0.4em] border border-zinc-200 text-center cursor-not-allowed">
+                  Item No Longer Available
+                </div>
+              )}
+
+              {/* Shipping estimate / freight inquiry. Purchasable parcel items
+                  already reach the drawer through the Purchase button. */}
+              <HideFromOwner ownerId={item.user_created?.id ?? null}>
+                {!isSold && !isExternal && !(hasPrice && shipsByParcel) && (
+                  <div className="pt-2 group/shipping relative">
+                    <ShippingDrawer
+                      mode={shipsByParcel ? "estimate" : "freight"}
+                      weight={Number(item.weight) || 0}
+                      length={Number(item.length) || 0}
+                      width={Number(item.width) || 0}
+                      height={Number(item.height) || 0}
+                      itemName={item.name}
+                      id={item.id}
+                    />
+                  </div>
+                )}
+              </HideFromOwner>
+            </div>
+
+            {/* Details below the buy area, so long descriptions don't push Purchase off screen */}
+            <div className="mt-12 mb-12 text-zinc-500 leading-relaxed border-l border-zinc-200 pl-8 text-base font-medium max-w-prose">
               <div
                 className="prose prose-zinc prose-sm italic"
                 dangerouslySetInnerHTML={{ __html: sanitizeDescription(item.description) }}
@@ -306,89 +400,6 @@ export default async function ProductPage({
                     : "—"}
                 </p>
               </div>
-            </div>
-
-            {/* Why checkout sent the buyer back here */}
-            {(notice.shipping === "required" || notice.unavailable) && (
-              <p className="mb-4 border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                {notice.unavailable
-                  ? "Sorry, this item is no longer available for purchase."
-                  : "Your shipping quote expired. Click Purchase to get a fresh rate, then continue to payment."}
-              </p>
-            )}
-
-            <div className="space-y-4">
-              {!isSold && (
-                <div className="flex flex-col gap-4">
-                  {isExternal ? (
-                    <a
-                      href={item.source_url!}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full bg-blue-600 text-white py-5 text-label font-black uppercase tracking-[0.4em] hover:bg-zinc-800 transition-all shadow-xl flex items-center justify-center gap-3"
-                    >
-                      View Original Listing <ExternalLink size={16} />
-                    </a>
-                  ) : (
-                    <>
-                      {hasPrice && shipsByParcel && (
-                        <ShippingDrawer
-                          mode="checkout"
-                          id={item.id}
-                          itemName={item.name}
-                          price={priceNumber}
-                          weight={Number(item.weight) || 0}
-                          length={Number(item.length) || 0}
-                          width={Number(item.width) || 0}
-                          height={Number(item.height) || 0}
-                        />
-                      )}
-                      {hasPrice && !shipsByParcel && (
-                        <form action={createCheckout} className="space-y-2">
-                          <input type="hidden" name="itemId" value={item.id} />
-                          <button
-                            type="submit"
-                            className="w-full bg-zinc-800 text-white py-5 text-label font-black uppercase tracking-[0.4em] hover:bg-blue-600 transition-all shadow-xl active:scale-[0.98]"
-                          >
-                            Purchase
-                          </button>
-                          <p className="text-detail text-zinc-500 uppercase tracking-widest text-center">
-                            Freight item · shipping arranged after purchase
-                          </p>
-                        </form>
-                      )}
-                      <Link
-                        href={contactLink}
-                        className="w-full border border-zinc-300 text-zinc-500 py-4 text-label font-black uppercase tracking-[0.2em] hover:bg-zinc-800 hover:text-white hover:border-zinc-800 transition-all flex items-center justify-center gap-3"
-                      >
-                        <MessageSquare size={14} /> Contact Vendor
-                      </Link>
-                    </>
-                  )}
-                </div>
-              )}
-
-              {isSold && (
-                <div className="w-full bg-zinc-100 text-zinc-500 py-5 text-label font-black uppercase tracking-[0.4em] border border-zinc-200 text-center cursor-not-allowed">
-                  Item No Longer Available
-                </div>
-              )}
-
-              {/* Shipping estimate / freight inquiry. Purchasable parcel items
-                  already reach the drawer through the Purchase button. */}
-              {!isSold && !isExternal && !(hasPrice && shipsByParcel) && (
-                <div className="pt-2 group/shipping relative">
-                  <ShippingDrawer
-                    mode={shipsByParcel ? "estimate" : "freight"}
-                    weight={Number(item.weight) || 0}
-                    length={Number(item.length) || 0}
-                    width={Number(item.width) || 0}
-                    height={Number(item.height) || 0}
-                    itemName={item.name}
-                    id={item.id}
-                  />
-                </div>
-              )}
             </div>
           </section>
         </div>

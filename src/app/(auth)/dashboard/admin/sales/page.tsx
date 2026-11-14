@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getAdminSession } from "@/lib/admin";
 import { listRecentSales, formatUSD, type AdminSale } from "@/lib/admin-data";
+import { carrierLabel, trackingUrl } from "@/lib/tracking";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,7 @@ export default async function AdminSalesPage() {
               <th className="text-left font-black px-5 py-3">Date</th>
               <th className="text-left font-black px-5 py-3">Item</th>
               <th className="text-left font-black px-5 py-3">Vendor</th>
+              {sales.some((s) => s.shipped !== undefined) && <th className="text-left font-black px-5 py-3">Shipped</th>}
               <th className="text-right font-black px-5 py-3">Price</th>
             </tr>
           </thead>
@@ -52,6 +54,29 @@ export default async function AdminSalesPage() {
                   <span className="ml-2 text-[10px] text-zinc-500 font-mono">CAS-{String(s.id).padStart(4, "0")}</span>
                 </td>
                 <td className="px-5 py-4 text-zinc-600">{s.vendor}</td>
+                {s.shipped !== undefined && (
+                  <td className="px-5 py-4 whitespace-nowrap">
+                    {s.shipped ? (
+                      (() => {
+                        const link = trackingUrl(s.shipped.carrier, s.shipped.number);
+                        const label = `${carrierLabel(s.shipped.carrier)}${
+                          s.shipped.date
+                            ? ` · ${new Date(s.shipped.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
+                            : ""
+                        }`;
+                        return link ? (
+                          <a href={link} target="_blank" rel="noopener noreferrer" className="text-green-700 hover:underline">
+                            {label}
+                          </a>
+                        ) : (
+                          <span className="text-green-700">{label}</span>
+                        );
+                      })()
+                    ) : (
+                      <span className="text-[10px] font-black uppercase tracking-widest text-amber-700">Awaiting</span>
+                    )}
+                  </td>
+                )}
                 <td className="px-5 py-4 text-right font-medium whitespace-nowrap">{formatUSD(s.purchase_price)}</td>
               </tr>
             ))}

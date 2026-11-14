@@ -13,6 +13,12 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // Old "artifact" URLs (renamed to "listing") keep working for bookmarks and old emails.
+      {
+        source: '/dashboard/artifact/:path*',
+        destination: '/dashboard/listing/:path*',
+        permanent: true,
+      },
       {
         source: '/:path*',
         has: [

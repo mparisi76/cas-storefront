@@ -26,10 +26,79 @@ function initialValues(user: DirectusUser) {
     city: user.city ?? "",
     state: user.state ?? "",
     zip_code: user.zip_code ?? "",
+    // Optional separate ship-from address ("1" = enabled)
+    ship_from_enabled: user.ship_from_street || user.ship_from_zip ? "1" : "",
+    ship_from_street: user.ship_from_street ?? "",
+    ship_from_city: user.ship_from_city ?? "",
+    ship_from_state: user.ship_from_state ?? "",
+    ship_from_zip: user.ship_from_zip ?? "",
   };
 }
 
-export function ProfileForm({ user, shopUrl }: { user: DirectusUser; shopUrl?: string | null }) {
+/** Street / City / State / ZIP block, used for both the shop and ship-from addresses. */
+function AddressFields({
+  prefix,
+  values,
+  onChange,
+}: {
+  prefix: "" | "ship_from_";
+  values: { street: string; city: string; state: string; zip: string };
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) {
+  const n = (field: "street" | "city" | "state" | "zip") =>
+    prefix ? `ship_from_${field}` : field === "street" ? "street_address" : field === "zip" ? "zip_code" : field;
+  return (
+    <div className="space-y-4">
+      <div className="space-y-1.5">
+        <label className={labelClass}>Street Address</label>
+        <input name={n("street")} type="text" autoComplete="address-line1" value={values.street} onChange={onChange} className={inputClass} />
+      </div>
+      <div className="grid grid-cols-6 gap-4">
+        <div className="space-y-1.5 col-span-3">
+          <label className={labelClass}>City</label>
+          <input name={n("city")} type="text" autoComplete="address-level2" value={values.city} onChange={onChange} className={inputClass} />
+        </div>
+        <div className="space-y-1.5 col-span-1">
+          <label className={labelClass}>State</label>
+          <input
+            name={n("state")}
+            type="text"
+            maxLength={2}
+            placeholder="NY"
+            autoComplete="address-level1"
+            value={values.state}
+            onChange={onChange}
+            className={`${inputClass} uppercase`}
+          />
+        </div>
+        <div className="space-y-1.5 col-span-2">
+          <label className={labelClass}>ZIP</label>
+          <input
+            name={n("zip")}
+            type="text"
+            inputMode="numeric"
+            maxLength={5}
+            autoComplete="postal-code"
+            value={values.zip}
+            onChange={onChange}
+            className={`${inputClass} font-mono`}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function ProfileForm({
+  user,
+  shopUrl,
+  shipFromSupported = false,
+}: {
+  user: DirectusUser;
+  shopUrl?: string | null;
+  /** False until the ship_from_* fields exist in Directus; hides that option. */
+  shipFromSupported?: boolean;
+}) {
   const { showToast } = useToast();
   const [state, formAction, isPending] = useActionState(updateProfileAction, null);
 
@@ -204,62 +273,66 @@ export function ProfileForm({ user, shopUrl }: { user: DirectusUser; shopUrl?: s
           <p className="text-[10px] text-zinc-500">Shown on your public shop page.</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className={labelClass}>City</label>
-            <input name="city" type="text" value={formData.city} onChange={handleChange} className={inputClass} />
-          </div>
-          <div className="space-y-1.5">
-            <label className={labelClass}>State</label>
-            <input
-              name="state"
-              type="text"
-              maxLength={2}
-              placeholder="NY"
-              value={formData.state}
-              onChange={handleChange}
-              className={`${inputClass} uppercase`}
-            />
-          </div>
-        </div>
-        <p className="text-[10px] text-zinc-500 -mt-2">City and state are shown publicly on your shop and listings.</p>
       </div>
 
-      {/* Private shipping origin */}
+      {/* Shop address (city/state public; street/ZIP private) */}
       <div className="space-y-4">
         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-900 border-b border-zinc-100 pb-2">
-          Ship-From Address
+          Shop Address
         </h3>
-        <div className="grid grid-cols-3 gap-4">
-          <div className="space-y-1.5 col-span-2">
-            <label className={labelClass}>Street Address</label>
-            <input
-              name="street_address"
-              type="text"
-              autoComplete="address-line1"
-              value={formData.street_address}
-              onChange={handleChange}
-              className={inputClass}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className={labelClass}>ZIP</label>
-            <input
-              name="zip_code"
-              type="text"
-              inputMode="numeric"
-              maxLength={5}
-              autoComplete="postal-code"
-              value={formData.zip_code}
-              onChange={handleChange}
-              className={`${inputClass} font-mono`}
-            />
-          </div>
-        </div>
+        <AddressFields
+          prefix=""
+          values={{ street: formData.street_address, city: formData.city, state: formData.state, zip: formData.zip_code }}
+          onChange={handleChange}
+        />
         <p className="text-[10px] text-zinc-500 leading-relaxed">
-          Private. Used with your city and state to calculate shipping rates. Without it, your items check out
-          with &ldquo;shipping arranged after purchase.&rdquo;
+          Only your <strong>city and state</strong> are shown publicly, on your shop page and listings. Street and ZIP
+          stay private{shipFromSupported ? "" : " and are used to calculate shipping rates"}.
         </p>
+
+        {shipFromSupported && (
+          <div className="pt-2 space-y-4">
+            <input type="hidden" name="ship_from_supported" value="1" />
+            <label className="flex items-center gap-3 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                name="ship_from_enabled"
+                value="1"
+                checked={formData.ship_from_enabled === "1"}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, ship_from_enabled: e.target.checked ? "1" : "" }))
+                }
+                className="h-4 w-4 accent-zinc-900"
+              />
+              <span className="text-[11px] font-black uppercase tracking-widest text-zinc-800">
+                Ship from a different address
+              </span>
+            </label>
+
+            {formData.ship_from_enabled === "1" ? (
+              <div className="border-l-2 border-zinc-200 pl-4 space-y-3">
+                <AddressFields
+                  prefix="ship_from_"
+                  values={{
+                    street: formData.ship_from_street,
+                    city: formData.ship_from_city,
+                    state: formData.ship_from_state,
+                    zip: formData.ship_from_zip,
+                  }}
+                  onChange={handleChange}
+                />
+                <p className="text-[10px] text-zinc-500 leading-relaxed">
+                  Private. Shipping rates are calculated from this address instead of your shop address.
+                </p>
+              </div>
+            ) : (
+              <p className="text-[10px] text-zinc-500 leading-relaxed">
+                Shipping rates are calculated from your shop address. Tick this if you ship from a warehouse or storage
+                unit.
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Actions */}

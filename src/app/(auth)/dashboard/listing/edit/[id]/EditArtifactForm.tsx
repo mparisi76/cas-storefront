@@ -1,5 +1,7 @@
 "use client";
 
+import { shippingSpecsError } from "@/lib/shipping-specs";
+import { useUnsavedChangesGuard } from "@/components/dashboard/UnsavedChangesGuard";
 import {
   useActionState,
   startTransition,
@@ -96,7 +98,7 @@ export default function EditArtifactForm({
 
   useEffect(() => {
     if (state?.success) {
-      showToast("Artifact Updated Successfully");
+      showToast("Listing updated");
     }
   }, [state?.success, showToast]);
 
@@ -130,7 +132,7 @@ export default function EditArtifactForm({
         showToast(
           result.error === "PERMISSION_DENIED"
             ? "Permission Denied"
-            : "Error deleting artifact",
+            : "Error deleting listing",
         );
       }
     });
@@ -155,8 +157,12 @@ export default function EditArtifactForm({
       }).format(new Date(artifact.date_created))
     : "Unknown";
 
+  const specsError = shippingSpecsError(form);
+  const { modal: leaveModal } = useUnsavedChangesGuard(() => isDirty && !isPending);
+
   return (
     <div className="relative">
+      {leaveModal}
       <ConfirmDeleteModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
@@ -170,7 +176,7 @@ export default function EditArtifactForm({
         {/* Top Row: Title and Actions with Border Underneath */}
         <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-zinc-100 pb-2 mb-4 gap-6">
           <h1 className="text-4xl font-light tracking-tighter text-zinc-900 italic leading-none">
-            Edit Artifact
+            Edit Listing
           </h1>
 
           <div className="flex items-center gap-2 sm:gap-3">
@@ -190,7 +196,7 @@ export default function EditArtifactForm({
             <button
               form="edit-form"
               type="submit"
-              disabled={isPending || !isDirty}
+              disabled={isPending || !isDirty || !!specsError}
               className="bg-zinc-900 px-8 py-2.5 text-[11px] font-black uppercase tracking-widest text-white hover:bg-zinc-800 transition-all disabled:opacity-20 shadow-sm"
             >
               {isPending ? "Saving..." : "Save"}
@@ -269,6 +275,7 @@ export default function EditArtifactForm({
           width={form.width}
           height={form.height}
           onChange={handleField as (f: string, v: string) => void}
+          error={specsError}
         />
 
         <section className="space-y-3 relative">
@@ -294,7 +301,7 @@ export default function EditArtifactForm({
 
         <div className="pt-10 pb-20 border-t border-zinc-100">
           <button
-            disabled={isPending || !isDirty}
+            disabled={isPending || !isDirty || !!specsError}
             type="submit"
             className="w-full bg-zinc-900 text-white py-8 text-[15px] font-black uppercase tracking-[0.4em] hover:bg-zinc-800 transition-all shadow-xl disabled:opacity-20"
           >

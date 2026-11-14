@@ -20,7 +20,7 @@ export function IdentityFields({
       <div className="space-y-3">
         <div className="flex justify-between items-end">
           <label className="block text-xs font-black uppercase tracking-widest text-zinc-800">
-            Artifact Name <span className="text-red-500">*</span>
+            Title <span className="text-red-500">*</span>
           </label>
           <span
             className={`text-[10px] font-mono ${

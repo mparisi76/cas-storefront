@@ -218,3 +218,90 @@ export async function sendSaleNotifications(sale: SaleDetails): Promise<string[]
   });
   return failed;
 }
+
+/**
+ * "Your order has shipped" to the buyer (with tracking link), plus a copy to the
+ * shop inbox. Never throws; returns which sends failed.
+ */
+export async function sendShippedEmails(input: {
+  item: { id: string | number; name: string };
+  buyer: { name: string | null; email: string | null };
+  seller: string | null;
+  carrier: string;
+  trackingNumber: string;
+  trackingLink: string | null;
+  isUpdate: boolean;
+}): Promise<string[]> {
+  const { item, buyer, seller, carrier, trackingNumber, trackingLink, isUpdate } = input;
+  const first = (buyer.name || "").trim().split(/\s+/)[0] || "there";
+  const heading = isUpdate ? "Tracking updated" : "Your order has shipped";
+  const trackLine = trackingLink
+    ? `<p style="margin: 28px 0;"><a href="${trackingLink}" style="background: #18181b; color: #ffffff; padding: 14px 28px; text-decoration: none; font-family: sans-serif; font-size: 12px; font-weight: bold; letter-spacing: 0.2em; text-transform: uppercase;">Track package</a></p>`
+    : "";
+
+  const jobs: [string, () => Promise<void>][] = [];
+  if (buyer.email) {
+    jobs.push([
+      "buyer",
+      () =>
+        sendEmail({
+          from: FROM_ORDERS,
+          to: buyer.email!,
+          replyTo: SHOP_EMAIL,
+          subject: `${heading}: ${item.name} (${ref(item.id)})`,
+          text: [
+            `Hi ${first},`,
+            "",
+            isUpdate
+              ? `The tracking for "${item.name}" (${ref(item.id)}) has been updated.`
+              : `Good news: "${item.name}" (${ref(item.id)}) is on its way${seller ? ` from ${seller}` : ""}.`,
+            `${carrier} tracking number: ${trackingNumber}`,
+            trackingLink ? `Track it here: ${trackingLink}` : "",
+            "",
+            "Questions? Just reply to this email.",
+          ]
+            .filter((l) => l !== "")
+            .join("\n"),
+          html: layout(
+            heading,
+            `<p>Hi ${escapeHtml(first)},</p>
+             <p>${
+               isUpdate
+                 ? `The tracking for <strong>${escapeHtml(item.name)}</strong> has been updated.`
+                 : `Good news: <strong>${escapeHtml(item.name)}</strong> is on its way${seller ? ` from ${escapeHtml(seller)}` : ""}.`
+             }</p>
+             <p><strong>${escapeHtml(carrier)}</strong> tracking number:<br/><span style="font-family: monospace; font-size: 15px;">${escapeHtml(trackingNumber)}</span></p>
+             ${trackLine}
+             <p>Questions? Just reply to this email.</p>`,
+          ),
+        }),
+    ]);
+  }
+  jobs.push([
+    "admin",
+    () =>
+      sendEmail({
+        from: `CAS Orders <orders@catskillas.com>`,
+        to: SHOP_EMAIL,
+        subject: `[SHIPPED] ${item.name} (${ref(item.id)}): ${carrier} ${trackingNumber}`,
+        html: layout(
+          isUpdate ? "Tracking updated" : "Order shipped",
+          `<p><strong>${escapeHtml(item.name)}</strong> (${ref(item.id)})${seller ? ` from ${escapeHtml(seller)}` : ""}</p>
+           <p>${escapeHtml(carrier)}: <span style="font-family: monospace;">${escapeHtml(trackingNumber)}</span>${
+             trackingLink ? ` · <a href="${trackingLink}">track</a>` : ""
+           }</p>
+           <p>${buyer.email ? `The buyer (${escapeHtml(buyer.email)}) was emailed.` : `<strong style="color:#dc2626;">No buyer email found. The buyer was NOT notified.</strong>`}</p>`,
+        ),
+      }),
+  ]);
+
+  const results = await Promise.allSettled(jobs.map(([, fn]) => fn()));
+  const failed: string[] = [];
+  results.forEach((r, i) => {
+    if (r.status === "rejected") {
+      failed.push(jobs[i][0]);
+      console.error(`Shipped email (${jobs[i][0]}) failed for item ${item.id}:`, r.reason);
+    }
+  });
+  return failed;
+}
